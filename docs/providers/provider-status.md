@@ -183,6 +183,10 @@ quote response fixtures
 manual quote verification command
 manual quote verification documentation
 manual quote verification hardening tests
+provider compliance documentation
+Kiwoom compliance notes
+credential handling documentation
+public quote tool readiness checklist
 normalized auth errors
 no-network safety tests
 read-only provider skeleton
@@ -247,6 +251,7 @@ Real Kiwoom API calls must remain disabled by default.
 | Manual quote command + disabled endpoint mapping | No token or quote request |
 | Manual quote command + provider quote error | Safe normalized error only |
 | Manual quote command + malformed quote response | Safe bad-response error only |
+| Provider compliance review        | Added documentation and tests |
 | Mocked quote response                 | Can be normalized safely          |
 | Malformed quote response              | `KIWOOM_QUOTE_BAD_RESPONSE`       |
 | Market data request                   | Not implemented yet               |
@@ -452,6 +457,9 @@ tests are isolated from caller shell environment
 manual quote command output does not expose app key, secret, or access token
 manual quote command output does not expose raw malformed quote responses
 endpoint mapping metadata documents manual-only/read-only/no-public-tool policy
+provider compliance docs exist
+credential handling docs exist
+public quote tool readiness checklist exists
 ```
 
 Kiwoom tests must not require real credentials.
@@ -673,6 +681,33 @@ Kiwoom Quote Manual Verification Hardening
 ```
 
 This release must not be described as public Kiwoom quote support. Public MCP quote tools, public real Kiwoom quote lookup, account access, orders, balance lookup, holdings lookup, trading, auto-trading, and investment recommendations remain unimplemented or forbidden.
+
+---
+
+## v0.11.0-alpha
+
+Provider status:
+
+```text
+mock provider implemented
+Kiwoom token verification hardened
+Kiwoom quote endpoint mapping documented and guarded
+Kiwoom read-only quote manual verification workflow hardened
+provider compliance review added
+credential handling policy documented
+public quote tool readiness checklist added
+public MCP quote tool not added
+public real quote lookup not enabled
+account/order/trading explicitly out of scope
+```
+
+Recommended release description:
+
+```text
+Provider Compliance and Security Review
+```
+
+This release must not be described as public Kiwoom quote support. Public MCP quote tools, public real Kiwoom quote lookup, account access, orders, balance lookup, holdings lookup, trading, auto-trading, investment recommendations, centralized credential storage, and centralized data redistribution proxy behavior remain unimplemented or forbidden.
 
 ---
 

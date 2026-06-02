@@ -72,8 +72,10 @@ Rules:
 4. Do not include secrets in test fixtures.
 5. Do not include secrets in GitHub issues or pull requests.
 6. Do not paste real provider credentials into examples.
-7. Use `.env.example` for variable names only.
-8. Use local `.env` files for real credentials.
+7. Use `.env.example` for variable names and obvious placeholders only.
+8. Use local `.env`, `.env.local`, or shell session environment variables for real credentials.
+9. Keep provider credentials local to the user's machine unless a future design is explicitly reviewed.
+10. Do not build a centralized credential collection or proxy service without a separate security review.
 
 ---
 
@@ -235,13 +237,14 @@ Rules:
 
 If you discover a security issue, please do not open a public issue with sensitive details.
 
-Instead, report it privately to the maintainer.
+Instead, report it privately to the maintainer. Use the repository's private vulnerability reporting feature if enabled.
 
 Maintainer:
 
 ```text id="91juhp"
 GitHub: @farmbit-mdk
 Repository: https://github.com/farmbit-mdk/korea-market-data-mcp
+Contact: SECURITY_CONTACT_PLACEHOLDER
 ```
 
 If GitHub Security Advisories are enabled for this repository, use GitHub's private vulnerability reporting feature.
@@ -299,6 +302,8 @@ No secrets logged
 No raw tokens returned
 No hidden provider account access
 No unsafe scraping added
+No public MCP quote tool without readiness review
+No centralized data redistribution proxy
 Provider adapter boundaries preserved
 Tool schemas documented
 Tests updated

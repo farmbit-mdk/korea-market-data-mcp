@@ -49,6 +49,9 @@ describe("Kiwoom manual token verification workflow", () => {
   it.each([
     ["YOUR_APP_KEY", "valid_secret_key"],
     ["valid_app_key", "YOUR_SECRET_KEY"],
+    ["YOUR_KIWOOM_APP_KEY", "valid_secret_key"],
+    ["valid_app_key", "YOUR_KIWOOM_SECRET_KEY"],
+    ["valid_app_key", "YOUR_KIWOOM_APP_SECRET"],
     ["CHANGE_ME", "valid_secret_key"],
     ["valid_app_key", "REPLACE_ME"],
     ["", "valid_secret_key"],
