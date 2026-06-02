@@ -78,6 +78,20 @@ describe("mock provider", () => {
     });
   });
 
+  it("searches Samsung Electronics by Korean, English, and symbol aliases", async () => {
+    await expectFirstSearchSymbol("삼성전자", "005930");
+    await expectFirstSearchSymbol("Samsung Electronics", "005930");
+    await expectFirstSearchSymbol("Samsung", "005930");
+    await expectFirstSearchSymbol("005930", "005930");
+  });
+
+  it("searches KODEX 200 by Korean, English, and symbol aliases", async () => {
+    await expectFirstSearchSymbol("코덱스200", "069500");
+    await expectFirstSearchSymbol("코덱스 200", "069500");
+    await expectFirstSearchSymbol("KODEX 200", "069500");
+    await expectFirstSearchSymbol("069500", "069500");
+  });
+
   it("throws normalized invalid input errors", async () => {
     await expect(provider.getStockQuote({ symbol: "" })).rejects.toMatchObject({
       code: "INVALID_INPUT",
@@ -93,4 +107,13 @@ describe("mock provider", () => {
       retryable: false
     });
   });
+
+  async function expectFirstSearchSymbol(query: string, symbol: string): Promise<void> {
+    const results = await provider.searchSymbol({ query });
+
+    expect(results[0]).toMatchObject({
+      symbol,
+      provider: "mock"
+    });
+  }
 });

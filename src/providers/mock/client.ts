@@ -36,19 +36,22 @@ export class MockMarketDataProvider implements MarketDataProvider {
 
   async searchSymbol(input: SymbolSearchInput): Promise<SymbolSearchResult[]> {
     assertNonEmpty(input.query, "query");
-    const query = input.query.trim().toLowerCase();
+    const query = normalizeSearchText(input.query);
     const limit = clampLimit(input.limit, 10, 1, 50);
 
     return mockSymbols
       .filter((item) => {
-        const matchesQuery =
-          item.symbol.toLowerCase().includes(query) || item.name.toLowerCase().includes(query);
+        const searchableValues = [item.symbol, item.name, item.koreanName, ...item.aliases].filter(
+          (value): value is string => value !== undefined
+        );
+        const matchesQuery = searchableValues.some((value) => matchesSearchValue(value, query));
         const matchesMarket = input.market === undefined || input.market === "UNKNOWN" || item.market === input.market;
         const matchesAssetType =
           input.assetType === undefined || input.assetType === "unknown" || item.assetType === input.assetType;
 
         return matchesQuery && matchesMarket && matchesAssetType;
       })
+      .map(({ aliases: _aliases, koreanName: _koreanName, ...result }) => result)
       .slice(0, limit);
   }
 
@@ -113,4 +116,17 @@ function clampLimit(value: number | undefined, defaultValue: number, minimum: nu
   }
 
   return value;
+}
+
+function matchesSearchValue(value: string, normalizedQuery: string): boolean {
+  const normalizedValue = normalizeSearchText(value);
+  return normalizedValue.includes(normalizedQuery) || compactText(normalizedValue).includes(compactText(normalizedQuery));
+}
+
+function normalizeSearchText(value: string): string {
+  return value.trim().toLocaleLowerCase();
+}
+
+function compactText(value: string): string {
+  return value.replace(/\s+/g, "");
 }
