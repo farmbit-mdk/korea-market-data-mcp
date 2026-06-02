@@ -274,6 +274,18 @@ get_daily_chart
 
 The Kiwoom provider is not implemented yet. Do not set `MARKET_DATA_PROVIDER=kiwoom` until the Kiwoom adapter is added in a later milestone.
 
+### Kiwoom auth skeleton
+
+The repository includes a Kiwoom provider auth skeleton for future adapter work. It can load Kiwoom-related environment variables and return normalized credential errors, but it does not request tokens or call the Kiwoom REST API by default.
+
+Keep this flag disabled:
+
+```env
+KIWOOM_ENABLE_REAL_API_CALLS=false
+```
+
+Real Kiwoom market data calls are still intentionally not implemented.
+
 ---
 
 ## Claude Desktop example

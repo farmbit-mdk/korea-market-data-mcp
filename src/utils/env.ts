@@ -1,4 +1,4 @@
-export type MarketDataProviderId = "mock";
+export type MarketDataProviderId = "mock" | "kiwoom";
 
 export interface RuntimeConfig {
   provider: MarketDataProviderId;
@@ -10,8 +10,8 @@ export interface RuntimeConfig {
 export function loadRuntimeConfig(env: NodeJS.ProcessEnv = process.env): RuntimeConfig {
   const provider = env.MARKET_DATA_PROVIDER ?? "mock";
 
-  if (provider !== "mock") {
-    throw new Error(`Unsupported MARKET_DATA_PROVIDER: ${provider}. Only mock is implemented.`);
+  if (provider !== "mock" && provider !== "kiwoom") {
+    throw new Error(`Unsupported MARKET_DATA_PROVIDER: ${provider}. Supported providers: mock, kiwoom.`);
   }
 
   return {
