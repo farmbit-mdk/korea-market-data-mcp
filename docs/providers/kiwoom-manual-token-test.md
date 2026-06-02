@@ -94,6 +94,18 @@ KIWOOM_ENABLE_REAL_API_CALLS=false
 
 If the opt-in flag is missing or false, the manual command exits without making a token request.
 
+Placeholder values are also blocked before any request is made:
+
+```text
+YOUR_APP_KEY
+YOUR_SECRET_KEY
+CHANGE_ME
+REPLACE_ME
+empty string
+```
+
+Replace placeholders with real local credentials before running the manual command.
+
 ---
 
 ## 6. PowerShell Example
@@ -166,6 +178,7 @@ If token verification fails, check:
 KIWOOM_ENABLE_REAL_API_CALLS is set to true
 KIWOOM_APP_KEY is present
 KIWOOM_SECRET_KEY is present
+KIWOOM_APP_KEY and KIWOOM_SECRET_KEY are not placeholder values
 KIWOOM_ENV matches the issued credentials
 IP address is registered if Kiwoom requires it
 mock vs production environment is correct

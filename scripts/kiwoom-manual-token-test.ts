@@ -29,12 +29,15 @@ interface ManualKiwoomEnv {
 
 const defaultApiBaseUrl = "https://api.kiwoom.com";
 const defaultMockApiBaseUrl = "https://mockapi.kiwoom.com";
+const placeholderCredentialValues = new Set(["YOUR_APP_KEY", "YOUR_SECRET_KEY", "CHANGE_ME", "REPLACE_ME", ""]);
 
 export async function runManualKiwoomTokenVerification(
   env: ManualKiwoomEnv = process.env,
   transport?: KiwoomTokenTransport
 ): Promise<ManualKiwoomTokenSummary> {
   const environment = parseManualEnvironment(env.KIWOOM_ENV);
+  const rawAppKey = env.KIWOOM_APP_KEY;
+  const rawSecretKey = env.KIWOOM_SECRET_KEY ?? env.KIWOOM_APP_SECRET;
   const appKey = normalizeEnvValue(env.KIWOOM_APP_KEY);
   const secretKey = normalizeEnvValue(env.KIWOOM_SECRET_KEY) ?? normalizeEnvValue(env.KIWOOM_APP_SECRET);
 
@@ -45,6 +48,16 @@ export async function runManualKiwoomTokenVerification(
       environment,
       token_present: false,
       reason: "KIWOOM_ENABLE_REAL_API_CALLS must be set to true for manual token verification."
+    };
+  }
+
+  if (isPlaceholderCredential(rawAppKey) || isPlaceholderCredential(rawSecretKey)) {
+    return {
+      status: "blocked",
+      provider: "kiwoom",
+      environment,
+      token_present: false,
+      reason: "Placeholder credentials cannot be used for manual token verification."
     };
   }
 
@@ -105,6 +118,10 @@ function parseManualEnvironment(value: string | undefined): "mock" | "production
 
 function normalizeEnvValue(value: string | undefined): string | undefined {
   return value === undefined || value.trim() === "" ? undefined : value;
+}
+
+function isPlaceholderCredential(value: string | undefined): boolean {
+  return value !== undefined && placeholderCredentialValues.has(value.trim().toUpperCase());
 }
 
 function isCliEntryPoint(): boolean {

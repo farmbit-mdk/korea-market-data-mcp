@@ -307,6 +307,8 @@ The default remains `KIWOOM_ENABLE_REAL_API_CALLS=false`. Token values are never
 
 This workflow does not add quote lookup, account access, order execution, balance lookup, holdings lookup, trading, auto-trading, or investment recommendation features. See `docs/providers/kiwoom-manual-token-test.md`.
 
+Placeholder credential values such as `YOUR_APP_KEY`, `YOUR_SECRET_KEY`, `CHANGE_ME`, and `REPLACE_ME` are blocked before any manual token request is sent.
+
 ---
 
 ## Claude Desktop example

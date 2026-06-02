@@ -42,6 +42,41 @@ describe("Kiwoom manual token verification workflow", () => {
     expect(transport.requestToken).not.toHaveBeenCalled();
   });
 
+  it.each([
+    ["YOUR_APP_KEY", "valid_secret_key"],
+    ["valid_app_key", "YOUR_SECRET_KEY"],
+    ["CHANGE_ME", "valid_secret_key"],
+    ["valid_app_key", "REPLACE_ME"],
+    ["", "valid_secret_key"],
+    ["valid_app_key", ""]
+  ])("blocks placeholder credentials before requesting a token", async (appKey, secretKey) => {
+    const transport = createMockTransport();
+    const summary = await runManualKiwoomTokenVerification(
+      {
+        KIWOOM_ENABLE_REAL_API_CALLS: "true",
+        KIWOOM_APP_KEY: appKey,
+        KIWOOM_SECRET_KEY: secretKey,
+        KIWOOM_ENV: "mock"
+      },
+      transport
+    );
+
+    expect(summary).toMatchObject({
+      status: "blocked",
+      provider: "kiwoom",
+      environment: "mock",
+      token_present: false,
+      reason: expect.stringContaining("Placeholder credentials")
+    });
+    if (appKey !== "") {
+      expect(JSON.stringify(summary)).not.toContain(appKey);
+    }
+    if (secretKey !== "") {
+      expect(JSON.stringify(summary)).not.toContain(secretKey);
+    }
+    expect(transport.requestToken).not.toHaveBeenCalled();
+  });
+
   it("uses only mocked transport after explicit opt-in and returns safe token summary", async () => {
     const transport = createMockTransport({
       token_type: "Bearer",
