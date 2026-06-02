@@ -1,6 +1,7 @@
 export const allowedToolNames = [
   "search_korean_symbol",
   "get_stock_quote",
+  "get_kiwoom_stock_quote",
   "get_etf_quote",
   "get_market_index",
   "get_daily_chart"

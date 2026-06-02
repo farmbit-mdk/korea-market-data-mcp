@@ -46,10 +46,11 @@ describe("provider compliance and security review docs", () => {
     expect(envExample).not.toMatch(/Bearer\s+[A-Za-z0-9._~+/=-]{12,}/);
   });
 
-  it("keeps the MCP registry at the existing five tools with no public quote addition", () => {
+  it("keeps the MCP registry at allowed read-only tools with guarded Kiwoom quote only", () => {
     expect(getRegisteredToolNames()).toEqual([
       "search_korean_symbol",
       "get_stock_quote",
+      "get_kiwoom_stock_quote",
       "get_etf_quote",
       "get_market_index",
       "get_daily_chart"
@@ -62,6 +63,7 @@ describe("provider compliance and security review docs", () => {
     const sourcePaths = [
       "src/providers/kiwoom/quote-client.ts",
       "src/providers/kiwoom/token-client.ts",
+      "src/tools/get-kiwoom-stock-quote.ts",
       "scripts/kiwoom-manual-token-test.ts",
       "scripts/kiwoom-manual-quote-test.ts"
     ];

@@ -3,7 +3,7 @@ import { allowedToolNames, forbiddenToolNames, validateRegisteredTools } from ".
 import { getRegisteredToolNames } from "../src/tools/index.js";
 
 describe("tool registry", () => {
-  it("registers exactly the five initial read-only tools", () => {
+  it("registers exactly the allowed read-only tools including the guarded Kiwoom quote skeleton", () => {
     const registeredToolNames = getRegisteredToolNames();
 
     expect(registeredToolNames).toEqual([...allowedToolNames]);

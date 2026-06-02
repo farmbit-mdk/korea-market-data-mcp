@@ -219,10 +219,11 @@ describe("Kiwoom read-only quote adapter skeleton", () => {
     });
   });
 
-  it("keeps public MCP tool registry unchanged", () => {
+  it("keeps public MCP tool registry limited to read-only tools", () => {
     expect(getRegisteredToolNames()).toEqual([
       "search_korean_symbol",
       "get_stock_quote",
+      "get_kiwoom_stock_quote",
       "get_etf_quote",
       "get_market_index",
       "get_daily_chart"

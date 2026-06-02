@@ -379,6 +379,26 @@ docs/security/credential-handling.md
 docs/release/public-quote-tool-readiness-checklist.md
 ```
 
+### Kiwoom public quote guarded skeleton
+
+`v0.12.0-alpha` adds a guarded public MCP tool skeleton:
+
+```text
+get_kiwoom_stock_quote
+```
+
+The tool is registered so clients can validate the future public Kiwoom quote shape, but real Kiwoom quote lookup remains disabled by default. The guard returns `blocked` unless public exposure, real API opt-in, endpoint mapping, credentials, token, and read-only checks are all explicitly satisfied.
+
+This release does not enable live Kiwoom quote support:
+
+```text
+public real Kiwoom quote lookup is not enabled by default
+KIWOOM_ENABLE_REAL_API_CALLS=false remains the default
+provider credentials must remain local
+centralized data redistribution proxy is not included
+account, order, balance, holdings, trading, auto-trading, and recommendation features remain excluded
+```
+
 ---
 
 ## Claude Desktop example

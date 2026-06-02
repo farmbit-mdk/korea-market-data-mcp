@@ -187,6 +187,7 @@ provider compliance documentation
 Kiwoom compliance notes
 credential handling documentation
 public quote tool readiness checklist
+guarded Kiwoom public quote MCP tool skeleton
 normalized auth errors
 no-network safety tests
 read-only provider skeleton
@@ -252,6 +253,8 @@ Real Kiwoom API calls must remain disabled by default.
 | Manual quote command + provider quote error | Safe normalized error only |
 | Manual quote command + malformed quote response | Safe bad-response error only |
 | Provider compliance review        | Added documentation and tests |
+| Kiwoom public quote tool          | Guarded skeleton registered |
+| Public real Kiwoom quote lookup   | Not enabled by default |
 | Mocked quote response                 | Can be normalized safely          |
 | Malformed quote response              | `KIWOOM_QUOTE_BAD_RESPONSE`       |
 | Market data request                   | Not implemented yet               |
@@ -460,6 +463,8 @@ endpoint mapping metadata documents manual-only/read-only/no-public-tool policy
 provider compliance docs exist
 credential handling docs exist
 public quote tool readiness checklist exists
+guarded Kiwoom public quote tool is registered
+public real Kiwoom quote lookup remains blocked by default
 ```
 
 Kiwoom tests must not require real credentials.
@@ -708,6 +713,30 @@ Provider Compliance and Security Review
 ```
 
 This release must not be described as public Kiwoom quote support. Public MCP quote tools, public real Kiwoom quote lookup, account access, orders, balance lookup, holdings lookup, trading, auto-trading, investment recommendations, centralized credential storage, and centralized data redistribution proxy behavior remain unimplemented or forbidden.
+
+---
+
+## v0.12.0-alpha
+
+Provider status:
+
+```text
+mock provider implemented
+Kiwoom token verification hardened
+Kiwoom quote manual verification hardened
+provider compliance review added
+Kiwoom public quote tool guarded skeleton registered
+public real Kiwoom quote lookup not enabled by default
+account/order/trading explicitly out of scope
+```
+
+Recommended release description:
+
+```text
+Kiwoom Public Quote Tool Guarded Skeleton
+```
+
+This release registers a guarded read-only MCP tool skeleton for future Kiwoom stock quotes. It must not be described as live Kiwoom quote support. Public real Kiwoom quote lookup, account access, orders, balance lookup, holdings lookup, trading, auto-trading, investment recommendations, centralized credential storage, and centralized data redistribution proxy behavior remain unimplemented or forbidden.
 
 ---
 
