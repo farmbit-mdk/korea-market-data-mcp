@@ -11,6 +11,9 @@ import {
   malformedKiwoomQuoteResponse,
   missingPriceKiwoomQuoteResponse,
   providerErrorKiwoomQuoteResponse,
+  sensitiveMalformedKiwoomQuoteResponse,
+  sensitiveProviderErrorKiwoomQuoteResponse,
+  signedChangeKiwoomQuoteResponse,
   successfulKiwoomQuoteLikeResponse
 } from "./fixtures/kiwoom-quote-responses.js";
 
@@ -47,7 +50,21 @@ describe("Kiwoom read-only quote adapter skeleton", () => {
       apiId: "ka10001",
       manualOnly: true,
       readOnly: true,
+      requiresToken: true,
+      exposesPublicTool: false,
+      forbiddenScopes: ["account", "order", "balance", "holdings", "trading"],
       verified: false
+    });
+  });
+
+  it("normalizes signed quote numeric strings", () => {
+    expect(normalizeKiwoomQuoteResponse(signedChangeKiwoomQuoteResponse, { symbol: "069500" })).toMatchObject({
+      provider: "kiwoom",
+      symbol: "069500",
+      price: 35250,
+      change: 125,
+      change_rate: 0.36,
+      volume: 1234567
     });
   });
 
@@ -84,6 +101,56 @@ describe("Kiwoom read-only quote adapter skeleton", () => {
     });
     expect(JSON.stringify(response)).not.toContain("appkey");
     expect(JSON.stringify(response)).not.toContain("secretkey");
+  });
+
+  it("redacts sensitive-looking provider quote error messages", async () => {
+    const transport = createMockQuoteTransport(sensitiveProviderErrorKiwoomQuoteResponse);
+    const client = createKiwoomQuoteClient({
+      baseUrl: "https://mock.local",
+      quoteEndpointPath: "/quote-placeholder",
+      transport
+    });
+
+    const response = await client.getQuote({ symbol: "005930" }).catch((error: unknown) => toToolErrorResponse(error, "kiwoom"));
+    const serialized = JSON.stringify(response);
+
+    expect(response).toMatchObject({
+      error: {
+        code: "KIWOOM_QUOTE_REQUEST_FAILED",
+        provider: "kiwoom",
+        retryable: false,
+        return_code: "Q2001"
+      }
+    });
+    expect(serialized).not.toContain("fixture_quote_access_token");
+    expect(serialized).not.toContain("fixture_app_key");
+    expect(serialized).not.toContain("fixture_secret");
+    expect(serialized).not.toContain("access_token=");
+    expect(serialized).not.toContain("secretkey=");
+  });
+
+  it("does not include raw malformed quote responses in errors", async () => {
+    const transport = createMockQuoteTransport(sensitiveMalformedKiwoomQuoteResponse);
+    const client = createKiwoomQuoteClient({
+      baseUrl: "https://mock.local",
+      quoteEndpointPath: "/quote-placeholder",
+      transport
+    });
+
+    const response = await client.getQuote({ symbol: "005930" }).catch((error: unknown) => toToolErrorResponse(error, "kiwoom"));
+    const serialized = JSON.stringify(response);
+
+    expect(response).toMatchObject({
+      error: {
+        code: "KIWOOM_QUOTE_BAD_RESPONSE",
+        provider: "kiwoom",
+        retryable: false
+      }
+    });
+    expect(serialized).toContain("invalid price");
+    expect(serialized).not.toContain("not-a-number-with-token");
+    expect(serialized).not.toContain("fixture_quote_access_token");
+    expect(serialized).not.toContain("fixture_secret");
   });
 
   it("uses quote transport abstraction when endpoint config is supplied", async () => {

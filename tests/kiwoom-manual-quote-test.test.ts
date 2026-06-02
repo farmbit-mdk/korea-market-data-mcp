@@ -8,6 +8,8 @@ import type {
 } from "../src/providers/kiwoom/index.js";
 import {
   providerErrorKiwoomQuoteResponse,
+  sensitiveMalformedKiwoomQuoteResponse,
+  sensitiveProviderErrorKiwoomQuoteResponse,
   successfulKiwoomQuoteLikeResponse
 } from "./fixtures/kiwoom-quote-responses.js";
 import { kiwoomErrorTokenResponse, successfulKiwoomTokenResponse } from "./fixtures/kiwoom-token-responses.js";
@@ -187,6 +189,55 @@ describe("Kiwoom manual quote verification workflow", () => {
     expect(JSON.stringify(summary)).not.toContain("fixture_access_token_value");
   });
 
+  it("does not expose access tokens in quote provider error output", async () => {
+    const tokenTransport = createMockTokenTransport(successfulKiwoomTokenResponse);
+    const quoteTransport = createMockQuoteTransport(sensitiveProviderErrorKiwoomQuoteResponse);
+    const summary = await runManualKiwoomQuoteVerification(
+      validQuoteEnv,
+      { tokenTransport, quoteTransport, quoteEndpointMapping: enabledQuoteMapping }
+    );
+    const serialized = JSON.stringify(summary);
+
+    expect(summary).toMatchObject({
+      status: "error",
+      quote_present: false,
+      error: {
+        code: "KIWOOM_QUOTE_REQUEST_FAILED",
+        provider: "kiwoom",
+        retryable: false,
+        return_code: "Q2001"
+      }
+    });
+    expect(serialized).not.toContain("fixture_access_token_value");
+    expect(serialized).not.toContain("fixture_quote_access_token");
+    expect(serialized).not.toContain("dummy_app_key");
+    expect(serialized).not.toContain("dummy_secret_key");
+    expect(serialized).not.toContain("access_token=");
+  });
+
+  it("does not expose raw malformed quote response bodies", async () => {
+    const tokenTransport = createMockTokenTransport(successfulKiwoomTokenResponse);
+    const quoteTransport = createMockQuoteTransport(sensitiveMalformedKiwoomQuoteResponse);
+    const summary = await runManualKiwoomQuoteVerification(
+      validQuoteEnv,
+      { tokenTransport, quoteTransport, quoteEndpointMapping: enabledQuoteMapping }
+    );
+    const serialized = JSON.stringify(summary);
+
+    expect(summary).toMatchObject({
+      status: "error",
+      quote_present: false,
+      error: {
+        code: "KIWOOM_QUOTE_BAD_RESPONSE",
+        provider: "kiwoom",
+        retryable: false
+      }
+    });
+    expect(serialized).not.toContain("not-a-number-with-token");
+    expect(serialized).not.toContain("fixture_quote_access_token");
+    expect(serialized).not.toContain("fixture_secret");
+  });
+
   it("keeps fetch isolated to Kiwoom transport", () => {
     const scriptSource = readFileSync("scripts/kiwoom-manual-quote-test.ts", "utf8");
     const transportSource = readFileSync("src/providers/kiwoom/transport.ts", "utf8");
@@ -211,6 +262,9 @@ describe("Kiwoom manual quote verification workflow", () => {
     path: "/quote-placeholder",
     apiId: "ka10001",
     description: "Test-only enabled quote endpoint mapping.",
+    requiresToken: true,
+    exposesPublicTool: false,
+    forbiddenScopes: ["account", "order", "balance", "holdings", "trading"],
     verified: false
   };
 

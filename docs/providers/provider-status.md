@@ -15,7 +15,7 @@ This document is especially important because different providers may have diffe
 | Provider | Status        | Real API calls |     Credentials required | Default | Notes                                                   |
 | -------- | ------------- | -------------: | -----------------------: | ------: | ------------------------------------------------------- |
 | `mock`   | Implemented   |             No |                       No |     Yes | Fixed sample data for local MCP testing                 |
-| `kiwoom` | Manual quote verification |  No by default | Yes, for manual token/quote verification |      No | Guarded manual quote workflow; public MCP quote tool not added |
+| `kiwoom` | Manual quote verification hardened |  No by default | Yes, for manual token/quote verification |      No | Guarded manual quote workflow; public MCP quote tool not added |
 
 ---
 
@@ -147,7 +147,7 @@ It must not be used for investment decisions.
 manual quote verification
 ```
 
-The Kiwoom provider currently exists as an authentication, provider-selection, token-request opt-in, manual token verification workflow, read-only quote adapter skeleton, disabled quote endpoint mapping, and guarded manual quote verification workflow.
+The Kiwoom provider currently exists as an authentication, provider-selection, token-request opt-in, manual token verification workflow, read-only quote adapter skeleton, disabled quote endpoint mapping, and hardened guarded manual quote verification workflow.
 
 It does not provide live Kiwoom market data yet.
 
@@ -182,6 +182,7 @@ quote endpoint mapping documentation
 quote response fixtures
 manual quote verification command
 manual quote verification documentation
+manual quote verification hardening tests
 normalized auth errors
 no-network safety tests
 read-only provider skeleton
@@ -241,9 +242,11 @@ Real Kiwoom API calls must remain disabled by default.
 | Manual command + missing credentials  | No real request                   |
 | Manual command + explicit opt-in      | Token request allowed only by command |
 | Quote adapter skeleton without endpoint config | `KIWOOM_QUOTE_NOT_IMPLEMENTED` |
-| Quote endpoint mapping                 | Documented and disabled         |
+| Quote endpoint mapping                 | Documented, guarded, and disabled |
 | Manual quote command + opt-in false    | No real request                 |
 | Manual quote command + disabled endpoint mapping | No token or quote request |
+| Manual quote command + provider quote error | Safe normalized error only |
+| Manual quote command + malformed quote response | Safe bad-response error only |
 | Mocked quote response                 | Can be normalized safely          |
 | Malformed quote response              | `KIWOOM_QUOTE_BAD_RESPONSE`       |
 | Market data request                   | Not implemented yet               |
@@ -446,6 +449,9 @@ manual quote command remains blocked by default
 quote adapter rejects account/order/balance/holdings fields
 MCP tool registry remains unchanged
 tests are isolated from caller shell environment
+manual quote command output does not expose app key, secret, or access token
+manual quote command output does not expose raw malformed quote responses
+endpoint mapping metadata documents manual-only/read-only/no-public-tool policy
 ```
 
 Kiwoom tests must not require real credentials.
@@ -643,6 +649,30 @@ Kiwoom Read-only Quote Manual Verification
 ```
 
 This release must not be described as public Kiwoom quote support. Public MCP quote tools, account access, orders, balance lookup, holdings lookup, trading, auto-trading, and investment recommendations remain unimplemented or forbidden.
+
+---
+
+## v0.10.0-alpha
+
+Provider status:
+
+```text
+mock provider implemented
+Kiwoom token verification hardened
+Kiwoom quote endpoint mapping documented and guarded
+Kiwoom read-only quote manual verification workflow added and hardened
+public MCP quote tool not added
+public real quote lookup not enabled
+account/order/trading explicitly out of scope
+```
+
+Recommended release description:
+
+```text
+Kiwoom Quote Manual Verification Hardening
+```
+
+This release must not be described as public Kiwoom quote support. Public MCP quote tools, public real Kiwoom quote lookup, account access, orders, balance lookup, holdings lookup, trading, auto-trading, and investment recommendations remain unimplemented or forbidden.
 
 ---
 

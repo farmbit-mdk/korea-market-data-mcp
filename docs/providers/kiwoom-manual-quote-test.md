@@ -2,7 +2,7 @@
 
 ## 1. Purpose
 
-This document describes the `v0.9.0-alpha` manual workflow for verifying a Kiwoom read-only quote request.
+This document describes the `v0.10.0-alpha` hardened manual workflow for verifying a Kiwoom read-only quote request.
 
 This is manual verification only. It is not a public MCP tool and is not live quote support for normal users.
 
@@ -18,6 +18,7 @@ token request before quote request
 quote endpoint mapping guard
 safe quote output
 mocked transport tests
+troubleshooting and redaction checks
 ```
 
 Excluded:
@@ -31,6 +32,7 @@ holdings lookup
 trading
 auto-trading
 investment recommendations
+public real Kiwoom quote lookup
 ```
 
 ---
@@ -103,6 +105,14 @@ The command still returns `blocked` while endpoint mapping is disabled.
 
 ## 6. Output Shapes
 
+The manual command has three statuses:
+
+```text
+ok: token and quote verification completed through the manual command
+blocked: a safety/configuration guard stopped the workflow before a quote request
+error: the provider/token/quote request or response normalization failed safely
+```
+
 Successful output shape:
 
 ```json
@@ -160,17 +170,48 @@ Access token values are never printed.
 
 ## 7. Troubleshooting
 
-Common cases:
+Blocked cases:
 
 ```text
-opt-in false: set KIWOOM_ENABLE_REAL_API_CALLS=true only for manual verification
+KIWOOM_ENABLE_REAL_API_CALLS is not true: no network request is made
+missing credentials: set local KIWOOM_APP_KEY and KIWOOM_SECRET_KEY
 placeholder credentials: replace YOUR_APP_KEY, YOUR_SECRET_KEY, CHANGE_ME, or REPLACE_ME
 missing symbol: set KIWOOM_QUOTE_SYMBOL or pass a CLI symbol argument
 disabled endpoint mapping: expected until quote endpoint is verified
-token request failure: verify token manual workflow first
+token request blocked or failed: verify token manual workflow first
+```
+
+Error cases:
+
+```text
 quote request failure: check return_code and return_msg only
+provider error response: inspect normalized return_code and return_msg only
 malformed quote response: verify Kiwoom response field mapping
 missing price: quote response is not usable
+missing symbol in response: verify response mapping or request symbol fallback
+mock/production mismatch: confirm KIWOOM_ENV matches the issued credentials
+IP not registered: confirm Kiwoom REST API access setup
+incorrect app key or secret: update local shell environment only
+```
+
+Endpoint mapping transition guidance:
+
+```text
+Keep enabled:false until endpoint path, API ID, request fields, response fields, and headers are verified.
+Changing enabled:true must be reviewed in a separate PR.
+Changing enabled:true still must not add or expose a public MCP quote tool.
+```
+
+Before attempting any real API exposure, confirm:
+
+```text
+manual command remains explicit opt-in
+public MCP tool registry remains unchanged
+access token is not printed
+app key and secret are not printed
+raw request body is not printed
+raw quote response is not printed
+account/order/balance/holdings/trading/recommendation fields remain excluded
 ```
 
 ---
@@ -191,3 +232,5 @@ raw quote response containing sensitive values
 Do not expose this workflow as an MCP tool.
 
 Do not add account, order, balance, holdings, trading, auto-trading, or recommendation behavior.
+
+Manual quote verification is not public real quote support.

@@ -2,7 +2,7 @@
 
 ## 1. Purpose
 
-This document tracks the read-only Kiwoom quote endpoint mapping work for `v0.9.0-alpha`.
+This document tracks the read-only Kiwoom quote endpoint mapping work for `v0.10.0-alpha`.
 
 The goal is to prepare the provider-side quote adapter for a future verified Kiwoom quote endpoint without enabling live quote lookup yet.
 
@@ -47,6 +47,9 @@ Current mapping:
     enabled: false,
     manualOnly: true,
     readOnly: true,
+    requiresToken: true,
+    exposesPublicTool: false,
+    forbiddenScopes: ["account", "order", "balance", "holdings", "trading"],
     method: "POST",
     path: "TODO_VERIFY_OFFICIAL_KIWOOM_QUOTE_ENDPOINT",
     apiId: "ka10001",
@@ -57,6 +60,17 @@ Current mapping:
 ```
 
 The mapping is intentionally disabled.
+
+Field meanings:
+
+```text
+enabled:false means the mapping cannot be used for a real quote request yet.
+manualOnly:true means the mapping may only be exercised through the manual verification command.
+readOnly:true means the mapping cannot contain account, order, balance, holdings, or trading behavior.
+requiresToken:true means a token must be acquired before a quote request in manual verification.
+exposesPublicTool:false means enabling the mapping does not register any public MCP quote tool.
+forbiddenScopes records scopes that must not appear in request mapping, response mapping, docs, or tests.
+```
 
 Do not enable this mapping until:
 
@@ -71,6 +85,8 @@ security review is complete
 ```
 
 The manual quote command also checks `enabled`, `manualOnly`, and `readOnly` before any token or quote request is made.
+
+Changing `enabled:true` must be reviewed in a separate PR. That PR must verify the official endpoint path, API ID, auth header, request body, response body, normalized output, redaction behavior, and test coverage. It must not add a public MCP quote tool by implication.
 
 ---
 
@@ -170,6 +186,8 @@ get_daily_chart
 ```
 
 No public MCP quote tool is added in this release.
+
+An enabled endpoint mapping is only a provider-internal manual verification setting. It does not activate public real Kiwoom quote lookup.
 
 The quote adapter must not log or return:
 
