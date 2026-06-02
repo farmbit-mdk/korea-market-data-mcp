@@ -1,11 +1,19 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MarketDataProviderError } from "../src/providers/errors.js";
 import { createProvider } from "../src/providers/provider-registry.js";
 import { createKiwoomAuthClient, loadKiwoomAuthConfig } from "../src/providers/kiwoom/index.js";
 import { loadRuntimeConfig } from "../src/utils/env.js";
 
 describe("Kiwoom auth skeleton", () => {
+  const originalEnv = { ...process.env };
+
+  beforeEach(() => {
+    process.env = { ...originalEnv };
+    resetKiwoomEnvironment();
+  });
+
   afterEach(() => {
+    process.env = { ...originalEnv };
     vi.unstubAllGlobals();
   });
 
@@ -27,12 +35,9 @@ describe("Kiwoom auth skeleton", () => {
   });
 
   it("returns a normalized auth error when credentials are missing", async () => {
-    const authClient = createKiwoomAuthClient(
-      loadKiwoomAuthConfig({
-        KIWOOM_APP_KEY: "",
-        KIWOOM_APP_SECRET: ""
-      })
-    );
+    process.env.KIWOOM_APP_KEY = "";
+    process.env.KIWOOM_APP_SECRET = "";
+    const authClient = createKiwoomAuthClient(loadKiwoomAuthConfig());
 
     await expect(authClient.getAccessToken()).rejects.toMatchObject({
       code: "PROVIDER_AUTH_FAILED",
@@ -44,13 +49,10 @@ describe("Kiwoom auth skeleton", () => {
   it("does not make real API calls when credentials are present", async () => {
     const fetchSpy = vi.fn();
     vi.stubGlobal("fetch", fetchSpy);
-    const authClient = createKiwoomAuthClient(
-      loadKiwoomAuthConfig({
-        KIWOOM_APP_KEY: "fake_app_key",
-        KIWOOM_APP_SECRET: "fake_app_secret",
-        KIWOOM_ENABLE_REAL_API_CALLS: "false"
-      })
-    );
+    process.env.KIWOOM_APP_KEY = "fake_app_key";
+    process.env.KIWOOM_APP_SECRET = "fake_app_secret";
+    process.env.KIWOOM_ENABLE_REAL_API_CALLS = "false";
+    const authClient = createKiwoomAuthClient(loadKiwoomAuthConfig());
 
     await expect(authClient.getAccessToken()).rejects.toBeInstanceOf(MarketDataProviderError);
     await expect(authClient.getAccessToken()).rejects.toMatchObject({
@@ -74,6 +76,8 @@ describe("Kiwoom auth skeleton", () => {
   it("keeps Kiwoom data methods as no-network skeletons", async () => {
     const fetchSpy = vi.fn();
     vi.stubGlobal("fetch", fetchSpy);
+    delete process.env.KIWOOM_APP_KEY;
+    delete process.env.KIWOOM_APP_SECRET;
     const provider = createProvider("kiwoom");
 
     await expect(provider.getStockQuote({ symbol: "005930" })).rejects.toMatchObject({
@@ -82,4 +86,14 @@ describe("Kiwoom auth skeleton", () => {
     });
     expect(fetchSpy).not.toHaveBeenCalled();
   });
+
+  function resetKiwoomEnvironment(): void {
+    delete process.env.MARKET_DATA_PROVIDER;
+    delete process.env.KIWOOM_ENV;
+    delete process.env.KIWOOM_APP_KEY;
+    delete process.env.KIWOOM_APP_SECRET;
+    delete process.env.KIWOOM_API_BASE_URL;
+    delete process.env.KIWOOM_MOCK_API_BASE_URL;
+    delete process.env.KIWOOM_ENABLE_REAL_API_CALLS;
+  }
 });
