@@ -24,6 +24,9 @@ Token client interface: implemented
 Token request/response types: implemented
 In-memory token cache type: implemented
 Transport boundary: implemented
+Token request opt-in flow: implemented
+Token response normalization: implemented
+Token error normalization: implemented
 Real token request: not implemented
 Real market data request: not implemented
 Trading/account endpoints: not implemented and forbidden
@@ -35,7 +38,7 @@ Current test status:
 npm run build: passed
 npm test: passed
 Test files: 7 passed
-Tests: 30 passed
+Tests: 36 passed
 ```
 
 ---
@@ -331,18 +334,22 @@ When this flag is false, token requests return `UNSUPPORTED_PROVIDER_CAPABILITY`
 
 ## Stage 3 — Real token request opt-in
 
-Status: planned.
+Status: implemented for `v0.4.0-alpha` as an injected-transport flow only.
 
 Scope:
 
 ```text
 KIWOOM_ENABLE_REAL_API_CALLS=true required
-manual test only
-real token request implementation
+mocked transport tests only
+real token request remains isolated behind transport
 token response mapping
+token error mapping
+in-memory token cache behavior
 redacted logging
 no market data calls yet
 ```
+
+When `KIWOOM_ENABLE_REAL_API_CALLS=true`, the token client may call the configured transport interface. Tests must inject a mocked transport and must not call global `fetch` or live Kiwoom endpoints.
 
 ## Stage 4 — Read-only market data endpoints
 
@@ -385,12 +392,12 @@ These are outside the project scope.
 
 ## 13. Release implication
 
-This document supports the `v0.3.0-alpha` development line.
+This document supports the `v0.4.0-alpha` development line.
 
-The `v0.3.0-alpha` release should be described as:
+The `v0.4.0-alpha` release should be described as:
 
 ```text
-Kiwoom token client interface with no real API calls by default.
+Kiwoom token request opt-in flow with no real API calls by default.
 ```
 
 It must not be described as live Kiwoom market data support.

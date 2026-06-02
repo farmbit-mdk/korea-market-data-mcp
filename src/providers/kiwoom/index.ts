@@ -10,6 +10,7 @@ export { KiwoomMarketDataProvider };
 export {
   createKiwoomTokenClient,
   DefaultKiwoomTokenClient,
+  normalizeKiwoomTokenError,
   normalizeKiwoomTokenResponse
 } from "./token-client.js";
 export { FetchKiwoomTokenTransport, createFetchKiwoomTokenTransport } from "./transport.js";

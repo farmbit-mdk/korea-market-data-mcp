@@ -15,7 +15,7 @@ This document is especially important because different providers may have diffe
 | Provider | Status        | Real API calls |     Credentials required | Default | Notes                                                   |
 | -------- | ------------- | -------------: | -----------------------: | ------: | ------------------------------------------------------- |
 | `mock`   | Implemented   |             No |                       No |     Yes | Fixed sample data for local MCP testing                 |
-| `kiwoom` | Token client interface |  No by default | Yes, for future real use |      No | Token transport boundary only; no live Kiwoom requests yet |
+| `kiwoom` | Token request opt-in |  No by default | Yes, for future real use |      No | Token client may call injected transport only when explicitly enabled |
 
 ---
 
@@ -144,10 +144,10 @@ It must not be used for investment decisions.
 ## 5.1 Status
 
 ```text
-token client interface
+token request opt-in
 ```
 
-The Kiwoom provider currently exists as an authentication, provider-selection, and token-client-interface skeleton.
+The Kiwoom provider currently exists as an authentication, provider-selection, and token-request opt-in skeleton.
 
 It does not provide live Kiwoom market data yet.
 
@@ -168,6 +168,8 @@ token request and response types
 in-memory token cache type
 transport abstraction for token requests
 mocked token response normalization
+mocked token error normalization
+in-memory token cache storage and expiry checks
 normalized auth errors
 no-network safety tests
 read-only provider skeleton
@@ -221,6 +223,7 @@ Real Kiwoom API calls must remain disabled by default.
 | Real API enabled + mocked transport   | Token response can be normalized  |
 | Real API enabled + real transport     | Not implemented for default use   |
 | Token request with default safety     | No transport call                 |
+| Failed mocked token response          | `PROVIDER_BAD_RESPONSE`           |
 | Market data request                   | Not implemented yet               |
 | Trading/account request               | Forbidden                         |
 
@@ -402,7 +405,10 @@ dummy credentials with real API disabled return UNSUPPORTED_PROVIDER_CAPABILITY
 fetch/network calls do not happen by default
 dummy credentials do not trigger token transport when real API calls are disabled
 mocked token response can be normalized
+failed token responses can be normalized
 secrets are redacted from token errors
+token values are not logged
+in-memory token cache stores valid tokens and skips expired tokens
 tests are isolated from caller shell environment
 ```
 
@@ -467,6 +473,28 @@ Kiwoom Token Client Interface
 ```
 
 This release must not be described as live Kiwoom market data support or as support for Kiwoom stock, ETF, index, chart, account, order, or trading endpoints.
+
+---
+
+## v0.4.0-alpha
+
+Provider status:
+
+```text
+mock provider implemented
+Kiwoom token request opt-in flow implemented
+real Kiwoom API calls disabled by default
+token tests use mocked transport only
+in-memory token cache behavior tested
+```
+
+Recommended release description:
+
+```text
+Kiwoom Token Request Opt-In Flow
+```
+
+This release must not be described as live Kiwoom market data support. Stock, ETF, index, chart, realtime, account, order, trading, and recommendation endpoints remain unimplemented or forbidden.
 
 ---
 

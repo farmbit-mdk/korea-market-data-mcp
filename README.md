@@ -284,7 +284,7 @@ Keep this flag disabled:
 KIWOOM_ENABLE_REAL_API_CALLS=false
 ```
 
-Real Kiwoom market data calls are still intentionally not implemented.
+In `v0.4.0-alpha` development, the Kiwoom token client may call only its configured transport interface when `KIWOOM_ENABLE_REAL_API_CALLS=true`. Real API calls remain disabled by default, tests use mocked transport only, and live Kiwoom market data calls are still intentionally not implemented.
 
 ---
 
