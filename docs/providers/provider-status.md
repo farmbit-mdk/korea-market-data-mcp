@@ -15,7 +15,7 @@ This document is especially important because different providers may have diffe
 | Provider | Status        | Real API calls |     Credentials required | Default | Notes                                                   |
 | -------- | ------------- | -------------: | -----------------------: | ------: | ------------------------------------------------------- |
 | `mock`   | Implemented   |             No |                       No |     Yes | Fixed sample data for local MCP testing                 |
-| `kiwoom` | Auth skeleton |  No by default | Yes, for future real use |      No | Credential validation only; no live Kiwoom requests yet |
+| `kiwoom` | Token client interface |  No by default | Yes, for future real use |      No | Token transport boundary only; no live Kiwoom requests yet |
 
 ---
 
@@ -144,10 +144,10 @@ It must not be used for investment decisions.
 ## 5.1 Status
 
 ```text
-auth skeleton
+token client interface
 ```
 
-The Kiwoom provider currently exists as an authentication and provider-selection skeleton.
+The Kiwoom provider currently exists as an authentication, provider-selection, and token-client-interface skeleton.
 
 It does not provide live Kiwoom market data yet.
 
@@ -164,6 +164,10 @@ provider selection
 credential config loading
 missing credential validation
 dummy credential handling
+token request and response types
+in-memory token cache type
+transport abstraction for token requests
+mocked token response normalization
 normalized auth errors
 no-network safety tests
 read-only provider skeleton
@@ -173,7 +177,6 @@ Current not implemented behavior:
 
 ```text
 real token request
-token cache
 real stock quote request
 real ETF quote request
 real market index request
@@ -215,8 +218,9 @@ Real Kiwoom API calls must remain disabled by default.
 | ------------------------------------- | --------------------------------- |
 | Missing Kiwoom credentials            | `PROVIDER_AUTH_FAILED`            |
 | Dummy credentials + real API disabled | `UNSUPPORTED_PROVIDER_CAPABILITY` |
-| Real API enabled                      | Not implemented yet               |
-| Token request                         | Not implemented yet               |
+| Real API enabled + mocked transport   | Token response can be normalized  |
+| Real API enabled + real transport     | Not implemented for default use   |
+| Token request with default safety     | No transport call                 |
 | Market data request                   | Not implemented yet               |
 | Trading/account request               | Forbidden                         |
 
@@ -396,6 +400,9 @@ credentials can be loaded
 missing credentials return PROVIDER_AUTH_FAILED
 dummy credentials with real API disabled return UNSUPPORTED_PROVIDER_CAPABILITY
 fetch/network calls do not happen by default
+dummy credentials do not trigger token transport when real API calls are disabled
+mocked token response can be normalized
+secrets are redacted from token errors
 tests are isolated from caller shell environment
 ```
 
@@ -439,6 +446,27 @@ Kiwoom Provider Auth Skeleton
 ```
 
 This release must not be described as live Kiwoom market data support.
+
+---
+
+## v0.3.0-alpha
+
+Provider status:
+
+```text
+mock provider implemented
+Kiwoom token client interface implemented
+real Kiwoom API calls disabled by default
+token tests use mocked transport only
+```
+
+Recommended release description:
+
+```text
+Kiwoom Token Client Interface
+```
+
+This release must not be described as live Kiwoom market data support or as support for Kiwoom stock, ETF, index, chart, account, order, or trading endpoints.
 
 ---
 

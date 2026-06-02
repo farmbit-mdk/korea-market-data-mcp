@@ -7,3 +7,19 @@ export function createKiwoomProvider(): MarketDataProvider {
 
 export { createKiwoomAuthClient, KiwoomAuthClient, loadKiwoomAuthConfig } from "./auth.js";
 export { KiwoomMarketDataProvider };
+export {
+  createKiwoomTokenClient,
+  DefaultKiwoomTokenClient,
+  normalizeKiwoomTokenResponse
+} from "./token-client.js";
+export { FetchKiwoomTokenTransport, createFetchKiwoomTokenTransport } from "./transport.js";
+export { InMemoryKiwoomTokenCache } from "./token-cache.js";
+export type {
+  KiwoomAccessToken,
+  KiwoomRawTokenResponse,
+  KiwoomTokenCache,
+  KiwoomTokenCacheEntry,
+  KiwoomTokenRequest,
+  KiwoomTokenTransport,
+  KiwoomTokenTransportRequest
+} from "./types.js";

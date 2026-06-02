@@ -1,4 +1,5 @@
 import { MarketDataProviderError } from "../errors.js";
+import { createKiwoomTokenClient, type KiwoomTokenClient } from "./token-client.js";
 import type { KiwoomAccessToken, KiwoomAuthConfig, KiwoomEnvironment } from "./types.js";
 
 const defaultApiBaseUrl = "https://api.kiwoom.com";
@@ -16,17 +17,17 @@ export function loadKiwoomAuthConfig(env: NodeJS.ProcessEnv = process.env): Kiwo
 }
 
 export class KiwoomAuthClient {
-  constructor(private readonly config: KiwoomAuthConfig = loadKiwoomAuthConfig()) {}
+  private readonly tokenClient: KiwoomTokenClient;
+
+  constructor(
+    private readonly config: KiwoomAuthConfig = loadKiwoomAuthConfig(),
+    tokenClient?: KiwoomTokenClient
+  ) {
+    this.tokenClient = tokenClient ?? createKiwoomTokenClient({ config });
+  }
 
   async getAccessToken(): Promise<KiwoomAccessToken> {
-    this.assertCredentialsPresent();
-
-    throw new MarketDataProviderError(
-      "UNSUPPORTED_PROVIDER_CAPABILITY",
-      "Kiwoom auth is a skeleton and does not make real API calls yet.",
-      "kiwoom",
-      false
-    );
+    return this.tokenClient.getAccessToken();
   }
 
   assertCredentialsPresent(): void {
