@@ -2,7 +2,7 @@
 
 ## 1. Purpose
 
-This document tracks the read-only Kiwoom quote endpoint mapping work for `v0.8.0-alpha`.
+This document tracks the read-only Kiwoom quote endpoint mapping work for `v0.9.0-alpha`.
 
 The goal is to prepare the provider-side quote adapter for a future verified Kiwoom quote endpoint without enabling live quote lookup yet.
 
@@ -45,10 +45,12 @@ Current mapping:
 {
   quote: {
     enabled: false,
+    manualOnly: true,
+    readOnly: true,
     method: "POST",
     path: "TODO_VERIFY_OFFICIAL_KIWOOM_QUOTE_ENDPOINT",
-    apiId: "TODO_VERIFY_OFFICIAL_KIWOOM_QUOTE_API_ID",
-    description: "Read-only stock quote endpoint mapping placeholder. Disabled until official Kiwoom documentation is verified.",
+    apiId: "ka10001",
+    description: "Stock basic information request. Disabled until endpoint path/header/body are verified against official Kiwoom documentation.",
     verified: false
   }
 }
@@ -60,13 +62,15 @@ Do not enable this mapping until:
 
 ```text
 official Kiwoom quote endpoint path is verified
-official API ID is verified
+official API ID `ka10001` request/response behavior is verified
 request fields are confirmed
 response fields are confirmed
 manual opt-in verification plan is documented
 tests are updated
 security review is complete
 ```
+
+The manual quote command also checks `enabled`, `manualOnly`, and `readOnly` before any token or quote request is made.
 
 ---
 

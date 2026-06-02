@@ -341,6 +341,18 @@ tests use quote fixtures and mocked transport
 
 No account, order, balance, holdings, trading, auto-trading, or recommendation features are added.
 
+### Kiwoom manual quote verification
+
+`v0.9.0-alpha` adds a guarded manual-only quote verification workflow:
+
+```bash
+npm run kiwoom:quote:manual
+```
+
+The command is blocked by default. It requires explicit real API opt-in, local credentials, a symbol, and an enabled read-only/manual-only endpoint mapping. The endpoint mapping remains disabled by default, so this release does not enable live quote lookup.
+
+No public MCP quote tool is added. No account, order, balance, holdings, trading, auto-trading, or recommendation features are added.
+
 ---
 
 ## Claude Desktop example

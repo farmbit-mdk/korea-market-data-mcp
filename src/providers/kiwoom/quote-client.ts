@@ -66,7 +66,12 @@ export class DefaultKiwoomQuoteClient implements KiwoomQuoteClient {
       return this.options.quoteEndpointPath;
     }
 
-    if (this.options.useMappedQuoteEndpoint === true && kiwoomQuoteEndpointMappings.quote.enabled) {
+    if (
+      this.options.useMappedQuoteEndpoint === true &&
+      kiwoomQuoteEndpointMappings.quote.enabled &&
+      kiwoomQuoteEndpointMappings.quote.manualOnly &&
+      kiwoomQuoteEndpointMappings.quote.readOnly
+    ) {
       return kiwoomQuoteEndpointMappings.quote.path;
     }
 
