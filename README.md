@@ -311,6 +311,21 @@ Placeholder credential values such as `YOUR_APP_KEY`, `YOUR_SECRET_KEY`, `CHANGE
 
 Kiwoom token error responses are normalized without printing raw request bodies, credentials, or token values.
 
+### Kiwoom quote adapter skeleton
+
+`v0.7.0-alpha` adds a Kiwoom read-only quote adapter skeleton for provider-side development.
+
+This is not live quote support yet:
+
+```text
+real quote API endpoint is not finalized
+tests use mocked quote transport
+no new public MCP tool is registered
+real API calls remain opt-in only
+```
+
+The skeleton intentionally excludes account access, orders, balance lookup, holdings lookup, trading, auto-trading, and investment recommendations.
+
 ---
 
 ## Claude Desktop example

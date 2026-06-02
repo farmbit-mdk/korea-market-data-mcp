@@ -6,6 +6,9 @@ describe("read-only safety", () => {
   it("rejects account, trading, and recommendation tool names", () => {
     expect(() => validateToolCategory("buy_stock")).toThrow();
     expect(() => validateToolCategory("get_account_balance")).toThrow();
+    expect(() => validateToolCategory("place_order")).toThrow();
+    expect(() => validateToolCategory("get_holdings")).toThrow();
+    expect(() => validateToolCategory("auto_trade")).toThrow();
     expect(() => validateToolCategory("recommend_etf")).toThrow();
   });
 

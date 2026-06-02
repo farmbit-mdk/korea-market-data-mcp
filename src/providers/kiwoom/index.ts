@@ -8,19 +8,35 @@ export function createKiwoomProvider(): MarketDataProvider {
 export { createKiwoomAuthClient, KiwoomAuthClient, loadKiwoomAuthConfig } from "./auth.js";
 export { KiwoomMarketDataProvider };
 export {
+  createKiwoomQuoteClient,
+  DefaultKiwoomQuoteClient,
+  normalizeKiwoomQuoteError,
+  normalizeKiwoomQuoteResponse
+} from "./quote-client.js";
+export {
   createKiwoomTokenClient,
   DefaultKiwoomTokenClient,
   normalizeKiwoomTokenError,
   normalizeKiwoomTokenResponse
 } from "./token-client.js";
-export { FetchKiwoomTokenTransport, createFetchKiwoomTokenTransport } from "./transport.js";
+export {
+  FetchKiwoomTokenTransport,
+  FetchKiwoomTransport,
+  createFetchKiwoomQuoteTransport,
+  createFetchKiwoomTokenTransport
+} from "./transport.js";
 export { InMemoryKiwoomTokenCache } from "./token-cache.js";
 export type {
   KiwoomAccessToken,
+  KiwoomQuoteRequest,
+  KiwoomQuoteResponse,
+  KiwoomQuoteTransport,
+  KiwoomQuoteTransportRequest,
   KiwoomRawTokenResponse,
   KiwoomTokenCache,
   KiwoomTokenCacheEntry,
   KiwoomTokenRequest,
   KiwoomTokenTransport,
-  KiwoomTokenTransportRequest
+  KiwoomTokenTransportRequest,
+  NormalizedKiwoomQuote
 } from "./types.js";
