@@ -2,6 +2,8 @@
 
 Use this checklist before adding or enabling any public provider-backed MCP quote tool.
 
+`v0.12.0-alpha` may register a guarded public quote tool skeleton. That does not mean real provider-backed quote lookup is enabled.
+
 ## Documentation
 
 Confirm:
@@ -13,6 +15,7 @@ docs/security/credential-handling.md exists
 SECURITY.md is current
 README disclaimer is current
 docs/providers/provider-status.md is current
+guarded skeleton status is documented if a public skeleton exists
 ```
 
 ## Provider Review
@@ -39,6 +42,8 @@ Confirm:
 ```text
 real quote lookup policy is explicit
 endpoint enabled policy is reviewed
+exposesPublicTool policy is reviewed
+enabled/manualOnly/readOnly policy is reviewed
 redaction tests pass
 fetch boundary remains inside provider transport
 credentials are local-only by default
@@ -71,4 +76,5 @@ realtime data license risk has been reviewed
 caching policy has been reviewed
 provider terms are compatible with the intended use
 public MCP behavior is documented
+guarded skeleton still returns blocked unless every release gate is satisfied
 ```

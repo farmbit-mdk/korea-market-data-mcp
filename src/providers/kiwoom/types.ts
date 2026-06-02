@@ -89,7 +89,7 @@ export interface KiwoomQuoteEndpointMapping {
   manualOnly: boolean;
   readOnly: boolean;
   requiresToken: boolean;
-  exposesPublicTool: false;
+  exposesPublicTool: boolean;
   forbiddenScopes: readonly ["account", "order", "balance", "holdings", "trading"];
   method: "POST";
   path: string;
