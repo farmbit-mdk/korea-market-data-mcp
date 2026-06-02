@@ -262,17 +262,18 @@ Run tests:
 npm test
 ```
 
-The current implementation registers only these read-only mock-backed tools:
+The current implementation registers these read-only tools:
 
 ```text
 search_korean_symbol
 get_stock_quote
+get_kiwoom_stock_quote
 get_etf_quote
 get_market_index
 get_daily_chart
 ```
 
-The Kiwoom provider is not implemented yet. Do not set `MARKET_DATA_PROVIDER=kiwoom` until the Kiwoom adapter is added in a later milestone.
+`get_kiwoom_stock_quote` is a guarded Kiwoom-only skeleton. It is registered, but real Kiwoom quote lookup remains blocked by default.
 
 ### Kiwoom auth skeleton
 
@@ -381,13 +382,60 @@ docs/release/public-quote-tool-readiness-checklist.md
 
 ### Kiwoom public quote guarded skeleton
 
-`v0.12.0-alpha` adds a guarded public MCP tool skeleton:
+`v0.13.0-alpha` stabilizes the guarded public MCP tool skeleton:
 
 ```text
 get_kiwoom_stock_quote
 ```
 
 The tool is registered so clients can validate the future public Kiwoom quote shape, but real Kiwoom quote lookup remains disabled by default. The guard returns `blocked` unless public exposure, real API opt-in, endpoint mapping, credentials, token, and read-only checks are all explicitly satisfied.
+
+Example input:
+
+```json
+{
+  "symbol": "005930",
+  "market": "KOSPI",
+  "provider": "kiwoom"
+}
+```
+
+Default blocked output shape:
+
+```json
+{
+  "status": "blocked",
+  "provider": "kiwoom",
+  "symbol": "005930",
+  "quote_present": false,
+  "reason": "Kiwoom public quote tool is registered as a guarded skeleton but real quote lookup is not enabled."
+}
+```
+
+Mock/test-only success output shape:
+
+```json
+{
+  "status": "ok",
+  "provider": "kiwoom",
+  "symbol": "005930",
+  "quote_present": true,
+  "quote": {
+    "provider": "kiwoom",
+    "symbol": "005930",
+    "name": "Samsung Electronics",
+    "market": "KOSPI",
+    "currency": "KRW",
+    "price": 70000,
+    "change": 500,
+    "change_rate": 0.72,
+    "volume": 12000000,
+    "as_of": "..."
+  }
+}
+```
+
+The symbol must be a 6-digit Korean stock code such as `005930`. The input schema only allows `symbol`, `market`, and optional `provider`.
 
 This release does not enable live Kiwoom quote support:
 
@@ -398,6 +446,8 @@ provider credentials must remain local
 centralized data redistribution proxy is not included
 account, order, balance, holdings, trading, auto-trading, and recommendation features remain excluded
 ```
+
+Mock/test integration is used only to validate the response format. It must not be treated as provider fallback or live quote availability.
 
 ---
 
