@@ -386,3 +386,38 @@ This project is for software development, research, and data access tooling.
 It does not provide investment advice, trading advice, brokerage services, financial recommendations, or automated trading functionality.
 
 Users are responsible for complying with provider terms of service, data licensing restrictions, and applicable laws.
+
+---
+
+## Verified mock provider test
+
+The MCP server has been verified with Claude Desktop using the mock provider.
+
+Test prompt:
+
+```text
+Use korea-market-data MCP to get the stock quote for 005930.
+```
+
+Expected behavior:
+
+- Claude Desktop detects the `korea-market-data` MCP server.
+- The `get_stock_quote` tool is called.
+- The mock provider returns Samsung Electronics sample data.
+- The response includes `provider: "mock"`.
+- The response must not be treated as live market data.
+
+Example mock data:
+
+| Field | Value |
+|---|---|
+| Symbol | 005930 |
+| Name | Samsung Electronics |
+| Market | KOSPI |
+| Price | 70,000 KRW |
+| Previous close | 69,500 KRW |
+| Change | +500 KRW |
+| Change rate | +0.72% |
+| Provider | mock |
+
+Note: mock provider data is fixed sample data for local MCP testing only. It is not live market data and must not be used for investment decisions.
