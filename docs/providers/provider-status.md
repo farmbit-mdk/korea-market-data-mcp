@@ -1,0 +1,512 @@
+# Provider Status
+
+## 1. Purpose
+
+This document tracks the implementation status of market data providers in `korea-market-data-mcp`.
+
+The goal is to make provider capabilities, limitations, and safety constraints explicit for users, maintainers, and contributors.
+
+This document is especially important because different providers may have different authentication requirements, data licenses, rate limits, and supported market data endpoints.
+
+---
+
+## 2. Current provider summary
+
+| Provider | Status        | Real API calls |     Credentials required | Default | Notes                                                   |
+| -------- | ------------- | -------------: | -----------------------: | ------: | ------------------------------------------------------- |
+| `mock`   | Implemented   |             No |                       No |     Yes | Fixed sample data for local MCP testing                 |
+| `kiwoom` | Auth skeleton |  No by default | Yes, for future real use |      No | Credential validation only; no live Kiwoom requests yet |
+
+---
+
+## 3. Provider selection
+
+Provider selection is controlled by:
+
+```env
+MARKET_DATA_PROVIDER=mock
+```
+
+Supported values:
+
+```text
+mock
+kiwoom
+```
+
+Default provider:
+
+```text
+mock
+```
+
+The mock provider should remain the safest default because it does not require credentials and does not make network calls.
+
+---
+
+## 4. Mock provider
+
+## 4.1 Status
+
+```text
+implemented
+```
+
+The mock provider is fully available for local MCP client testing.
+
+It returns fixed sample data and does not call external services.
+
+---
+
+## 4.2 Supported tools
+
+The mock provider currently supports:
+
+```text
+search_korean_symbol
+get_stock_quote
+get_etf_quote
+get_market_index
+get_daily_chart
+```
+
+---
+
+## 4.3 Supported sample data
+
+Current mock data includes:
+
+```text
+005930 Samsung Electronics
+069500 KODEX 200
+KOSPI
+KOSDAQ
+KOSPI200
+```
+
+Korean alias search is also supported.
+
+Examples:
+
+```text
+삼성전자 -> 005930
+코덱스200 -> 069500
+```
+
+English alias search is supported.
+
+Examples:
+
+```text
+Samsung Electronics -> 005930
+Samsung -> 005930
+KODEX 200 -> 069500
+```
+
+---
+
+## 4.4 Network behavior
+
+The mock provider must not call:
+
+```text
+fetch
+axios
+http.request
+https.request
+external APIs
+```
+
+The mock provider is intended for:
+
+```text
+local MCP testing
+tool schema validation
+Claude Desktop integration testing
+read-only safety testing
+documentation examples
+```
+
+---
+
+## 4.5 Data limitation
+
+Mock provider data is fixed sample data.
+
+It is not live market data.
+
+It must not be used for investment decisions.
+
+---
+
+## 5. Kiwoom provider
+
+## 5.1 Status
+
+```text
+auth skeleton
+```
+
+The Kiwoom provider currently exists as an authentication and provider-selection skeleton.
+
+It does not provide live Kiwoom market data yet.
+
+It does not make real Kiwoom API calls by default.
+
+---
+
+## 5.2 Current implementation
+
+Current implemented behavior:
+
+```text
+provider selection
+credential config loading
+missing credential validation
+dummy credential handling
+normalized auth errors
+no-network safety tests
+read-only provider skeleton
+```
+
+Current not implemented behavior:
+
+```text
+real token request
+token cache
+real stock quote request
+real ETF quote request
+real market index request
+real daily chart request
+realtime data
+WebSocket streaming
+```
+
+---
+
+## 5.3 Environment variables
+
+Expected Kiwoom-related environment variables:
+
+```env
+MARKET_DATA_PROVIDER=kiwoom
+
+KIWOOM_ENV=prod
+KIWOOM_APP_KEY=
+KIWOOM_APP_SECRET=
+KIWOOM_API_BASE_URL=https://api.kiwoom.com
+KIWOOM_MOCK_API_BASE_URL=https://mockapi.kiwoom.com
+KIWOOM_ENABLE_REAL_API_CALLS=false
+```
+
+Security default:
+
+```env
+KIWOOM_ENABLE_REAL_API_CALLS=false
+```
+
+Real Kiwoom API calls must remain disabled by default.
+
+---
+
+## 5.4 Current behavior matrix
+
+| Condition                             | Expected behavior                 |
+| ------------------------------------- | --------------------------------- |
+| Missing Kiwoom credentials            | `PROVIDER_AUTH_FAILED`            |
+| Dummy credentials + real API disabled | `UNSUPPORTED_PROVIDER_CAPABILITY` |
+| Real API enabled                      | Not implemented yet               |
+| Token request                         | Not implemented yet               |
+| Market data request                   | Not implemented yet               |
+| Trading/account request               | Forbidden                         |
+
+---
+
+## 5.5 Network behavior
+
+The current Kiwoom provider skeleton must not call:
+
+```text
+fetch
+axios
+http.request
+https.request
+external Kiwoom endpoints
+```
+
+Tests must confirm that no network call happens.
+
+---
+
+## 5.6 Future allowed capabilities
+
+Future Kiwoom provider implementation may support read-only market data endpoints such as:
+
+```text
+stock quote lookup
+ETF quote lookup
+market index lookup
+daily chart lookup
+symbol search or symbol mapping
+provider status check
+```
+
+These capabilities must be implemented through normalized provider adapters.
+
+---
+
+## 5.7 Explicitly forbidden capabilities
+
+The Kiwoom provider must not expose:
+
+```text
+trading
+order execution
+order cancellation
+order modification
+account balance lookup
+deposit lookup
+holdings lookup
+trade history lookup
+order history lookup
+profit/loss lookup
+portfolio rebalancing
+automated trading
+investment recommendations
+```
+
+Even if a provider API supports these endpoints, this MCP server must not expose them.
+
+---
+
+## 6. Read-only policy
+
+All providers must follow the read-only project scope.
+
+Allowed tool category:
+
+```text
+market data lookup
+```
+
+Forbidden tool categories:
+
+```text
+trading
+orders
+account
+portfolio
+recommendation
+automation for execution
+```
+
+Current allowed MCP tools:
+
+```text
+search_korean_symbol
+get_stock_quote
+get_etf_quote
+get_market_index
+get_daily_chart
+```
+
+The tool registry safety tests must fail if forbidden tools are added.
+
+---
+
+## 7. Credential handling policy
+
+Provider credentials must be handled locally.
+
+Credentials must not be:
+
+```text
+logged
+returned in MCP responses
+committed to Git
+included in tests
+included in examples as real values
+written to persistent cache by default
+```
+
+Sensitive values include:
+
+```text
+KIWOOM_APP_KEY
+KIWOOM_APP_SECRET
+access_token
+Authorization
+Bearer tokens
+provider secrets
+.env content
+```
+
+Secret redaction tests must continue to verify that sensitive values are removed from logs and errors.
+
+---
+
+## 8. Error normalization policy
+
+Provider-specific errors must be mapped to normalized project error codes.
+
+Current normalized error codes include:
+
+```text
+PROVIDER_AUTH_FAILED
+PROVIDER_RATE_LIMITED
+PROVIDER_TIMEOUT
+PROVIDER_UNAVAILABLE
+PROVIDER_BAD_RESPONSE
+SYMBOL_NOT_FOUND
+INVALID_INPUT
+UNSUPPORTED_PROVIDER_CAPABILITY
+INTERNAL_ERROR
+```
+
+Provider errors must not expose raw provider credentials, tokens, request headers, or `.env` values.
+
+---
+
+## 9. Test requirements by provider
+
+## 9.1 Mock provider tests
+
+The mock provider should verify:
+
+```text
+stock quote response
+ETF quote response
+market index response
+daily chart response
+Korean alias search
+English alias search
+normalized response fields
+no real network dependency
+```
+
+---
+
+## 9.2 Kiwoom provider tests
+
+The Kiwoom provider should verify:
+
+```text
+provider selection works
+credentials can be loaded
+missing credentials return PROVIDER_AUTH_FAILED
+dummy credentials with real API disabled return UNSUPPORTED_PROVIDER_CAPABILITY
+fetch/network calls do not happen by default
+tests are isolated from caller shell environment
+```
+
+Kiwoom tests must not require real credentials.
+
+---
+
+## 10. Release mapping
+
+## v0.1.0-alpha
+
+Provider status:
+
+```text
+mock provider implemented
+Kiwoom provider not implemented
+```
+
+Release description:
+
+```text
+Mock Provider MCP Skeleton
+```
+
+---
+
+## v0.2.0-alpha
+
+Provider status:
+
+```text
+mock provider implemented
+Kiwoom auth skeleton implemented
+real Kiwoom API calls disabled by default
+```
+
+Recommended release description:
+
+```text
+Kiwoom Provider Auth Skeleton
+```
+
+This release must not be described as live Kiwoom market data support.
+
+---
+
+## 11. Future provider candidates
+
+Potential future providers may include:
+
+```text
+KRX public data
+Bank of Korea ECOS
+FRED
+Yahoo Finance
+other public macro or market data sources
+```
+
+Each provider must be added behind the same provider adapter interface.
+
+Each provider must have:
+
+```text
+status documentation
+capability documentation
+credential policy if applicable
+rate limit notes if applicable
+tests
+normalized response mapping
+```
+
+---
+
+## 12. Maintainer checklist before enabling a provider
+
+Before a provider is marked as implemented, verify:
+
+```text
+provider status documented
+environment variables documented
+credentials redacted
+tests added
+build passes
+all tests pass
+no forbidden tools added
+no account/order/trading endpoints exposed
+normalized responses implemented
+provider errors normalized
+README updated
+```
+
+For providers that make real API calls, also verify:
+
+```text
+real API calls are opt-in where appropriate
+rate limit behavior is understood
+terms of service are reviewed
+data redistribution risk is reviewed
+manual verification steps are documented
+```
+
+---
+
+## 13. Current recommended default
+
+The recommended default remains:
+
+```env
+MARKET_DATA_PROVIDER=mock
+```
+
+Use `mock` for local MCP setup, Claude Desktop testing, documentation validation, and contributor onboarding.
+
+Use `kiwoom` only for provider skeleton validation until real Kiwoom market data integration is explicitly implemented and documented.
