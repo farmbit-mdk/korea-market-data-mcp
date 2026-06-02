@@ -15,7 +15,7 @@ This document is especially important because different providers may have diffe
 | Provider | Status        | Real API calls |     Credentials required | Default | Notes                                                   |
 | -------- | ------------- | -------------: | -----------------------: | ------: | ------------------------------------------------------- |
 | `mock`   | Implemented   |             No |                       No |     Yes | Fixed sample data for local MCP testing                 |
-| `kiwoom` | Quote endpoint mapping |  No by default | Yes, for manual token verification |      No | Disabled read-only quote endpoint mapping; no live quote lookup enabled yet |
+| `kiwoom` | Manual quote verification |  No by default | Yes, for manual token/quote verification |      No | Guarded manual quote workflow; public MCP quote tool not added |
 
 ---
 
@@ -144,10 +144,10 @@ It must not be used for investment decisions.
 ## 5.1 Status
 
 ```text
-quote endpoint mapping
+manual quote verification
 ```
 
-The Kiwoom provider currently exists as an authentication, provider-selection, token-request opt-in, manual token verification workflow, read-only quote adapter skeleton, and disabled quote endpoint mapping.
+The Kiwoom provider currently exists as an authentication, provider-selection, token-request opt-in, manual token verification workflow, read-only quote adapter skeleton, disabled quote endpoint mapping, and guarded manual quote verification workflow.
 
 It does not provide live Kiwoom market data yet.
 
@@ -180,6 +180,8 @@ quote endpoint intentionally not configured by default
 disabled quote endpoint mapping constant
 quote endpoint mapping documentation
 quote response fixtures
+manual quote verification command
+manual quote verification documentation
 normalized auth errors
 no-network safety tests
 read-only provider skeleton
@@ -240,6 +242,8 @@ Real Kiwoom API calls must remain disabled by default.
 | Manual command + explicit opt-in      | Token request allowed only by command |
 | Quote adapter skeleton without endpoint config | `KIWOOM_QUOTE_NOT_IMPLEMENTED` |
 | Quote endpoint mapping                 | Documented and disabled         |
+| Manual quote command + opt-in false    | No real request                 |
+| Manual quote command + disabled endpoint mapping | No token or quote request |
 | Mocked quote response                 | Can be normalized safely          |
 | Malformed quote response              | `KIWOOM_QUOTE_BAD_RESPONSE`       |
 | Market data request                   | Not implemented yet               |
@@ -438,6 +442,7 @@ manual command blocks when credentials are missing
 manual command returns token_present without printing token values
 quote adapter normalizes mocked quote responses
 quote endpoint mapping remains disabled
+manual quote command remains blocked by default
 quote adapter rejects account/order/balance/holdings fields
 MCP tool registry remains unchanged
 tests are isolated from caller shell environment
@@ -615,6 +620,29 @@ Kiwoom Quote Endpoint Mapping
 ```
 
 This release must not be described as live Kiwoom quote support. Public MCP quote tools, real quote lookup, ETF, index, chart, realtime, account, order, balance, holdings, trading, auto-trading, and recommendation features remain unimplemented or forbidden.
+
+---
+
+## v0.9.0-alpha
+
+Provider status:
+
+```text
+mock provider implemented
+Kiwoom token verification hardened
+Kiwoom quote endpoint mapping documented
+Kiwoom read-only quote manual verification workflow added
+public MCP quote tool not added
+real quote lookup remains guarded and disabled by default
+```
+
+Recommended release description:
+
+```text
+Kiwoom Read-only Quote Manual Verification
+```
+
+This release must not be described as public Kiwoom quote support. Public MCP quote tools, account access, orders, balance lookup, holdings lookup, trading, auto-trading, and investment recommendations remain unimplemented or forbidden.
 
 ---
 

@@ -81,12 +81,14 @@ export interface KiwoomQuoteResponse {
 }
 
 export interface KiwoomQuoteEndpointMapping {
-  enabled: false;
+  enabled: boolean;
+  manualOnly: boolean;
+  readOnly: boolean;
   method: "POST";
   path: string;
   apiId: string;
   description: string;
-  verified: false;
+  verified: boolean;
 }
 
 export interface NormalizedKiwoomQuote {

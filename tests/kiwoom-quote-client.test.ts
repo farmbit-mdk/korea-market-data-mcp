@@ -44,7 +44,9 @@ describe("Kiwoom read-only quote adapter skeleton", () => {
       enabled: false,
       method: "POST",
       path: "TODO_VERIFY_OFFICIAL_KIWOOM_QUOTE_ENDPOINT",
-      apiId: "TODO_VERIFY_OFFICIAL_KIWOOM_QUOTE_API_ID",
+      apiId: "ka10001",
+      manualOnly: true,
+      readOnly: true,
       verified: false
     });
   });
