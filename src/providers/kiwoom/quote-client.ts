@@ -1,5 +1,6 @@
 import { MarketDataProviderError } from "../errors.js";
 import { redactSecrets } from "../../safety/redact-secret.js";
+import { kiwoomQuoteEndpointMappings } from "./quote-endpoints.js";
 import { createFetchKiwoomQuoteTransport } from "./transport.js";
 import type {
   KiwoomQuoteRequest,
@@ -17,6 +18,7 @@ export interface KiwoomQuoteClientOptions {
   transport?: KiwoomQuoteTransport;
   quoteEndpointPath?: string;
   baseUrl?: string;
+  useMappedQuoteEndpoint?: boolean;
 }
 
 export class DefaultKiwoomQuoteClient implements KiwoomQuoteClient {
@@ -29,7 +31,9 @@ export class DefaultKiwoomQuoteClient implements KiwoomQuoteClient {
   async getQuote(request: KiwoomQuoteRequest): Promise<NormalizedKiwoomQuote> {
     assertReadOnlyQuoteRequest(request);
 
-    if (this.options.quoteEndpointPath === undefined || this.options.baseUrl === undefined) {
+    const quoteEndpointPath = this.resolveQuoteEndpointPath();
+
+    if (quoteEndpointPath === undefined || this.options.baseUrl === undefined) {
       throw new MarketDataProviderError(
         "KIWOOM_QUOTE_NOT_IMPLEMENTED",
         "Kiwoom quote endpoint is not configured yet.",
@@ -39,7 +43,7 @@ export class DefaultKiwoomQuoteClient implements KiwoomQuoteClient {
     }
 
     const transportRequest: KiwoomQuoteTransportRequest = {
-      url: `${this.options.baseUrl}${this.options.quoteEndpointPath}`,
+      url: `${this.options.baseUrl}${quoteEndpointPath}`,
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -55,6 +59,18 @@ export class DefaultKiwoomQuoteClient implements KiwoomQuoteClient {
     } catch (error) {
       throw normalizeKiwoomQuoteError(error);
     }
+  }
+
+  private resolveQuoteEndpointPath(): string | undefined {
+    if (this.options.quoteEndpointPath !== undefined) {
+      return this.options.quoteEndpointPath;
+    }
+
+    if (this.options.useMappedQuoteEndpoint === true && kiwoomQuoteEndpointMappings.quote.enabled) {
+      return kiwoomQuoteEndpointMappings.quote.path;
+    }
+
+    return undefined;
   }
 }
 
@@ -79,7 +95,8 @@ export function normalizeKiwoomQuoteResponse(
     );
   }
 
-  const symbol = normalizeRequiredString(response.symbol ?? request.symbol, "symbol");
+  const symbol = normalizeRequiredString(response.symbol ?? response.stock_code ?? request.symbol, "symbol");
+  const price = normalizeRequiredNumber(response.price ?? response.current_price, "price");
 
   return {
     provider: "kiwoom",
@@ -87,11 +104,11 @@ export function normalizeKiwoomQuoteResponse(
     name: normalizeOptionalString(response.name),
     market: normalizeOptionalString(response.market ?? request.market),
     currency: "KRW",
-    price: normalizeOptionalNumber(response.price, "price"),
+    price,
     change: normalizeOptionalNumber(response.change, "change"),
     change_rate: normalizeOptionalNumber(response.change_rate, "change_rate"),
     volume: normalizeOptionalNumber(response.volume, "volume"),
-    as_of: normalizeOptionalString(response.as_of),
+    as_of: normalizeOptionalString(response.as_of ?? response.timestamp),
     raw_available: false,
     returnCode,
     returnMessage: response.return_msg
@@ -156,6 +173,16 @@ function normalizeOptionalNumber(value: string | number | undefined, fieldName: 
 
   if (!Number.isFinite(normalized)) {
     throw new MarketDataProviderError("KIWOOM_QUOTE_BAD_RESPONSE", `Kiwoom quote response had invalid ${fieldName}.`, "kiwoom", false);
+  }
+
+  return normalized;
+}
+
+function normalizeRequiredNumber(value: string | number | undefined, fieldName: string): number {
+  const normalized = normalizeOptionalNumber(value, fieldName);
+
+  if (normalized === undefined) {
+    throw new MarketDataProviderError("KIWOOM_QUOTE_BAD_RESPONSE", `Kiwoom quote response missing ${fieldName}.`, "kiwoom", false);
   }
 
   return normalized;

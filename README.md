@@ -326,6 +326,21 @@ real API calls remain opt-in only
 
 The skeleton intentionally excludes account access, orders, balance lookup, holdings lookup, trading, auto-trading, and investment recommendations.
 
+### Kiwoom quote endpoint mapping
+
+`v0.8.0-alpha` adds documentation and disabled endpoint mapping constants for future Kiwoom read-only quote work.
+
+This is still preparation only:
+
+```text
+real quote lookup is not enabled
+public MCP quote tool is not added
+endpoint mapping remains disabled until official verification
+tests use quote fixtures and mocked transport
+```
+
+No account, order, balance, holdings, trading, auto-trading, or recommendation features are added.
+
 ---
 
 ## Claude Desktop example

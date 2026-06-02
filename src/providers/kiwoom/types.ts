@@ -66,15 +66,27 @@ export interface KiwoomQuoteRequest {
 
 export interface KiwoomQuoteResponse {
   symbol?: string;
+  stock_code?: string;
   name?: string;
   market?: string;
   price?: string | number;
+  current_price?: string | number;
   change?: string | number;
   change_rate?: string | number;
   volume?: string | number;
   as_of?: string;
+  timestamp?: string;
   return_code?: string | number;
   return_msg?: string;
+}
+
+export interface KiwoomQuoteEndpointMapping {
+  enabled: false;
+  method: "POST";
+  path: string;
+  apiId: string;
+  description: string;
+  verified: false;
 }
 
 export interface NormalizedKiwoomQuote {
