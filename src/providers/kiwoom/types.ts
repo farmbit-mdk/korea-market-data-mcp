@@ -56,3 +56,53 @@ export interface KiwoomTokenTransportRequest {
 export interface KiwoomTokenTransport {
   requestToken(request: KiwoomTokenTransportRequest): Promise<KiwoomRawTokenResponse>;
 }
+
+export type KiwoomQuoteMarket = "KRX" | "KOSPI" | "KOSDAQ" | "KONEX" | "UNKNOWN";
+
+export interface KiwoomQuoteRequest {
+  symbol: string;
+  market?: KiwoomQuoteMarket;
+}
+
+export interface KiwoomQuoteResponse {
+  symbol?: string;
+  name?: string;
+  market?: string;
+  price?: string | number;
+  change?: string | number;
+  change_rate?: string | number;
+  volume?: string | number;
+  as_of?: string;
+  return_code?: string | number;
+  return_msg?: string;
+}
+
+export interface NormalizedKiwoomQuote {
+  provider: "kiwoom";
+  symbol: string;
+  name?: string;
+  market?: string;
+  currency: "KRW";
+  price?: number;
+  change?: number;
+  change_rate?: number;
+  volume?: number;
+  as_of?: string;
+  raw_available: false;
+  returnCode?: string;
+  returnMessage?: string;
+}
+
+export interface KiwoomQuoteTransportRequest {
+  url: string;
+  method: "POST";
+  headers: Record<string, string>;
+  body: {
+    symbol: string;
+    market?: KiwoomQuoteMarket;
+  };
+}
+
+export interface KiwoomQuoteTransport {
+  requestQuote(request: KiwoomQuoteTransportRequest): Promise<KiwoomQuoteResponse>;
+}

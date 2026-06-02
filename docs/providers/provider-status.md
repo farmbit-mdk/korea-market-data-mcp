@@ -15,7 +15,7 @@ This document is especially important because different providers may have diffe
 | Provider | Status        | Real API calls |     Credentials required | Default | Notes                                                   |
 | -------- | ------------- | -------------: | -----------------------: | ------: | ------------------------------------------------------- |
 | `mock`   | Implemented   |             No |                       No |     Yes | Fixed sample data for local MCP testing                 |
-| `kiwoom` | Manual token verification hardened |  No by default | Yes, for manual token verification |      No | Hardened manual token command only; no live market data requests yet |
+| `kiwoom` | Quote adapter skeleton |  No by default | Yes, for manual token verification |      No | Read-only quote adapter skeleton; no live quote endpoint enabled yet |
 
 ---
 
@@ -144,10 +144,10 @@ It must not be used for investment decisions.
 ## 5.1 Status
 
 ```text
-manual token verification hardened
+quote adapter skeleton
 ```
 
-The Kiwoom provider currently exists as an authentication, provider-selection, token-request opt-in, and manual token verification workflow.
+The Kiwoom provider currently exists as an authentication, provider-selection, token-request opt-in, manual token verification workflow, and read-only quote adapter skeleton.
 
 It does not provide live Kiwoom market data yet.
 
@@ -173,6 +173,10 @@ Kiwoom token failure response normalization
 in-memory token cache storage and expiry checks
 manual token verification command
 manual token verification documentation
+read-only quote request/response types
+read-only quote adapter skeleton
+mocked quote response normalization
+quote endpoint intentionally not configured by default
 normalized auth errors
 no-network safety tests
 read-only provider skeleton
@@ -231,6 +235,9 @@ Real Kiwoom API calls must remain disabled by default.
 | Manual command + opt-in false         | No real request                   |
 | Manual command + missing credentials  | No real request                   |
 | Manual command + explicit opt-in      | Token request allowed only by command |
+| Quote adapter skeleton without endpoint config | `KIWOOM_QUOTE_NOT_IMPLEMENTED` |
+| Mocked quote response                 | Can be normalized safely          |
+| Malformed quote response              | `KIWOOM_QUOTE_BAD_RESPONSE`       |
 | Market data request                   | Not implemented yet               |
 | Trading/account request               | Forbidden                         |
 
@@ -373,6 +380,9 @@ PROVIDER_TIMEOUT
 PROVIDER_UNAVAILABLE
 PROVIDER_BAD_RESPONSE
 KIWOOM_TOKEN_REQUEST_FAILED
+KIWOOM_QUOTE_NOT_IMPLEMENTED
+KIWOOM_QUOTE_BAD_RESPONSE
+KIWOOM_QUOTE_REQUEST_FAILED
 SYMBOL_NOT_FOUND
 INVALID_INPUT
 UNSUPPORTED_PROVIDER_CAPABILITY
@@ -422,6 +432,9 @@ in-memory token cache stores valid tokens and skips expired tokens
 manual command blocks when real API opt-in is false
 manual command blocks when credentials are missing
 manual command returns token_present without printing token values
+quote adapter normalizes mocked quote responses
+quote adapter rejects account/order/balance/holdings fields
+MCP tool registry remains unchanged
 tests are isolated from caller shell environment
 ```
 
@@ -552,6 +565,28 @@ Kiwoom Manual Token Verification Hardening
 ```
 
 This release must not be described as live Kiwoom market data support. Quote, ETF, index, chart, realtime, account, order, balance, holdings, trading, auto-trading, and recommendation features remain unimplemented or forbidden.
+
+---
+
+## v0.7.0-alpha
+
+Provider status:
+
+```text
+mock provider implemented
+Kiwoom manual token verification workflow hardened
+Kiwoom read-only quote adapter skeleton implemented
+real quote lookup not implemented or enabled
+MCP tool registry unchanged
+```
+
+Recommended release description:
+
+```text
+Kiwoom Read-only Quote Adapter Skeleton
+```
+
+This release must not be described as live Kiwoom quote support. Quote, ETF, index, chart, realtime, account, order, balance, holdings, trading, auto-trading, and recommendation features remain unimplemented or forbidden.
 
 ---
 
