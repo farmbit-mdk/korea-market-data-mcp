@@ -8,6 +8,7 @@ import type {
   KiwoomQuoteMarket,
   NormalizedKiwoomQuote
 } from "../providers/kiwoom/types.js";
+import type { NormalizedQuote } from "../schemas/index.js";
 import { redactSecrets } from "../safety/redact-secret.js";
 import type { ToolDefinition } from "./types.js";
 
@@ -25,9 +26,20 @@ export interface KiwoomPublicQuoteBlockedResponse {
   reason: string;
 }
 
-export interface KiwoomPublicQuoteOkResponse extends NormalizedKiwoomQuote {
+export interface KiwoomPublicQuoteOkResponse {
   status: "ok";
+  provider: "kiwoom";
+  symbol: string;
   quote_present: true;
+  quote: NormalizedKiwoomQuote;
+}
+
+export interface KiwoomPublicQuoteErrorResponse {
+  status: "error";
+  provider: "kiwoom";
+  symbol?: string;
+  quote_present: false;
+  error: ReturnType<typeof toToolErrorResponse>["error"];
 }
 
 interface KiwoomPublicQuoteDependencies {
@@ -81,7 +93,9 @@ export const getKiwoomStockQuoteTool: ToolDefinition = {
 export async function runGuardedKiwoomPublicQuote(
   input: Record<string, unknown>,
   dependencies: KiwoomPublicQuoteDependencies = {}
-): Promise<KiwoomPublicQuoteBlockedResponse | KiwoomPublicQuoteOkResponse | ReturnType<typeof toToolErrorResponse>> {
+): Promise<KiwoomPublicQuoteBlockedResponse | KiwoomPublicQuoteOkResponse | KiwoomPublicQuoteErrorResponse> {
+  const symbolForError = typeof input.symbol === "string" ? input.symbol.trim() : undefined;
+
   try {
     const normalizedInput = normalizeKiwoomPublicQuoteInput(input);
     const mapping = dependencies.quoteEndpointMapping ?? kiwoomQuoteEndpointMappings.quote;
@@ -128,13 +142,37 @@ export async function runGuardedKiwoomPublicQuote(
     });
 
     return {
-      ...redactSecrets(quote),
       status: "ok",
-      quote_present: true
+      provider: "kiwoom",
+      symbol: normalizedInput.symbol,
+      quote_present: true,
+      quote: redactSecrets(quote)
     };
   } catch (error) {
-    return toToolErrorResponse(normalizeKiwoomQuoteError(error), "kiwoom");
+    return {
+      status: "error",
+      provider: "kiwoom",
+      symbol: symbolForError === "" ? undefined : symbolForError,
+      quote_present: false,
+      error: redactSecrets(toToolErrorResponse(normalizeKiwoomQuoteError(error), "kiwoom").error)
+    };
   }
+}
+
+export function normalizeMockQuoteForKiwoomPublicTool(quote: NormalizedQuote): NormalizedKiwoomQuote {
+  return {
+    provider: "kiwoom",
+    symbol: quote.symbol,
+    name: quote.name,
+    market: quote.market,
+    currency: "KRW",
+    price: quote.price ?? undefined,
+    change: quote.change ?? undefined,
+    change_rate: quote.changeRate ?? undefined,
+    volume: quote.volume ?? undefined,
+    as_of: quote.providerTimestamp ?? quote.requestTimestamp,
+    raw_available: false
+  };
 }
 
 function normalizeKiwoomPublicQuoteInput(input: Record<string, unknown>): Required<Pick<KiwoomPublicQuoteInput, "symbol">> & {
@@ -156,6 +194,10 @@ function normalizeKiwoomPublicQuoteInput(input: Record<string, unknown>): Requir
 
   if (symbol === "") {
     throw new MarketDataProviderError("INVALID_INPUT", "symbol is required.", "kiwoom", false);
+  }
+
+  if (!/^[0-9]{6}$/.test(symbol)) {
+    throw new MarketDataProviderError("INVALID_INPUT", "symbol must be a 6-digit Korean stock code.", "kiwoom", false);
   }
 
   if (input.provider !== undefined && input.provider !== "kiwoom") {

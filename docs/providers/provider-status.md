@@ -188,6 +188,7 @@ Kiwoom compliance notes
 credential handling documentation
 public quote tool readiness checklist
 guarded Kiwoom public quote MCP tool skeleton
+mock/test integration for guarded public quote response shape
 normalized auth errors
 no-network safety tests
 read-only provider skeleton
@@ -255,6 +256,7 @@ Real Kiwoom API calls must remain disabled by default.
 | Provider compliance review        | Added documentation and tests |
 | Kiwoom public quote tool          | Guarded skeleton registered |
 | Public real Kiwoom quote lookup   | Not enabled by default |
+| Mock/test quote response          | Available for response validation only |
 | Mocked quote response                 | Can be normalized safely          |
 | Malformed quote response              | `KIWOOM_QUOTE_BAD_RESPONSE`       |
 | Market data request                   | Not implemented yet               |
@@ -345,6 +347,7 @@ Current allowed MCP tools:
 ```text
 search_korean_symbol
 get_stock_quote
+get_kiwoom_stock_quote
 get_etf_quote
 get_market_index
 get_daily_chart
@@ -465,6 +468,7 @@ credential handling docs exist
 public quote tool readiness checklist exists
 guarded Kiwoom public quote tool is registered
 public real Kiwoom quote lookup remains blocked by default
+mock/test public quote success path returns stable nested quote shape
 ```
 
 Kiwoom tests must not require real credentials.
@@ -737,6 +741,30 @@ Kiwoom Public Quote Tool Guarded Skeleton
 ```
 
 This release registers a guarded read-only MCP tool skeleton for future Kiwoom stock quotes. It must not be described as live Kiwoom quote support. Public real Kiwoom quote lookup, account access, orders, balance lookup, holdings lookup, trading, auto-trading, investment recommendations, centralized credential storage, and centralized data redistribution proxy behavior remain unimplemented or forbidden.
+
+---
+
+## v0.13.0-alpha
+
+Provider status:
+
+```text
+mock provider implemented
+Kiwoom public quote tool guarded skeleton registered
+Kiwoom public quote tool response shape stabilized
+mock/test provider flow available for response validation only
+symbol validation requires 6-digit Korean stock code
+public real Kiwoom quote lookup disabled by default
+account/order/trading explicitly out of scope
+```
+
+Recommended release description:
+
+```text
+Kiwoom Public Quote Tool Mock Provider Integration
+```
+
+This release validates `get_kiwoom_stock_quote` with mock/test-only flows and stabilizes blocked/error/ok response shapes. It must not be described as live Kiwoom quote support. Public real Kiwoom quote lookup, account access, orders, balance lookup, holdings lookup, trading, auto-trading, investment recommendations, centralized credential storage, and centralized data redistribution proxy behavior remain unimplemented or forbidden.
 
 ---
 

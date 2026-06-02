@@ -1,6 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
+import { MockMarketDataProvider } from "../src/providers/mock/client.js";
 import type { KiwoomQuoteEndpointMapping, NormalizedKiwoomQuote } from "../src/providers/kiwoom/index.js";
-import { getKiwoomStockQuoteTool, runGuardedKiwoomPublicQuote } from "../src/tools/get-kiwoom-stock-quote.js";
+import {
+  getKiwoomStockQuoteTool,
+  normalizeMockQuoteForKiwoomPublicTool,
+  runGuardedKiwoomPublicQuote
+} from "../src/tools/get-kiwoom-stock-quote.js";
 import { getRegisteredToolNames } from "../src/tools/index.js";
 
 describe("Kiwoom public quote guarded skeleton", () => {
@@ -10,6 +15,9 @@ describe("Kiwoom public quote guarded skeleton", () => {
 
   it("requires symbol", async () => {
     await expect(runGuardedKiwoomPublicQuote({})).resolves.toMatchObject({
+      status: "error",
+      provider: "kiwoom",
+      quote_present: false,
       error: {
         code: "INVALID_INPUT",
         provider: "kiwoom",
@@ -17,6 +25,27 @@ describe("Kiwoom public quote guarded skeleton", () => {
       }
     });
   });
+
+  it.each(["", "   ", "00593", "0059300", "ABCDEF", "005930;DROP", { code: "005930" }])(
+    "returns a safe validation error for invalid symbol %s",
+    async (symbol) => {
+      const response = await runGuardedKiwoomPublicQuote({ symbol });
+
+      expect(response).toMatchObject({
+        status: "error",
+        provider: "kiwoom",
+        quote_present: false,
+        error: {
+          code: "INVALID_INPUT",
+          provider: "kiwoom",
+          retryable: false
+        }
+      });
+      expect(JSON.stringify(response)).not.toContain("app_key");
+      expect(JSON.stringify(response)).not.toContain("secret");
+      expect(JSON.stringify(response)).not.toContain("access_token");
+    }
+  );
 
   it.each([
     "account_no",
@@ -31,6 +60,9 @@ describe("Kiwoom public quote guarded skeleton", () => {
     "recommendation"
   ])("rejects forbidden input field %s", async (field) => {
     await expect(runGuardedKiwoomPublicQuote({ symbol: "005930", [field]: "forbidden" })).resolves.toMatchObject({
+      status: "error",
+      provider: "kiwoom",
+      quote_present: false,
       error: {
         code: "INVALID_INPUT",
         provider: "kiwoom"
@@ -143,7 +175,7 @@ describe("Kiwoom public quote guarded skeleton", () => {
     expect(serialized).not.toContain("fixture_access_token");
   });
 
-  it("normalizes mocked success only when every guard is explicitly enabled in tests", async () => {
+  it("returns a stable mocked ok response only when every guard is explicitly enabled in tests", async () => {
     const tokenClient = createMockTokenClient();
     const quoteClient = createMockQuoteClient();
 
@@ -162,12 +194,58 @@ describe("Kiwoom public quote guarded skeleton", () => {
       quote_present: true,
       provider: "kiwoom",
       symbol: "005930",
-      currency: "KRW",
-      price: 70000
+      quote: {
+        provider: "kiwoom",
+        symbol: "005930",
+        name: "Samsung Electronics",
+        market: "KOSPI",
+        currency: "KRW",
+        price: 70000,
+        change: -500,
+        change_rate: -0.71,
+        volume: 12345678,
+        as_of: "2026-06-03T09:00:00.000Z",
+        raw_available: false
+      }
     });
     expect(JSON.stringify(response)).not.toContain("fixture_access_token");
     expect(tokenClient.getAccessToken).toHaveBeenCalledOnce();
     expect(quoteClient.getQuote).toHaveBeenCalledWith({ symbol: "005930", market: "KOSPI" });
+  });
+
+  it("can build a mocked ok response from the existing mock provider quote flow", async () => {
+    const mockProvider = new MockMarketDataProvider();
+    const mockQuote = await mockProvider.getStockQuote({ symbol: "005930", market: "KOSPI" });
+    const tokenClient = createMockTokenClient();
+    const quoteClient = createMockQuoteClient(normalizeMockQuoteForKiwoomPublicTool(mockQuote));
+
+    const response = await runGuardedKiwoomPublicQuote(
+      { symbol: "005930", market: "KOSPI", provider: "kiwoom" },
+      {
+        env: validEnabledEnv,
+        quoteEndpointMapping: enabledPublicMapping,
+        tokenClient,
+        quoteClient
+      }
+    );
+
+    expect(response).toMatchObject({
+      status: "ok",
+      provider: "kiwoom",
+      symbol: "005930",
+      quote_present: true,
+      quote: {
+        provider: "kiwoom",
+        symbol: "005930",
+        name: "Samsung Electronics",
+        market: "KOSPI",
+        currency: "KRW",
+        price: 70000,
+        change: 500,
+        change_rate: 0.72,
+        volume: 12000000
+      }
+    });
   });
 
   const validEnabledEnv = {

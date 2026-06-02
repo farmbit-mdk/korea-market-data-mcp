@@ -16,6 +16,8 @@ SECURITY.md is current
 README disclaimer is current
 docs/providers/provider-status.md is current
 guarded skeleton status is documented if a public skeleton exists
+public tool response format is documented
+mock/test integration status is documented
 ```
 
 ## Provider Review
@@ -77,4 +79,19 @@ caching policy has been reviewed
 provider terms are compatible with the intended use
 public MCP behavior is documented
 guarded skeleton still returns blocked unless every release gate is satisfied
+mock/test success path is clearly labeled as non-live data
+```
+
+## v0.13 Mock/Test Validation
+
+Confirm:
+
+```text
+get_kiwoom_stock_quote blocked response shape is stable
+get_kiwoom_stock_quote error response shape is stable
+get_kiwoom_stock_quote mocked ok response shape nests quote under quote
+symbol validation requires a 6-digit Korean stock code
+forbidden schema fields are absent
+real lookup remains disabled by default
+redaction tests pass
 ```
