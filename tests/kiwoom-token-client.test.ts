@@ -8,6 +8,13 @@ import {
   normalizeKiwoomTokenResponse
 } from "../src/providers/kiwoom/index.js";
 import type { KiwoomTokenTransport } from "../src/providers/kiwoom/index.js";
+import {
+  kiwoomErrorTokenResponse,
+  malformedKiwoomTokenResponse,
+  missingExpiresDtKiwoomTokenResponse,
+  missingTokenKiwoomTokenResponse,
+  successfulKiwoomTokenResponse
+} from "./fixtures/kiwoom-token-responses.js";
 
 describe("Kiwoom token client interface", () => {
   afterEach(() => {
@@ -70,11 +77,7 @@ describe("Kiwoom token client interface", () => {
   it("calls only the injected mocked transport when real API calls are explicitly enabled", async () => {
     const fetchSpy = vi.fn();
     vi.stubGlobal("fetch", fetchSpy);
-    const transport = createMockTransport({
-      access_token: "dummy_access_token_value",
-      token_type: "Bearer",
-      expires_in: 3600
-    });
+    const transport = createMockTransport(successfulKiwoomTokenResponse);
     const tokenClient = createKiwoomTokenClient({
       config: loadKiwoomAuthConfig({
         KIWOOM_APP_KEY: "dummy_app_key",
@@ -88,7 +91,7 @@ describe("Kiwoom token client interface", () => {
     const token = await tokenClient.getAccessToken();
 
     expect(token).toMatchObject({
-      accessToken: "dummy_access_token_value",
+      accessToken: "fixture_access_token_value",
       tokenType: "Bearer",
       provider: "kiwoom"
     });
@@ -108,25 +111,20 @@ describe("Kiwoom token client interface", () => {
   });
 
   it("can normalize raw token responses directly", () => {
-    const token = normalizeKiwoomTokenResponse({
-      access_token: "dummy_access_token_value",
-      token_type: "Bearer",
-      expires_at: "2026-06-02T00:00:00.000Z"
-    });
+    const token = normalizeKiwoomTokenResponse(successfulKiwoomTokenResponse);
 
     expect(token).toEqual({
-      accessToken: "dummy_access_token_value",
+      accessToken: "fixture_access_token_value",
       tokenType: "Bearer",
       expiresAt: "2026-06-02T00:00:00.000Z",
-      provider: "kiwoom"
+      provider: "kiwoom",
+      returnCode: "0",
+      returnMessage: "OK"
     });
   });
 
-  it("normalizes failed token responses", async () => {
-    const transport = createMockTransport({
-      token_type: "Bearer",
-      expires_in: 3600
-    });
+  it("normalizes Kiwoom error token responses", async () => {
+    const transport = createMockTransport(kiwoomErrorTokenResponse);
     const tokenClient = createKiwoomTokenClient({
       config: loadKiwoomAuthConfig({
         KIWOOM_APP_KEY: "dummy_app_key",
@@ -137,10 +135,30 @@ describe("Kiwoom token client interface", () => {
     });
 
     await expect(tokenClient.getAccessToken()).rejects.toMatchObject({
-      code: "PROVIDER_BAD_RESPONSE",
+      code: "KIWOOM_TOKEN_REQUEST_FAILED",
       provider: "kiwoom",
-      retryable: false
+      retryable: false,
+      returnCode: "10001",
+      returnMessage: "Invalid app key or secret key."
     });
+  });
+
+  it("turns malformed token responses into safe provider errors", () => {
+    expect(() => normalizeKiwoomTokenResponse(malformedKiwoomTokenResponse)).toThrowError(
+      /Provider token response was invalid/
+    );
+  });
+
+  it("turns missing token responses into safe provider errors", () => {
+    expect(() => normalizeKiwoomTokenResponse(missingTokenKiwoomTokenResponse)).toThrowError(
+      /Provider token response was invalid/
+    );
+  });
+
+  it("turns missing expires_dt responses into safe provider errors", () => {
+    expect(() => normalizeKiwoomTokenResponse(missingExpiresDtKiwoomTokenResponse)).toThrowError(
+      /Provider token response was invalid/
+    );
   });
 
   it("normalizes token transport errors directly", () => {
@@ -187,11 +205,7 @@ describe("Kiwoom token client interface", () => {
 
   it("does not log token values", async () => {
     const stderrSpy = vi.spyOn(process.stderr, "write").mockImplementation(() => true);
-    const transport = createMockTransport({
-      access_token: "dummy_access_token_value",
-      token_type: "Bearer",
-      expires_in: 3600
-    });
+    const transport = createMockTransport(successfulKiwoomTokenResponse);
     const tokenClient = createKiwoomTokenClient({
       config: loadKiwoomAuthConfig({
         KIWOOM_APP_KEY: "dummy_app_key",
@@ -204,7 +218,7 @@ describe("Kiwoom token client interface", () => {
     await tokenClient.getAccessToken();
 
     const loggedText = stderrSpy.mock.calls.flat().join(" ");
-    expect(loggedText).not.toContain("dummy_access_token_value");
+    expect(loggedText).not.toContain("fixture_access_token_value");
     expect(loggedText).not.toContain("dummy_app_secret");
   });
 

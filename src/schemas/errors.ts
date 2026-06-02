@@ -4,6 +4,7 @@ export const providerErrorCodes = [
   "PROVIDER_TIMEOUT",
   "PROVIDER_UNAVAILABLE",
   "PROVIDER_BAD_RESPONSE",
+  "KIWOOM_TOKEN_REQUEST_FAILED",
   "SYMBOL_NOT_FOUND",
   "INVALID_INPUT",
   "UNSUPPORTED_PROVIDER_CAPABILITY",
@@ -18,5 +19,7 @@ export interface ToolErrorResponse {
     message: string;
     provider?: string;
     retryable: boolean;
+    return_code?: string;
+    return_msg?: string;
   };
 }

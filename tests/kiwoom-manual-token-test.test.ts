@@ -2,6 +2,10 @@ import { describe, expect, it, vi } from "vitest";
 import { runManualKiwoomTokenVerification } from "../scripts/kiwoom-manual-token-test.js";
 import { redactSecrets } from "../src/safety/redact-secret.js";
 import type { KiwoomTokenTransport } from "../src/providers/kiwoom/index.js";
+import {
+  kiwoomErrorTokenResponse,
+  successfulKiwoomTokenResponse
+} from "./fixtures/kiwoom-token-responses.js";
 
 describe("Kiwoom manual token verification workflow", () => {
   it("blocks manual token requests when real API opt-in is disabled", async () => {
@@ -78,13 +82,7 @@ describe("Kiwoom manual token verification workflow", () => {
   });
 
   it("uses only mocked transport after explicit opt-in and returns safe token summary", async () => {
-    const transport = createMockTransport({
-      token_type: "Bearer",
-      access_token: "dummy_access_token_value",
-      expires_dt: "2026-06-02T00:00:00.000Z",
-      return_code: "0",
-      return_msg: "OK"
-    });
+    const transport = createMockTransport(successfulKiwoomTokenResponse);
 
     const summary = await runManualKiwoomTokenVerification(
       {
@@ -97,7 +95,7 @@ describe("Kiwoom manual token verification workflow", () => {
     );
 
     expect(summary).toEqual({
-      status: "success",
+      status: "ok",
       provider: "kiwoom",
       environment: "mock",
       token_present: true,
@@ -106,8 +104,37 @@ describe("Kiwoom manual token verification workflow", () => {
       return_code: "0",
       return_msg: "OK"
     });
-    expect(JSON.stringify(summary)).not.toContain("dummy_access_token_value");
+    expect(JSON.stringify(summary)).not.toContain("fixture_access_token_value");
     expect(transport.requestToken).toHaveBeenCalledOnce();
+  });
+
+  it("returns safe error output for Kiwoom token error responses", async () => {
+    const transport = createMockTransport(kiwoomErrorTokenResponse);
+    const summary = await runManualKiwoomTokenVerification(
+      {
+        KIWOOM_ENABLE_REAL_API_CALLS: "true",
+        KIWOOM_APP_KEY: "dummy_app_key",
+        KIWOOM_SECRET_KEY: "dummy_secret_key",
+        KIWOOM_ENV: "mock"
+      },
+      transport
+    );
+
+    expect(summary).toMatchObject({
+      status: "error",
+      provider: "kiwoom",
+      environment: "mock",
+      token_present: false,
+      error: {
+        code: "KIWOOM_TOKEN_REQUEST_FAILED",
+        provider: "kiwoom",
+        retryable: false,
+        return_code: "10001",
+        return_msg: "Invalid app key or secret key."
+      }
+    });
+    expect(JSON.stringify(summary)).not.toContain("dummy_app_key");
+    expect(JSON.stringify(summary)).not.toContain("dummy_secret_key");
   });
 
   it("redacts app key, secret key, and token-like values", () => {
