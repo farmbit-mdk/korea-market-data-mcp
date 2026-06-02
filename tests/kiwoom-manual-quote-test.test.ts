@@ -77,6 +77,30 @@ describe("Kiwoom manual quote verification workflow", () => {
     expect(quoteTransport.requestQuote).not.toHaveBeenCalled();
   });
 
+  it("blocks .env.example placeholder credentials", async () => {
+    const tokenTransport = createMockTokenTransport();
+    const quoteTransport = createMockQuoteTransport();
+    const summary = await runManualKiwoomQuoteVerification(
+      {
+        KIWOOM_ENABLE_REAL_API_CALLS: "true",
+        KIWOOM_APP_KEY: "YOUR_KIWOOM_APP_KEY",
+        KIWOOM_SECRET_KEY: "YOUR_KIWOOM_SECRET_KEY",
+        KIWOOM_QUOTE_SYMBOL: "005930"
+      },
+      { tokenTransport, quoteTransport, quoteEndpointMapping: enabledQuoteMapping }
+    );
+
+    expect(summary).toMatchObject({
+      status: "blocked",
+      quote_present: false,
+      reason: expect.stringContaining("Placeholder credentials")
+    });
+    expect(JSON.stringify(summary)).not.toContain("YOUR_KIWOOM_APP_KEY");
+    expect(JSON.stringify(summary)).not.toContain("YOUR_KIWOOM_SECRET_KEY");
+    expect(tokenTransport.requestToken).not.toHaveBeenCalled();
+    expect(quoteTransport.requestQuote).not.toHaveBeenCalled();
+  });
+
   it("blocks when symbol is missing", async () => {
     const tokenTransport = createMockTokenTransport();
     const quoteTransport = createMockQuoteTransport();

@@ -355,6 +355,30 @@ The workflow now documents and tests endpoint enabled/disabled policy, safe quot
 
 No public MCP quote tool is added. Public real Kiwoom quote lookup is still not enabled. No account, order, balance, holdings, trading, auto-trading, or recommendation features are added.
 
+### Provider compliance and security review
+
+`v0.11.0-alpha` adds provider compliance and security review documentation before any public provider-backed quote tool is exposed.
+
+This is not a feature enablement release:
+
+```text
+public MCP quote tool is still not added
+public real Kiwoom quote lookup is still not enabled
+credentials must remain local and must not be committed
+centralized credential storage is out of scope
+centralized market data redistribution proxy is out of scope
+account, order, balance, holdings, trading, auto-trading, and recommendation features remain excluded
+```
+
+See:
+
+```text
+docs/providers/provider-compliance.md
+docs/providers/kiwoom-compliance-notes.md
+docs/security/credential-handling.md
+docs/release/public-quote-tool-readiness-checklist.md
+```
+
 ---
 
 ## Claude Desktop example

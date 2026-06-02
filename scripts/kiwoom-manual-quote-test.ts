@@ -43,7 +43,16 @@ interface ManualKiwoomQuoteDependencies {
 
 const defaultApiBaseUrl = "https://api.kiwoom.com";
 const defaultMockApiBaseUrl = "https://mockapi.kiwoom.com";
-const placeholderCredentialValues = new Set(["YOUR_APP_KEY", "YOUR_SECRET_KEY", "CHANGE_ME", "REPLACE_ME", ""]);
+const placeholderCredentialValues = new Set([
+  "YOUR_APP_KEY",
+  "YOUR_SECRET_KEY",
+  "YOUR_KIWOOM_APP_KEY",
+  "YOUR_KIWOOM_APP_SECRET",
+  "YOUR_KIWOOM_SECRET_KEY",
+  "CHANGE_ME",
+  "REPLACE_ME",
+  ""
+]);
 
 export async function runManualKiwoomQuoteVerification(
   env: ManualKiwoomQuoteEnv = process.env,
