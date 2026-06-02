@@ -15,7 +15,7 @@ This document is especially important because different providers may have diffe
 | Provider | Status        | Real API calls |     Credentials required | Default | Notes                                                   |
 | -------- | ------------- | -------------: | -----------------------: | ------: | ------------------------------------------------------- |
 | `mock`   | Implemented   |             No |                       No |     Yes | Fixed sample data for local MCP testing                 |
-| `kiwoom` | Token request opt-in |  No by default | Yes, for future real use |      No | Token client may call injected transport only when explicitly enabled |
+| `kiwoom` | Manual token verification |  No by default | Yes, for manual token verification |      No | Manual token command only; no live market data requests yet |
 
 ---
 
@@ -144,10 +144,10 @@ It must not be used for investment decisions.
 ## 5.1 Status
 
 ```text
-token request opt-in
+manual token verification
 ```
 
-The Kiwoom provider currently exists as an authentication, provider-selection, and token-request opt-in skeleton.
+The Kiwoom provider currently exists as an authentication, provider-selection, token-request opt-in, and manual token verification workflow.
 
 It does not provide live Kiwoom market data yet.
 
@@ -170,6 +170,8 @@ transport abstraction for token requests
 mocked token response normalization
 mocked token error normalization
 in-memory token cache storage and expiry checks
+manual token verification command
+manual token verification documentation
 normalized auth errors
 no-network safety tests
 read-only provider skeleton
@@ -178,7 +180,6 @@ read-only provider skeleton
 Current not implemented behavior:
 
 ```text
-real token request
 real stock quote request
 real ETF quote request
 real market index request
@@ -196,9 +197,10 @@ Expected Kiwoom-related environment variables:
 ```env
 MARKET_DATA_PROVIDER=kiwoom
 
-KIWOOM_ENV=prod
+KIWOOM_ENV=mock
 KIWOOM_APP_KEY=
 KIWOOM_APP_SECRET=
+KIWOOM_SECRET_KEY=
 KIWOOM_API_BASE_URL=https://api.kiwoom.com
 KIWOOM_MOCK_API_BASE_URL=https://mockapi.kiwoom.com
 KIWOOM_ENABLE_REAL_API_CALLS=false
@@ -224,6 +226,9 @@ Real Kiwoom API calls must remain disabled by default.
 | Real API enabled + real transport     | Not implemented for default use   |
 | Token request with default safety     | No transport call                 |
 | Failed mocked token response          | `PROVIDER_BAD_RESPONSE`           |
+| Manual command + opt-in false         | No real request                   |
+| Manual command + missing credentials  | No real request                   |
+| Manual command + explicit opt-in      | Token request allowed only by command |
 | Market data request                   | Not implemented yet               |
 | Trading/account request               | Forbidden                         |
 
@@ -409,6 +414,9 @@ failed token responses can be normalized
 secrets are redacted from token errors
 token values are not logged
 in-memory token cache stores valid tokens and skips expired tokens
+manual command blocks when real API opt-in is false
+manual command blocks when credentials are missing
+manual command returns token_present without printing token values
 tests are isolated from caller shell environment
 ```
 
@@ -495,6 +503,28 @@ Kiwoom Token Request Opt-In Flow
 ```
 
 This release must not be described as live Kiwoom market data support. Stock, ETF, index, chart, realtime, account, order, trading, and recommendation endpoints remain unimplemented or forbidden.
+
+---
+
+## v0.5.0-alpha
+
+Provider status:
+
+```text
+mock provider implemented
+Kiwoom manual token verification workflow implemented
+real Kiwoom API calls disabled by default
+manual token command requires explicit opt-in
+market data endpoints remain unimplemented
+```
+
+Recommended release description:
+
+```text
+Kiwoom Manual Token Verification
+```
+
+This release must not be described as live Kiwoom market data support. Quote, ETF, index, chart, realtime, account, order, balance, holdings, trading, auto-trading, and recommendation features remain unimplemented or forbidden.
 
 ---
 

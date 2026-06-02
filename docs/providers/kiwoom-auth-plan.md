@@ -27,7 +27,8 @@ Transport boundary: implemented
 Token request opt-in flow: implemented
 Token response normalization: implemented
 Token error normalization: implemented
-Real token request: not implemented
+Manual token verification workflow: implemented
+Real token request: manual command only
 Real market data request: not implemented
 Trading/account endpoints: not implemented and forbidden
 ```
@@ -37,8 +38,8 @@ Current test status:
 ```text
 npm run build: passed
 npm test: passed
-Test files: 7 passed
-Tests: 36 passed
+Test files: 8 passed
+Tests: 40 passed
 ```
 
 ---
@@ -367,6 +368,24 @@ provider attribution
 no account/order endpoints
 ```
 
+## Stage 5 — Manual token verification
+
+Status: implemented for `v0.5.0-alpha`.
+
+Scope:
+
+```text
+manual token verification command
+explicit KIWOOM_ENABLE_REAL_API_CALLS=true requirement
+KIWOOM_APP_KEY and KIWOOM_SECRET_KEY requirement
+safe token summary output
+token raw value never printed
+documentation for Kiwoom manual verification
+unit tests without real credentials
+```
+
+This stage is not an MCP tool and is not live market data support.
+
 ---
 
 ## 12. Explicitly forbidden endpoints
@@ -392,12 +411,12 @@ These are outside the project scope.
 
 ## 13. Release implication
 
-This document supports the `v0.4.0-alpha` development line.
+This document supports the `v0.5.0-alpha` development line.
 
-The `v0.4.0-alpha` release should be described as:
+The `v0.5.0-alpha` release should be described as:
 
 ```text
-Kiwoom token request opt-in flow with no real API calls by default.
+Kiwoom manual token verification workflow.
 ```
 
 It must not be described as live Kiwoom market data support.

@@ -18,15 +18,21 @@ export interface KiwoomTokenRequest {
 export interface KiwoomRawTokenResponse {
   token_type?: string;
   access_token?: string;
+  token?: string;
   expires_at?: string;
+  expires_dt?: string;
   expires_in?: number;
+  return_code?: string | number;
+  return_msg?: string;
 }
 
 export interface KiwoomAccessToken {
   accessToken: string;
-  tokenType: "Bearer";
+  tokenType: string;
   expiresAt: string;
   provider: "kiwoom";
+  returnCode?: string;
+  returnMessage?: string;
 }
 
 export interface KiwoomTokenCacheEntry {
