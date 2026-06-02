@@ -382,7 +382,7 @@ docs/release/public-quote-tool-readiness-checklist.md
 
 ### Kiwoom public quote guarded skeleton
 
-`v0.13.0-alpha` stabilizes the guarded public MCP tool skeleton:
+`v0.14.0-alpha` hardens the guarded public MCP tool skeleton:
 
 ```text
 get_kiwoom_stock_quote
@@ -436,6 +436,23 @@ Mock/test-only success output shape:
 ```
 
 The symbol must be a 6-digit Korean stock code such as `005930`. The input schema only allows `symbol`, `market`, and optional `provider`.
+
+The guard order is intentionally conservative:
+
+```text
+input object validation
+forbidden field validation
+symbol validation
+provider validation
+endpoint readOnly check
+public exposure check
+real API opt-in check
+endpoint enabled check
+credential and token checks
+quote client call
+```
+
+Validation and blocked/error responses do not echo forbidden payload values, raw provider payloads, app keys, secret keys, or access tokens.
 
 This release does not enable live Kiwoom quote support:
 

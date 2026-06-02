@@ -13,8 +13,31 @@ describe("Kiwoom public quote guarded skeleton", () => {
     expect(getRegisteredToolNames()).toContain("get_kiwoom_stock_quote");
   });
 
-  it("requires symbol", async () => {
-    await expect(runGuardedKiwoomPublicQuote({})).resolves.toMatchObject({
+  it("returns blocked by default without calling injected clients", async () => {
+    const tokenClient = createMockTokenClient();
+    const quoteClient = createMockQuoteClient();
+    const response = await runGuardedKiwoomPublicQuote(
+      { symbol: "005930" },
+      { tokenClient, quoteClient }
+    );
+
+    expect(response).toMatchObject({
+      status: "blocked",
+      provider: "kiwoom",
+      symbol: "005930",
+      quote_present: false,
+      reason: expect.stringContaining("guarded skeleton")
+    });
+    expect(tokenClient.getAccessToken).not.toHaveBeenCalled();
+    expect(quoteClient.getQuote).not.toHaveBeenCalled();
+  });
+
+  it("requires symbol without calling clients", async () => {
+    const tokenClient = createMockTokenClient();
+    const quoteClient = createMockQuoteClient();
+    const response = await runGuardedKiwoomPublicQuote({}, { tokenClient, quoteClient });
+
+    expect(response).toMatchObject({
       status: "error",
       provider: "kiwoom",
       quote_present: false,
@@ -24,12 +47,29 @@ describe("Kiwoom public quote guarded skeleton", () => {
         retryable: false
       }
     });
+    expect(tokenClient.getAccessToken).not.toHaveBeenCalled();
+    expect(quoteClient.getQuote).not.toHaveBeenCalled();
   });
 
-  it.each(["", "   ", "00593", "0059300", "ABCDEF", "005930;DROP", { code: "005930" }])(
+  it.each([
+    "",
+    "   ",
+    "00593",
+    "0059300",
+    "ABCDEF",
+    "005930;DROP",
+    "005930 OR 1=1",
+    "1234567890123",
+    { code: "005930" },
+    ["005930"],
+    null,
+    undefined
+  ])(
     "returns a safe validation error for invalid symbol %s",
     async (symbol) => {
-      const response = await runGuardedKiwoomPublicQuote({ symbol });
+      const tokenClient = createMockTokenClient();
+      const quoteClient = createMockQuoteClient();
+      const response = await runGuardedKiwoomPublicQuote({ symbol }, { tokenClient, quoteClient });
 
       expect(response).toMatchObject({
         status: "error",
@@ -41,11 +81,29 @@ describe("Kiwoom public quote guarded skeleton", () => {
           retryable: false
         }
       });
+      expect((response as { symbol?: unknown }).symbol).toBeUndefined();
       expect(JSON.stringify(response)).not.toContain("app_key");
       expect(JSON.stringify(response)).not.toContain("secret");
       expect(JSON.stringify(response)).not.toContain("access_token");
+      expect(tokenClient.getAccessToken).not.toHaveBeenCalled();
+      expect(quoteClient.getQuote).not.toHaveBeenCalled();
     }
   );
+
+  it.each([null, undefined, ["005930"], "005930"])("rejects non-object input %s", async (input) => {
+    const response = await runGuardedKiwoomPublicQuote(input);
+
+    expect(response).toMatchObject({
+      status: "error",
+      provider: "kiwoom",
+      quote_present: false,
+      error: {
+        code: "INVALID_INPUT",
+        provider: "kiwoom",
+        retryable: false
+      }
+    });
+  });
 
   it.each([
     "account_no",
@@ -53,13 +111,25 @@ describe("Kiwoom public quote guarded skeleton", () => {
     "balance",
     "holdings",
     "quantity",
+    "price",
     "price_type",
+    "order_type",
     "side",
+    "buy",
+    "sell",
     "position",
     "leverage",
+    "execution",
+    "fill",
+    "trading",
     "recommendation"
   ])("rejects forbidden input field %s", async (field) => {
-    await expect(runGuardedKiwoomPublicQuote({ symbol: "005930", [field]: "forbidden" })).resolves.toMatchObject({
+    const response = await runGuardedKiwoomPublicQuote({
+      symbol: "005930",
+      [field]: "secretkey=forbidden_sensitive_value access_token=forbidden_token_value"
+    });
+
+    expect(response).toMatchObject({
       status: "error",
       provider: "kiwoom",
       quote_present: false,
@@ -68,6 +138,8 @@ describe("Kiwoom public quote guarded skeleton", () => {
         provider: "kiwoom"
       }
     });
+    expect(JSON.stringify(response)).not.toContain("forbidden_sensitive_value");
+    expect(JSON.stringify(response)).not.toContain("forbidden_token_value");
   });
 
   it("does not expose forbidden fields in the public input schema", () => {
@@ -170,6 +242,44 @@ describe("Kiwoom public quote guarded skeleton", () => {
     );
     const serialized = JSON.stringify(response);
 
+    expect(serialized).not.toContain("dummy_app_key");
+    expect(serialized).not.toContain("dummy_secret_key");
+    expect(serialized).not.toContain("fixture_access_token");
+  });
+
+  it("does not expose secrets or raw provider payloads in error output", async () => {
+    const tokenClient = createMockTokenClient();
+    const quoteClient = {
+      getQuote: vi.fn().mockRejectedValue(
+        new Error(
+          "raw provider payload appkey=dummy_app_key secretkey=dummy_secret_key access_token=fixture_access_token_value_that_must_not_escape"
+        )
+      )
+    };
+
+    const response = await runGuardedKiwoomPublicQuote(
+      { symbol: "005930", market: "KOSPI" },
+      {
+        env: validEnabledEnv,
+        quoteEndpointMapping: enabledPublicMapping,
+        tokenClient,
+        quoteClient
+      }
+    );
+    const serialized = JSON.stringify(response);
+
+    expect(response).toMatchObject({
+      status: "error",
+      provider: "kiwoom",
+      symbol: "005930",
+      quote_present: false,
+      error: {
+        code: "KIWOOM_QUOTE_REQUEST_FAILED",
+        provider: "kiwoom",
+        retryable: true
+      }
+    });
+    expect(serialized).not.toContain("raw provider payload");
     expect(serialized).not.toContain("dummy_app_key");
     expect(serialized).not.toContain("dummy_secret_key");
     expect(serialized).not.toContain("fixture_access_token");

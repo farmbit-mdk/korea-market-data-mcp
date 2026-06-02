@@ -95,3 +95,19 @@ forbidden schema fields are absent
 real lookup remains disabled by default
 redaction tests pass
 ```
+
+## v0.14 Guard Hardening
+
+Confirm:
+
+```text
+guard order is documented and tested
+input object validation rejects non-object input
+symbol validation rejects blank, malformed, 5-digit, 7-digit, non-numeric, SQL-like, object, and array input
+forbidden runtime fields are rejected safely
+forbidden runtime field values are not echoed
+blocked/error/ok response shapes remain stable
+raw request bodies and raw provider payloads are not returned
+real lookup remains disabled by default
+provider terms review is still required before real public enablement
+```

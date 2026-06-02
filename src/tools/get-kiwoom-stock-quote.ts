@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { MarketDataProviderError, toToolErrorResponse } from "../providers/errors.js";
 import { createKiwoomAuthClient, loadKiwoomAuthConfig } from "../providers/kiwoom/auth.js";
-import { createKiwoomQuoteClient, normalizeKiwoomQuoteError } from "../providers/kiwoom/quote-client.js";
+import { createKiwoomQuoteClient } from "../providers/kiwoom/quote-client.js";
 import { kiwoomQuoteEndpointMappings } from "../providers/kiwoom/quote-endpoints.js";
 import type {
   KiwoomQuoteEndpointMapping,
@@ -66,12 +66,17 @@ const forbiddenInputFields = [
   "holding",
   "quantity",
   "qty",
+  "price",
   "price_type",
+  "order_type",
   "side",
   "buy",
   "sell",
   "position",
   "leverage",
+  "execution",
+  "fill",
+  "trading",
   "recommendation"
 ];
 
@@ -91,10 +96,10 @@ export const getKiwoomStockQuoteTool: ToolDefinition = {
 };
 
 export async function runGuardedKiwoomPublicQuote(
-  input: Record<string, unknown>,
+  input: unknown,
   dependencies: KiwoomPublicQuoteDependencies = {}
 ): Promise<KiwoomPublicQuoteBlockedResponse | KiwoomPublicQuoteOkResponse | KiwoomPublicQuoteErrorResponse> {
-  const symbolForError = typeof input.symbol === "string" ? input.symbol.trim() : undefined;
+  const symbolForError = getSafeErrorSymbol(input);
 
   try {
     const normalizedInput = normalizeKiwoomPublicQuoteInput(input);
@@ -152,9 +157,9 @@ export async function runGuardedKiwoomPublicQuote(
     return {
       status: "error",
       provider: "kiwoom",
-      symbol: symbolForError === "" ? undefined : symbolForError,
+      symbol: symbolForError,
       quote_present: false,
-      error: redactSecrets(toToolErrorResponse(normalizeKiwoomQuoteError(error), "kiwoom").error)
+      error: redactSecrets(toToolErrorResponse(normalizePublicQuoteError(error), "kiwoom").error)
     };
   }
 }
@@ -175,10 +180,14 @@ export function normalizeMockQuoteForKiwoomPublicTool(quote: NormalizedQuote): N
   };
 }
 
-function normalizeKiwoomPublicQuoteInput(input: Record<string, unknown>): Required<Pick<KiwoomPublicQuoteInput, "symbol">> & {
+function normalizeKiwoomPublicQuoteInput(input: unknown): Required<Pick<KiwoomPublicQuoteInput, "symbol">> & {
   market?: KiwoomQuoteMarket;
   provider?: "kiwoom";
 } {
+  if (!isPlainInputRecord(input)) {
+    throw new MarketDataProviderError("INVALID_INPUT", "input must be an object.", "kiwoom", false);
+  }
+
   const forbiddenField = forbiddenInputFields.find((field) => Object.hasOwn(input, field));
 
   if (forbiddenField !== undefined) {
@@ -213,6 +222,32 @@ function normalizeKiwoomPublicQuoteInput(input: Record<string, unknown>): Requir
     market: input.market as KiwoomQuoteMarket | undefined,
     provider: "kiwoom"
   };
+}
+
+function normalizePublicQuoteError(error: unknown): MarketDataProviderError {
+  if (error instanceof MarketDataProviderError) {
+    return error;
+  }
+
+  return new MarketDataProviderError(
+    "KIWOOM_QUOTE_REQUEST_FAILED",
+    "Kiwoom quote request failed.",
+    "kiwoom",
+    true
+  );
+}
+
+function getSafeErrorSymbol(input: unknown): string | undefined {
+  if (!isPlainInputRecord(input) || typeof input.symbol !== "string") {
+    return undefined;
+  }
+
+  const symbol = input.symbol.trim();
+  return /^[0-9]{6}$/.test(symbol) ? symbol : undefined;
+}
+
+function isPlainInputRecord(input: unknown): input is Record<string, unknown> {
+  return input !== null && typeof input === "object" && !Array.isArray(input);
 }
 
 function blocked(symbol: string | undefined, reason: string): KiwoomPublicQuoteBlockedResponse {

@@ -189,6 +189,7 @@ credential handling documentation
 public quote tool readiness checklist
 guarded Kiwoom public quote MCP tool skeleton
 mock/test integration for guarded public quote response shape
+guard hardening for Kiwoom public quote tool
 normalized auth errors
 no-network safety tests
 read-only provider skeleton
@@ -255,6 +256,7 @@ Real Kiwoom API calls must remain disabled by default.
 | Manual quote command + malformed quote response | Safe bad-response error only |
 | Provider compliance review        | Added documentation and tests |
 | Kiwoom public quote tool          | Guarded skeleton registered |
+| Kiwoom public quote tool guards   | Hardened validation and redaction |
 | Public real Kiwoom quote lookup   | Not enabled by default |
 | Mock/test quote response          | Available for response validation only |
 | Mocked quote response                 | Can be normalized safely          |
@@ -469,6 +471,7 @@ public quote tool readiness checklist exists
 guarded Kiwoom public quote tool is registered
 public real Kiwoom quote lookup remains blocked by default
 mock/test public quote success path returns stable nested quote shape
+public quote guard rejects malformed symbols and forbidden fields safely
 ```
 
 Kiwoom tests must not require real credentials.
@@ -765,6 +768,31 @@ Kiwoom Public Quote Tool Mock Provider Integration
 ```
 
 This release validates `get_kiwoom_stock_quote` with mock/test-only flows and stabilizes blocked/error/ok response shapes. It must not be described as live Kiwoom quote support. Public real Kiwoom quote lookup, account access, orders, balance lookup, holdings lookup, trading, auto-trading, investment recommendations, centralized credential storage, and centralized data redistribution proxy behavior remain unimplemented or forbidden.
+
+---
+
+## v0.14.0-alpha
+
+Provider status:
+
+```text
+mock provider implemented
+Kiwoom public quote tool guarded skeleton registered
+Kiwoom public quote tool guard hardened
+symbol validation edge cases covered
+forbidden runtime fields rejected safely
+blocked/error/ok response shapes remain stable
+public real Kiwoom quote lookup disabled by default
+account/order/trading explicitly out of scope
+```
+
+Recommended release description:
+
+```text
+Kiwoom Public Quote Tool Guard Hardening
+```
+
+This release hardens `get_kiwoom_stock_quote` guard order, validation edge cases, forbidden-field handling, and redaction tests. It must not be described as live Kiwoom quote support. Public real Kiwoom quote lookup, account access, orders, balance lookup, holdings lookup, trading, auto-trading, investment recommendations, centralized credential storage, and centralized data redistribution proxy behavior remain unimplemented or forbidden.
 
 ---
 
