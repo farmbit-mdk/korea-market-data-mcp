@@ -78,12 +78,19 @@ export interface KiwoomQuoteResponse {
   timestamp?: string;
   return_code?: string | number;
   return_msg?: string;
+  access_token?: string;
+  token?: string;
+  appkey?: string;
+  secretkey?: string;
 }
 
 export interface KiwoomQuoteEndpointMapping {
   enabled: boolean;
   manualOnly: boolean;
   readOnly: boolean;
+  requiresToken: boolean;
+  exposesPublicTool: false;
+  forbiddenScopes: readonly ["account", "order", "balance", "holdings", "trading"];
   method: "POST";
   path: string;
   apiId: string;

@@ -1,4 +1,5 @@
-const secretKeyPattern = /(KIWOOM_APP_KEY|KIWOOM_APP_SECRET|KIWOOM_SECRET_KEY|access_token|refresh_token|Authorization|authorization|Bearer)\s*[:=]\s*["']?([^"',\s}]+)/gi;
+const secretAssignmentPattern =
+  /(KIWOOM_APP_KEY|KIWOOM_APP_SECRET|KIWOOM_SECRET_KEY|appkey|appsecret|secretkey|app_key|app_secret|secret_key|access_token|refresh_token|token|secret)\s*[:=]\s*["']?([^"',\s}]+)/gi;
 const bearerPattern = /Bearer\s+[A-Za-z0-9._~+/=-]{12,}/gi;
 const longTokenPattern = /\b[A-Za-z0-9_-]{32,}\b/g;
 const secretFieldNames = new Set([
@@ -47,7 +48,7 @@ export function redactSecrets<T>(value: T): T {
 
 function redactString(value: string): string {
   return value
-    .replace(secretKeyPattern, "$1=[REDACTED]")
+    .replace(secretAssignmentPattern, "[REDACTED]")
     .replace(bearerPattern, "Bearer [REDACTED]")
     .replace(longTokenPattern, "[REDACTED]");
 }
