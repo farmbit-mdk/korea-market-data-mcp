@@ -102,12 +102,7 @@ export class DefaultKiwoomTokenClient implements KiwoomTokenClient {
         }
       });
     } catch (error) {
-      if (error instanceof MarketDataProviderError) {
-        throw error;
-      }
-
-      const message = error instanceof Error ? redactSecrets(error.message) : "Provider token request failed.";
-      throw new MarketDataProviderError("PROVIDER_UNAVAILABLE", message, "kiwoom", true);
+      throw normalizeKiwoomTokenError(error);
     }
   }
 }
@@ -127,6 +122,15 @@ export function normalizeKiwoomTokenResponse(response: KiwoomRawTokenResponse): 
     expiresAt: normalizeExpiresAt(response),
     provider: "kiwoom"
   };
+}
+
+export function normalizeKiwoomTokenError(error: unknown): MarketDataProviderError {
+  if (error instanceof MarketDataProviderError) {
+    return error;
+  }
+
+  const message = error instanceof Error ? redactSecrets(error.message) : "Provider token request failed.";
+  return new MarketDataProviderError("PROVIDER_UNAVAILABLE", message, "kiwoom", true);
 }
 
 function normalizeExpiresAt(response: KiwoomRawTokenResponse): string {
