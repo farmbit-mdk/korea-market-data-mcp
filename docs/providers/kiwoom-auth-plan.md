@@ -20,6 +20,10 @@ Kiwoom provider selection: implemented
 Kiwoom credential config loading: implemented
 Missing credential handling: implemented
 Dummy credential handling: implemented
+Token client interface: implemented
+Token request/response types: implemented
+In-memory token cache type: implemented
+Transport boundary: implemented
 Real token request: not implemented
 Real market data request: not implemented
 Trading/account endpoints: not implemented and forbidden
@@ -30,8 +34,8 @@ Current test status:
 ```text
 npm run build: passed
 npm test: passed
-Test files: 6 passed
-Tests: 25 passed
+Test files: 7 passed
+Tests: 30 passed
 ```
 
 ---
@@ -301,9 +305,9 @@ no-network behavior
 tests
 ```
 
-## Stage 2 — Auth client interface
+## Stage 2 — Token client interface
 
-Status: planned.
+Status: implemented for `v0.3.0-alpha`.
 
 Scope:
 
@@ -311,10 +315,19 @@ Scope:
 token request interface
 network client boundary
 request/response types
+in-memory token cache
 auth error mapper
 no default real call
 expanded tests
 ```
+
+The token client accepts a transport abstraction so tests can use mocked transport only. The default safety setting remains:
+
+```env
+KIWOOM_ENABLE_REAL_API_CALLS=false
+```
+
+When this flag is false, token requests return `UNSUPPORTED_PROVIDER_CAPABILITY` before calling any transport.
 
 ## Stage 3 — Real token request opt-in
 
@@ -372,12 +385,12 @@ These are outside the project scope.
 
 ## 13. Release implication
 
-This document supports the `v0.2.0-alpha` release.
+This document supports the `v0.3.0-alpha` development line.
 
-The `v0.2.0-alpha` release should be described as:
+The `v0.3.0-alpha` release should be described as:
 
 ```text
-Kiwoom provider authentication skeleton with no real API calls by default.
+Kiwoom token client interface with no real API calls by default.
 ```
 
 It must not be described as live Kiwoom market data support.

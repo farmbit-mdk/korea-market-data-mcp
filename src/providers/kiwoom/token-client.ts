@@ -1,0 +1,142 @@
+import { MarketDataProviderError } from "../errors.js";
+import { redactSecrets } from "../../safety/redact-secret.js";
+import { nowIso } from "../../utils/time.js";
+import { InMemoryKiwoomTokenCache } from "./token-cache.js";
+import { createFetchKiwoomTokenTransport } from "./transport.js";
+import type {
+  KiwoomAccessToken,
+  KiwoomAuthConfig,
+  KiwoomRawTokenResponse,
+  KiwoomTokenCache,
+  KiwoomTokenRequest,
+  KiwoomTokenTransport
+} from "./types.js";
+
+export interface KiwoomTokenClient {
+  getAccessToken(): Promise<KiwoomAccessToken>;
+  requestToken(request: KiwoomTokenRequest): Promise<KiwoomAccessToken>;
+  clearCache(): void;
+}
+
+export interface KiwoomTokenClientOptions {
+  config: KiwoomAuthConfig;
+  transport?: KiwoomTokenTransport;
+  cache?: KiwoomTokenCache;
+}
+
+export class DefaultKiwoomTokenClient implements KiwoomTokenClient {
+  private readonly transport: KiwoomTokenTransport;
+  private readonly cache: KiwoomTokenCache;
+
+  constructor(private readonly options: KiwoomTokenClientOptions) {
+    this.transport = options.transport ?? createFetchKiwoomTokenTransport();
+    this.cache = options.cache ?? new InMemoryKiwoomTokenCache();
+  }
+
+  async getAccessToken(): Promise<KiwoomAccessToken> {
+    const cachedToken = this.cache.get();
+
+    if (cachedToken !== undefined) {
+      return cachedToken.token;
+    }
+
+    if (this.options.config.appKey === undefined || this.options.config.appSecret === undefined) {
+      throw new MarketDataProviderError(
+        "PROVIDER_AUTH_FAILED",
+        "Provider credentials are missing or invalid.",
+        "kiwoom",
+        false
+      );
+    }
+
+    return this.requestToken({
+      appKey: this.options.config.appKey,
+      appSecret: this.options.config.appSecret,
+      env: this.options.config.env
+    });
+  }
+
+  async requestToken(request: KiwoomTokenRequest): Promise<KiwoomAccessToken> {
+    if (!this.options.config.enableRealApiCalls) {
+      throw new MarketDataProviderError(
+        "UNSUPPORTED_PROVIDER_CAPABILITY",
+        "Kiwoom token requests are disabled by default.",
+        "kiwoom",
+        false
+      );
+    }
+
+    const rawResponse = await this.requestTokenThroughTransport(request);
+    const token = normalizeKiwoomTokenResponse(rawResponse);
+
+    this.cache.set({
+      token,
+      cachedAt: nowIso()
+    });
+
+    return token;
+  }
+
+  clearCache(): void {
+    this.cache.clear();
+  }
+
+  private get baseUrl(): string {
+    return this.options.config.env === "mock"
+      ? this.options.config.mockApiBaseUrl
+      : this.options.config.apiBaseUrl;
+  }
+
+  private async requestTokenThroughTransport(request: KiwoomTokenRequest): Promise<KiwoomRawTokenResponse> {
+    try {
+      return await this.transport.requestToken({
+        url: `${this.baseUrl}/oauth2/token`,
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: {
+          appkey: request.appKey,
+          secretkey: request.appSecret,
+          grant_type: "client_credentials"
+        }
+      });
+    } catch (error) {
+      if (error instanceof MarketDataProviderError) {
+        throw error;
+      }
+
+      const message = error instanceof Error ? redactSecrets(error.message) : "Provider token request failed.";
+      throw new MarketDataProviderError("PROVIDER_UNAVAILABLE", message, "kiwoom", true);
+    }
+  }
+}
+
+export function createKiwoomTokenClient(options: KiwoomTokenClientOptions): KiwoomTokenClient {
+  return new DefaultKiwoomTokenClient(options);
+}
+
+export function normalizeKiwoomTokenResponse(response: KiwoomRawTokenResponse): KiwoomAccessToken {
+  if (response.access_token === undefined || response.access_token.trim() === "") {
+    throw new MarketDataProviderError("PROVIDER_BAD_RESPONSE", "Provider token response was invalid.", "kiwoom", false);
+  }
+
+  return {
+    accessToken: response.access_token,
+    tokenType: "Bearer",
+    expiresAt: normalizeExpiresAt(response),
+    provider: "kiwoom"
+  };
+}
+
+function normalizeExpiresAt(response: KiwoomRawTokenResponse): string {
+  if (response.expires_at !== undefined && !Number.isNaN(Date.parse(response.expires_at))) {
+    return response.expires_at;
+  }
+
+  if (response.expires_in !== undefined && Number.isFinite(response.expires_in)) {
+    return new Date(Date.now() + response.expires_in * 1000).toISOString();
+  }
+
+  throw new MarketDataProviderError("PROVIDER_BAD_RESPONSE", "Provider token response was invalid.", "kiwoom", false);
+}
