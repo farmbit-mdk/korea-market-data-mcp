@@ -4,7 +4,7 @@
 
 This document describes the manual workflow for verifying Kiwoom REST API access token issuance.
 
-This is a `v0.5.0-alpha` manual verification workflow only. It is not an MCP tool and is not a product feature.
+This is a `v0.6.0-alpha` hardened manual verification workflow only. It is not an MCP tool and is not a product feature.
 
 ---
 
@@ -146,7 +146,7 @@ Successful output may include:
 
 ```json
 {
-  "status": "success",
+  "status": "ok",
   "provider": "kiwoom",
   "environment": "mock",
   "token_present": true,
@@ -184,9 +184,31 @@ IP address is registered if Kiwoom requires it
 mock vs production environment is correct
 network connectivity is available
 Kiwoom developer portal credentials are active
+Kiwoom server response has token, token_type, and expires_dt fields
 ```
 
 Errors must not include request body, app key, secret key, authorization header, or token values.
+
+Common outcomes:
+
+```text
+blocked: opt-in is false, credentials are missing, or placeholder credentials are used; this exits successfully because no unsafe request was made
+error: Kiwoom returned an error response, the response was malformed, or the network/transport failed
+ok: token was issued and summarized without printing the token value
+```
+
+Troubleshooting details:
+
+```text
+opt-in false: set KIWOOM_ENABLE_REAL_API_CALLS=true only for the manual command
+placeholder credentials: replace YOUR_APP_KEY, YOUR_SECRET_KEY, CHANGE_ME, or REPLACE_ME
+missing credentials: set KIWOOM_APP_KEY and KIWOOM_SECRET_KEY in the local shell session
+environment mismatch: confirm mock vs production credentials and KIWOOM_ENV
+IP not registered: check Kiwoom developer portal IP restrictions
+wrong app key or secret: reissue or verify credentials locally
+malformed response: check Kiwoom service status and endpoint compatibility
+token_present=false: no usable token was returned or the workflow was blocked
+```
 
 ---
 
@@ -223,6 +245,8 @@ GitHub pull request body
 screenshots
 release notes
 ```
+
+Do not store or share the raw token value. Manual verification output should record only `token_present`, `token_type`, `expires_dt`, `return_code`, and `return_msg`.
 
 ---
 

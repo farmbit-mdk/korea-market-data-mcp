@@ -112,6 +112,20 @@ export function createKiwoomTokenClient(options: KiwoomTokenClientOptions): Kiwo
 }
 
 export function normalizeKiwoomTokenResponse(response: KiwoomRawTokenResponse): KiwoomAccessToken {
+  const returnCode = response.return_code === undefined ? undefined : String(response.return_code);
+  const returnMessage = response.return_msg;
+
+  if (returnCode !== undefined && returnCode !== "0") {
+    throw new MarketDataProviderError(
+      "KIWOOM_TOKEN_REQUEST_FAILED",
+      "Kiwoom token request failed.",
+      "kiwoom",
+      false,
+      returnCode,
+      returnMessage === undefined ? undefined : redactSecrets(returnMessage)
+    );
+  }
+
   const accessToken = response.access_token ?? response.token;
 
   if (accessToken === undefined || accessToken.trim() === "") {
@@ -123,8 +137,8 @@ export function normalizeKiwoomTokenResponse(response: KiwoomRawTokenResponse): 
     tokenType: response.token_type ?? "Bearer",
     expiresAt: normalizeExpiresAt(response),
     provider: "kiwoom",
-    returnCode: response.return_code === undefined ? undefined : String(response.return_code),
-    returnMessage: response.return_msg
+    returnCode,
+    returnMessage
   };
 }
 

@@ -6,7 +6,9 @@ export class MarketDataProviderError extends Error {
     public readonly code: ProviderErrorCode,
     message: string,
     public readonly provider: string,
-    public readonly retryable: boolean = false
+    public readonly retryable: boolean = false,
+    public readonly returnCode?: string,
+    public readonly returnMessage?: string
   ) {
     super(redactSecrets(message));
     this.name = "MarketDataProviderError";
@@ -20,7 +22,9 @@ export function toToolErrorResponse(error: unknown, provider?: string): ToolErro
         code: error.code,
         message: redactSecrets(error.message),
         provider: error.provider,
-        retryable: error.retryable
+        retryable: error.retryable,
+        return_code: error.returnCode,
+        return_msg: error.returnMessage
       }
     };
   }

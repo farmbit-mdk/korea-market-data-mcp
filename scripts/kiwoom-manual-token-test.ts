@@ -5,7 +5,7 @@ import { toToolErrorResponse } from "../src/providers/errors.js";
 import { redactSecrets } from "../src/safety/redact-secret.js";
 
 export interface ManualKiwoomTokenSummary {
-  status: "blocked" | "success" | "error";
+  status: "blocked" | "ok" | "error";
   provider: "kiwoom";
   environment: "mock" | "production";
   token_present: boolean;
@@ -84,7 +84,7 @@ export async function runManualKiwoomTokenVerification(
     const token = await createKiwoomTokenClient({ config, transport }).getAccessToken();
 
     return {
-      status: "success",
+      status: "ok",
       provider: "kiwoom",
       environment,
       token_present: token.accessToken.length > 0,
@@ -94,12 +94,14 @@ export async function runManualKiwoomTokenVerification(
       return_msg: token.returnMessage
     };
   } catch (error) {
+    const toolError = toToolErrorResponse(error, "kiwoom").error;
+
     return {
       status: "error",
       provider: "kiwoom",
       environment,
       token_present: false,
-      error: redactSecrets(toToolErrorResponse(error, "kiwoom"))
+      error: redactSecrets(toolError)
     };
   }
 }
@@ -132,7 +134,7 @@ if (isCliEntryPoint()) {
   runManualKiwoomTokenVerification()
     .then((summary) => {
       process.stdout.write(`${JSON.stringify(redactSecrets(summary), null, 2)}\n`);
-      if (summary.status !== "success") {
+      if (summary.status === "error") {
         process.exitCode = 1;
       }
     })

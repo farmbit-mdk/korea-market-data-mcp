@@ -288,7 +288,7 @@ In `v0.4.0-alpha` development, the Kiwoom token client may call only its configu
 
 ### Kiwoom manual token verification
 
-`v0.5.0-alpha` adds a manual-only Kiwoom token verification workflow:
+`v0.6.0-alpha` hardens the manual-only Kiwoom token verification workflow:
 
 ```bash
 npm run kiwoom:token:manual
@@ -308,6 +308,8 @@ The default remains `KIWOOM_ENABLE_REAL_API_CALLS=false`. Token values are never
 This workflow does not add quote lookup, account access, order execution, balance lookup, holdings lookup, trading, auto-trading, or investment recommendation features. See `docs/providers/kiwoom-manual-token-test.md`.
 
 Placeholder credential values such as `YOUR_APP_KEY`, `YOUR_SECRET_KEY`, `CHANGE_ME`, and `REPLACE_ME` are blocked before any manual token request is sent.
+
+Kiwoom token error responses are normalized without printing raw request bodies, credentials, or token values.
 
 ---
 

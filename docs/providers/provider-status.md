@@ -15,7 +15,7 @@ This document is especially important because different providers may have diffe
 | Provider | Status        | Real API calls |     Credentials required | Default | Notes                                                   |
 | -------- | ------------- | -------------: | -----------------------: | ------: | ------------------------------------------------------- |
 | `mock`   | Implemented   |             No |                       No |     Yes | Fixed sample data for local MCP testing                 |
-| `kiwoom` | Manual token verification |  No by default | Yes, for manual token verification |      No | Manual token command only; no live market data requests yet |
+| `kiwoom` | Manual token verification hardened |  No by default | Yes, for manual token verification |      No | Hardened manual token command only; no live market data requests yet |
 
 ---
 
@@ -144,7 +144,7 @@ It must not be used for investment decisions.
 ## 5.1 Status
 
 ```text
-manual token verification
+manual token verification hardened
 ```
 
 The Kiwoom provider currently exists as an authentication, provider-selection, token-request opt-in, and manual token verification workflow.
@@ -169,6 +169,7 @@ in-memory token cache type
 transport abstraction for token requests
 mocked token response normalization
 mocked token error normalization
+Kiwoom token failure response normalization
 in-memory token cache storage and expiry checks
 manual token verification command
 manual token verification documentation
@@ -225,7 +226,8 @@ Real Kiwoom API calls must remain disabled by default.
 | Real API enabled + mocked transport   | Token response can be normalized  |
 | Real API enabled + real transport     | Not implemented for default use   |
 | Token request with default safety     | No transport call                 |
-| Failed mocked token response          | `PROVIDER_BAD_RESPONSE`           |
+| Kiwoom error token response           | `KIWOOM_TOKEN_REQUEST_FAILED`     |
+| Malformed token response              | `PROVIDER_BAD_RESPONSE`           |
 | Manual command + opt-in false         | No real request                   |
 | Manual command + missing credentials  | No real request                   |
 | Manual command + explicit opt-in      | Token request allowed only by command |
@@ -346,6 +348,7 @@ Sensitive values include:
 ```text
 KIWOOM_APP_KEY
 KIWOOM_APP_SECRET
+KIWOOM_SECRET_KEY
 access_token
 Authorization
 Bearer tokens
@@ -369,6 +372,7 @@ PROVIDER_RATE_LIMITED
 PROVIDER_TIMEOUT
 PROVIDER_UNAVAILABLE
 PROVIDER_BAD_RESPONSE
+KIWOOM_TOKEN_REQUEST_FAILED
 SYMBOL_NOT_FOUND
 INVALID_INPUT
 UNSUPPORTED_PROVIDER_CAPABILITY
@@ -411,6 +415,7 @@ fetch/network calls do not happen by default
 dummy credentials do not trigger token transport when real API calls are disabled
 mocked token response can be normalized
 failed token responses can be normalized
+Kiwoom token error responses include return_code and return_msg only
 secrets are redacted from token errors
 token values are not logged
 in-memory token cache stores valid tokens and skips expired tokens
@@ -522,6 +527,28 @@ Recommended release description:
 
 ```text
 Kiwoom Manual Token Verification
+```
+
+This release must not be described as live Kiwoom market data support. Quote, ETF, index, chart, realtime, account, order, balance, holdings, trading, auto-trading, and recommendation features remain unimplemented or forbidden.
+
+---
+
+## v0.6.0-alpha
+
+Provider status:
+
+```text
+mock provider implemented
+Kiwoom manual token verification workflow hardened
+real Kiwoom API calls disabled by default
+manual command remains the only token verification path
+market data endpoints remain unimplemented
+```
+
+Recommended release description:
+
+```text
+Kiwoom Manual Token Verification Hardening
 ```
 
 This release must not be described as live Kiwoom market data support. Quote, ETF, index, chart, realtime, account, order, balance, holdings, trading, auto-trading, and recommendation features remain unimplemented or forbidden.
