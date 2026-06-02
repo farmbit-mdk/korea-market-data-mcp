@@ -435,3 +435,5 @@ Example mock data:
 Note: mock provider data is fixed sample data for local MCP testing only. It is not live market data and must not be used for investment decisions.
 
 The mock provider also supports Korean alias search such as `삼성전자` → `005930` and `코덱스200` → `069500`.
+
+The Kiwoom provider is currently an authentication skeleton only. It validates local credential configuration but does not make real Kiwoom API calls by default.
