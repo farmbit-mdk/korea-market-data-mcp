@@ -112,15 +112,19 @@ export function createKiwoomTokenClient(options: KiwoomTokenClientOptions): Kiwo
 }
 
 export function normalizeKiwoomTokenResponse(response: KiwoomRawTokenResponse): KiwoomAccessToken {
-  if (response.access_token === undefined || response.access_token.trim() === "") {
+  const accessToken = response.access_token ?? response.token;
+
+  if (accessToken === undefined || accessToken.trim() === "") {
     throw new MarketDataProviderError("PROVIDER_BAD_RESPONSE", "Provider token response was invalid.", "kiwoom", false);
   }
 
   return {
-    accessToken: response.access_token,
-    tokenType: "Bearer",
+    accessToken,
+    tokenType: response.token_type ?? "Bearer",
     expiresAt: normalizeExpiresAt(response),
-    provider: "kiwoom"
+    provider: "kiwoom",
+    returnCode: response.return_code === undefined ? undefined : String(response.return_code),
+    returnMessage: response.return_msg
   };
 }
 
@@ -136,6 +140,10 @@ export function normalizeKiwoomTokenError(error: unknown): MarketDataProviderErr
 function normalizeExpiresAt(response: KiwoomRawTokenResponse): string {
   if (response.expires_at !== undefined && !Number.isNaN(Date.parse(response.expires_at))) {
     return response.expires_at;
+  }
+
+  if (response.expires_dt !== undefined && !Number.isNaN(Date.parse(response.expires_dt))) {
+    return response.expires_dt;
   }
 
   if (response.expires_in !== undefined && Number.isFinite(response.expires_in)) {

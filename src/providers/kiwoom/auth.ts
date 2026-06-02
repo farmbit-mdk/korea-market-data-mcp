@@ -9,7 +9,7 @@ export function loadKiwoomAuthConfig(env: NodeJS.ProcessEnv = process.env): Kiwo
   return {
     env: parseKiwoomEnvironment(env.KIWOOM_ENV),
     appKey: emptyToUndefined(env.KIWOOM_APP_KEY),
-    appSecret: emptyToUndefined(env.KIWOOM_APP_SECRET),
+    appSecret: emptyToUndefined(env.KIWOOM_SECRET_KEY) ?? emptyToUndefined(env.KIWOOM_APP_SECRET),
     apiBaseUrl: env.KIWOOM_API_BASE_URL ?? defaultApiBaseUrl,
     mockApiBaseUrl: env.KIWOOM_MOCK_API_BASE_URL ?? defaultMockApiBaseUrl,
     enableRealApiCalls: env.KIWOOM_ENABLE_REAL_API_CALLS === "true"
@@ -51,7 +51,7 @@ export function createKiwoomAuthClient(config: KiwoomAuthConfig = loadKiwoomAuth
 }
 
 function parseKiwoomEnvironment(value: string | undefined): KiwoomEnvironment {
-  if (value === undefined || value === "" || value === "prod") {
+  if (value === undefined || value === "" || value === "prod" || value === "production") {
     return "prod";
   }
 
@@ -59,7 +59,7 @@ function parseKiwoomEnvironment(value: string | undefined): KiwoomEnvironment {
     return "mock";
   }
 
-  throw new MarketDataProviderError("INVALID_INPUT", "KIWOOM_ENV must be prod or mock.", "kiwoom", false);
+  throw new MarketDataProviderError("INVALID_INPUT", "KIWOOM_ENV must be production, prod, or mock.", "kiwoom", false);
 }
 
 function emptyToUndefined(value: string | undefined): string | undefined {

@@ -286,6 +286,29 @@ KIWOOM_ENABLE_REAL_API_CALLS=false
 
 In `v0.4.0-alpha` development, the Kiwoom token client may call only its configured transport interface when `KIWOOM_ENABLE_REAL_API_CALLS=true`. Real API calls remain disabled by default, tests use mocked transport only, and live Kiwoom market data calls are still intentionally not implemented.
 
+### Kiwoom manual token verification
+
+`v0.5.0-alpha` adds a manual-only Kiwoom token verification workflow:
+
+```bash
+npm run kiwoom:token:manual
+```
+
+This command can make a real Kiwoom token request only when all of the following are true:
+
+```env
+KIWOOM_ENABLE_REAL_API_CALLS=true
+KIWOOM_APP_KEY=your-app-key
+KIWOOM_SECRET_KEY=your-secret-key
+KIWOOM_ENV=mock
+```
+
+The default remains `KIWOOM_ENABLE_REAL_API_CALLS=false`. Token values are never printed; the manual command only reports fields such as `token_present`, `token_type`, `expires_dt`, `return_code`, and `return_msg`.
+
+This workflow does not add quote lookup, account access, order execution, balance lookup, holdings lookup, trading, auto-trading, or investment recommendation features. See `docs/providers/kiwoom-manual-token-test.md`.
+
+Placeholder credential values such as `YOUR_APP_KEY`, `YOUR_SECRET_KEY`, `CHANGE_ME`, and `REPLACE_ME` are blocked before any manual token request is sent.
+
 ---
 
 ## Claude Desktop example
