@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "korea-market-data": {
+      "command": "node",
+      "args": [
+        "/absolute/path/to/korea-market-data-mcp/dist/index.js"
+      ],
+      "env": {
+        "MARKET_DATA_PROVIDER": "mock",
+        "LOG_LEVEL": "info",
+        "CACHE_TTL_SECONDS": "3",
+        "ENABLE_TRADING_TOOLS": "false",
+        "ENABLE_ACCOUNT_TOOLS": "false",
+        "ENABLE_ORDER_TOOLS": "false"
+      }
+    }
+  }
+}
