@@ -242,6 +242,8 @@ Copy environment variables:
 cp .env.example .env
 ```
 
+The default development provider is `mock`, so Kiwoom credentials are not required for the initial server skeleton.
+
 Run the development server:
 
 ```bash
@@ -259,6 +261,18 @@ Run tests:
 ```bash
 npm test
 ```
+
+The current implementation registers only these read-only mock-backed tools:
+
+```text
+search_korean_symbol
+get_stock_quote
+get_etf_quote
+get_market_index
+get_daily_chart
+```
+
+The Kiwoom provider is not implemented yet. Do not set `MARKET_DATA_PROVIDER=kiwoom` until the Kiwoom adapter is added in a later milestone.
 
 ---
 
