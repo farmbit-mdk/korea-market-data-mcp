@@ -13,6 +13,7 @@ export {
   normalizeKiwoomQuoteError,
   normalizeKiwoomQuoteResponse
 } from "./quote-client.js";
+export { kiwoomQuoteEndpointMappings } from "./quote-endpoints.js";
 export {
   createKiwoomTokenClient,
   DefaultKiwoomTokenClient,
@@ -29,6 +30,7 @@ export { InMemoryKiwoomTokenCache } from "./token-cache.js";
 export type {
   KiwoomAccessToken,
   KiwoomQuoteRequest,
+  KiwoomQuoteEndpointMapping,
   KiwoomQuoteResponse,
   KiwoomQuoteTransport,
   KiwoomQuoteTransportRequest,

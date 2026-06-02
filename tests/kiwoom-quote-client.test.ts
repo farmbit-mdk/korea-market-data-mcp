@@ -2,28 +2,21 @@ import { describe, expect, it, vi } from "vitest";
 import { toToolErrorResponse } from "../src/providers/errors.js";
 import {
   createKiwoomQuoteClient,
+  kiwoomQuoteEndpointMappings,
   normalizeKiwoomQuoteResponse
 } from "../src/providers/kiwoom/index.js";
 import type { KiwoomQuoteTransport } from "../src/providers/kiwoom/index.js";
 import { getRegisteredToolNames } from "../src/tools/index.js";
+import {
+  malformedKiwoomQuoteResponse,
+  missingPriceKiwoomQuoteResponse,
+  providerErrorKiwoomQuoteResponse,
+  successfulKiwoomQuoteLikeResponse
+} from "./fixtures/kiwoom-quote-responses.js";
 
 describe("Kiwoom read-only quote adapter skeleton", () => {
   it("normalizes a mocked quote response", () => {
-    const quote = normalizeKiwoomQuoteResponse(
-      {
-        symbol: "005930",
-        name: "Samsung Electronics",
-        market: "KOSPI",
-        price: "70,000",
-        change: "-500",
-        change_rate: "-0.71",
-        volume: "12,345,678",
-        as_of: "2026-06-02T09:00:00.000Z",
-        return_code: "0",
-        return_msg: "OK"
-      },
-      { symbol: "005930", market: "KOSPI" }
-    );
+    const quote = normalizeKiwoomQuoteResponse(successfulKiwoomQuoteLikeResponse, { symbol: "005930", market: "KOSPI" });
 
     expect(quote).toEqual({
       provider: "kiwoom",
@@ -40,26 +33,36 @@ describe("Kiwoom read-only quote adapter skeleton", () => {
       returnCode: "0",
       returnMessage: "OK"
     });
+    expect(quote).not.toHaveProperty("account");
+    expect(quote).not.toHaveProperty("order");
+    expect(quote).not.toHaveProperty("balance");
+    expect(quote).not.toHaveProperty("holdings");
+  });
+
+  it("keeps quote endpoint mapping disabled until the official endpoint is verified", () => {
+    expect(kiwoomQuoteEndpointMappings.quote).toMatchObject({
+      enabled: false,
+      method: "POST",
+      path: "TODO_VERIFY_OFFICIAL_KIWOOM_QUOTE_ENDPOINT",
+      apiId: "TODO_VERIFY_OFFICIAL_KIWOOM_QUOTE_API_ID",
+      verified: false
+    });
   });
 
   it("returns a safe provider error for malformed quote responses", () => {
     expect(() =>
-      normalizeKiwoomQuoteResponse(
-        {
-          symbol: "005930",
-          price: "not-a-number",
-          return_code: "0"
-        },
-        { symbol: "005930" }
-      )
+      normalizeKiwoomQuoteResponse(malformedKiwoomQuoteResponse, { symbol: "005930" })
     ).toThrowError(/invalid price/);
   });
 
+  it("returns a safe provider error for missing price responses", () => {
+    expect(() =>
+      normalizeKiwoomQuoteResponse(missingPriceKiwoomQuoteResponse, { symbol: "005930" })
+    ).toThrowError(/missing price/);
+  });
+
   it("returns a safe provider error for Kiwoom quote failure responses", async () => {
-    const transport = createMockQuoteTransport({
-      return_code: "Q1001",
-      return_msg: "Quote endpoint unavailable."
-    });
+    const transport = createMockQuoteTransport(providerErrorKiwoomQuoteResponse);
     const client = createKiwoomQuoteClient({
       baseUrl: "https://mock.local",
       quoteEndpointPath: "/quote-placeholder",
@@ -82,11 +85,7 @@ describe("Kiwoom read-only quote adapter skeleton", () => {
   });
 
   it("uses quote transport abstraction when endpoint config is supplied", async () => {
-    const transport = createMockQuoteTransport({
-      symbol: "005930",
-      price: "70000",
-      return_code: "0"
-    });
+    const transport = createMockQuoteTransport(successfulKiwoomQuoteLikeResponse);
     const client = createKiwoomQuoteClient({
       baseUrl: "https://mock.local",
       quoteEndpointPath: "/quote-placeholder",
@@ -112,12 +111,23 @@ describe("Kiwoom read-only quote adapter skeleton", () => {
   });
 
   it("does not hardcode or call an unconfirmed quote endpoint by default", async () => {
-    const transport = createMockQuoteTransport({
-      symbol: "005930",
-      price: "70000",
-      return_code: "0"
-    });
+    const transport = createMockQuoteTransport(successfulKiwoomQuoteLikeResponse);
     const client = createKiwoomQuoteClient({ transport });
+
+    await expect(client.getQuote({ symbol: "005930" })).rejects.toMatchObject({
+      code: "KIWOOM_QUOTE_NOT_IMPLEMENTED",
+      provider: "kiwoom"
+    });
+    expect(transport.requestQuote).not.toHaveBeenCalled();
+  });
+
+  it("does not call mapped quote endpoint while the mapping is disabled", async () => {
+    const transport = createMockQuoteTransport(successfulKiwoomQuoteLikeResponse);
+    const client = createKiwoomQuoteClient({
+      baseUrl: "https://mock.local",
+      useMappedQuoteEndpoint: true,
+      transport
+    });
 
     await expect(client.getQuote({ symbol: "005930" })).rejects.toMatchObject({
       code: "KIWOOM_QUOTE_NOT_IMPLEMENTED",
