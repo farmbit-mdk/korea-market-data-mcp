@@ -87,6 +87,31 @@ README disclaimer is current
 provider-status is current
 ```
 
+## Real Quote Endpoint Activation Gate
+
+Before changing any provider endpoint mapping from disabled/internal review toward real quote activation, maintainers must complete an activation review and decision record.
+
+Required artifacts:
+
+```text
+docs/providers/kiwoom-real-quote-endpoint-activation-review.md
+docs/providers/templates/kiwoom-real-quote-activation-decision-record.md
+docs/release/kiwoom-real-quote-activation-review-checklist.md
+```
+
+Endpoint `enabled` and `exposesPublicTool` flags must remain false unless a decision record explicitly approves a different value.
+
+Activation review must confirm:
+
+```text
+provider terms are reviewed
+centralized proxy and data redistribution risks are reviewed
+user credentials remain local by default
+public real lookup does not become default-enabled
+recommendation or advice behavior is not added
+account, order, balance, holdings, and trading scopes remain excluded
+```
+
 ## Recommendation Boundary
 
 This project provides data access, not financial advice.

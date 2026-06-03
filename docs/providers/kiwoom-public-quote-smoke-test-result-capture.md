@@ -245,3 +245,35 @@ centralized proxy behavior exists
 ```
 
 Public real quote lookup remains disabled by default.
+
+## Activation Review Submission
+
+A sanitized smoke test result may be submitted to activation review only as a summary.
+
+Use this format:
+
+```text
+tested version
+environment label
+symbol tested
+command or tool tested
+status
+token_present
+quote_present
+normalized fields present
+sanitized error code
+sanitized return_code
+sanitized return_msg
+redaction checklist status
+safe-to-share confirmation
+```
+
+Connect the summary to:
+
+```text
+docs/providers/templates/kiwoom-real-quote-activation-decision-record.md
+```
+
+Do not submit raw results, raw provider payloads, request bodies, response bodies, credentials, tokens, full IP addresses, account identifiers, order information, or personal information.
+
+Failed smoke test results may inform an activation decision when sanitized. A failure should usually keep the decision status as `not approved` or `rejected` until the cause is understood and safely resolved.

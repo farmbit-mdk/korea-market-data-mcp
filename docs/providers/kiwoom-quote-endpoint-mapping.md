@@ -88,6 +88,25 @@ The manual quote command also checks `enabled`, `manualOnly`, and `readOnly` bef
 
 Changing `enabled:true` must be reviewed in a separate PR. That PR must verify the official endpoint path, API ID, auth header, request body, response body, normalized output, redaction behavior, and test coverage. It must not add a public MCP quote tool by implication.
 
+Changing `enabled:true` or `exposesPublicTool:true` is forbidden unless an activation decision record explicitly approves it:
+
+```text
+docs/providers/templates/kiwoom-real-quote-activation-decision-record.md
+```
+
+Activation review must keep these guards in place before any transition:
+
+```text
+KIWOOM_ENABLE_REAL_API_CALLS=false by default
+KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH=false by default
+readOnly=true
+no account/order/balance/holdings/trading endpoint mapping
+no centralized credential storage
+no centralized data redistribution proxy
+```
+
+If `readOnly=false`, activation must be rejected.
+
 ---
 
 ## 4. Request Field Mapping
@@ -217,4 +236,7 @@ document manual quote verification workflow
 keep real API calls opt-in
 add mocked and manual tests
 confirm no account/order/trading fields are introduced
+complete activation review
+complete activation decision record
+confirm enabled/exposesPublicTool are not true by default
 ```

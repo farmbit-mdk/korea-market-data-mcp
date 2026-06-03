@@ -15,7 +15,7 @@ This document is especially important because different providers may have diffe
 | Provider | Status        | Real API calls |     Credentials required | Default | Notes                                                   |
 | -------- | ------------- | -------------: | -----------------------: | ------: | ------------------------------------------------------- |
 | `mock`   | Implemented   |             No |                       No |     Yes | Fixed sample data for local MCP testing                 |
-| `kiwoom` | Public quote smoke test result capture added |  No by default | Yes, for manual token/quote verification and local-only smoke tests |      No | Guarded public quote tool; real lookup disabled by default |
+| `kiwoom` | Real quote endpoint activation review added |  No by default | Yes, for manual token/quote verification and local-only smoke tests |      No | Guarded public quote tool; real lookup disabled by default |
 
 ---
 
@@ -199,6 +199,9 @@ public quote smoke test checklist
 smoke test result capture documentation
 sanitized smoke test result sample
 GitHub smoke test report template
+real quote endpoint activation review documentation
+real quote activation decision record template
+real quote activation review checklist
 normalized auth errors
 no-network safety tests
 read-only provider skeleton
@@ -271,6 +274,7 @@ Real Kiwoom API calls must remain disabled by default.
 | Kiwoom public quote local verification hardening | Env matrix, blocked reasons, and examples added |
 | Kiwoom public quote real local smoke test docs | Added; local-only and sanitized result recording only |
 | Kiwoom public quote smoke test result capture | Added; sanitized capture and sharing templates only |
+| Kiwoom real quote endpoint activation review | Added; decision record required before endpoint flag activation |
 | Public real Kiwoom quote lookup   | Not enabled by default |
 | Mock/test quote response          | Available for response validation only |
 | Mocked quote response                 | Can be normalized safely          |
@@ -491,6 +495,7 @@ local verification docs and MCP request example exist
 local verification env matrix and blocked reason matrix exist
 real local smoke test docs, checklist, and sanitized result template exist
 smoke test result capture docs, sample, and GitHub report template exist
+activation review docs, decision record template, and activation checklist exist
 ```
 
 Kiwoom tests must not require real credentials.
@@ -932,6 +937,32 @@ Kiwoom Public Quote Tool Smoke Test Result Capture
 ```
 
 This release documents how to capture and share sanitized local smoke test results for `get_kiwoom_stock_quote`. It must not be described as public live Kiwoom quote support. Public real Kiwoom quote lookup, account access, orders, balance lookup, holdings lookup, trading, auto-trading, investment recommendations, centralized credential storage, and centralized data redistribution proxy behavior remain disabled by default or forbidden.
+
+---
+
+## v0.20.0-alpha
+
+Provider status:
+
+```text
+mock provider implemented
+Kiwoom real quote endpoint activation review docs added
+activation decision record template added
+activation review checklist added
+public real Kiwoom quote lookup disabled by default
+endpoint enabled default remains false
+endpoint exposesPublicTool default remains false
+account/order/trading explicitly out of scope
+centralized data redistribution proxy out of scope
+```
+
+Recommended release description:
+
+```text
+Kiwoom Real Quote Endpoint Activation Review
+```
+
+This release documents the review and decision record required before any real Kiwoom quote endpoint activation. It must not be described as public live Kiwoom quote support. Public real Kiwoom quote lookup, endpoint enabled defaults, public exposure defaults, account access, orders, balance lookup, holdings lookup, trading, auto-trading, investment recommendations, centralized credential storage, and centralized data redistribution proxy behavior remain disabled by default or forbidden.
 
 ---
 

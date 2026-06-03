@@ -200,3 +200,23 @@ no account/order/balance/holdings fields are introduced
 no centralized data redistribution proxy is introduced
 result captures do not store credentials, tokens, raw request bodies, or raw provider payloads
 ```
+
+## v0.20 Real Quote Endpoint Activation Review
+
+Confirm:
+
+```text
+activation review docs are added
+activation decision record template is added
+activation checklist is added
+endpoint enabled remains false unless decision record approves otherwise
+endpoint exposesPublicTool remains false unless decision record approves otherwise
+default real quote lookup remains disabled
+KIWOOM_ENABLE_REAL_API_CALLS=false remains the default
+KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH=false remains the default
+provider terms review is required before wider enablement
+data redistribution risk review is required before wider enablement
+no account/order/trading schema is introduced
+no account/order/balance/holdings fields are introduced
+no centralized data redistribution proxy is introduced
+```

@@ -544,6 +544,20 @@ Do not share credentials, access tokens, authorization headers, raw request bodi
 
 Public real Kiwoom quote lookup remains disabled by default. This project still does not add account, order, trading, recommendation, or centralized proxy behavior.
 
+`v0.20.0-alpha` adds real quote endpoint activation review documentation.
+
+This is not activation. Public real Kiwoom quote lookup remains disabled by default, endpoint `enabled` remains false by default, and endpoint `exposesPublicTool` remains false by default.
+
+Any future activation requires an explicit decision record:
+
+```text
+docs/providers/kiwoom-real-quote-endpoint-activation-review.md
+docs/providers/templates/kiwoom-real-quote-activation-decision-record.md
+docs/release/kiwoom-real-quote-activation-review-checklist.md
+```
+
+The current model remains local-only opt-in with no account access, orders, balance lookup, holdings lookup, trading, auto-trading, investment recommendations, centralized credential storage, or centralized data redistribution proxy.
+
 ---
 
 ## Claude Desktop example
