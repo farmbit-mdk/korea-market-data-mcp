@@ -506,6 +506,28 @@ Before sharing logs, screenshots, issues, or pull requests, verify that app keys
 
 Mock/test integration is used only to validate the response format. It must not be treated as provider fallback or live quote availability.
 
+`v0.18.0-alpha` adds local-only real path smoke test documentation for `get_kiwoom_stock_quote`.
+
+This smoke test remains explicitly opt-in and local-only:
+
+```text
+real quote lookup is disabled by default
+KIWOOM_ENABLE_REAL_API_CALLS=false remains the default
+KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH=false remains the default
+credentials must remain local
+smoke test results must be sanitized before sharing
+no centralized data redistribution proxy is added
+no account, order, balance, holdings, trading, or recommendation features are added
+```
+
+See:
+
+```text
+docs/providers/kiwoom-public-quote-real-local-smoke-test.md
+docs/providers/templates/kiwoom-public-quote-smoke-test-result.md
+docs/release/kiwoom-public-quote-smoke-test-checklist.md
+```
+
 ---
 
 ## Claude Desktop example

@@ -161,3 +161,22 @@ examples contain no account/order/balance/holdings fields
 real path remains disabled by default
 provider terms review is still required before wider enablement
 ```
+
+## v0.18 Real Local Smoke Test Docs
+
+Confirm:
+
+```text
+real local smoke test docs are added
+sanitized result template is added
+smoke test checklist is added
+result sharing redaction checklist is added
+default real quote lookup remains disabled
+KIWOOM_ENABLE_REAL_API_CALLS=false remains the default
+KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH=false remains the default
+provider terms review is still required before wider enablement
+no account/order/trading schema is introduced
+no account/order/balance/holdings fields are introduced
+no centralized data redistribution proxy is introduced
+smoke test results do not store credentials, tokens, or raw provider payloads
+```
