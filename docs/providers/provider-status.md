@@ -15,7 +15,7 @@ This document is especially important because different providers may have diffe
 | Provider | Status        | Real API calls |     Credentials required | Default | Notes                                                   |
 | -------- | ------------- | -------------: | -----------------------: | ------: | ------------------------------------------------------- |
 | `mock`   | Implemented   |             No |                       No |     Yes | Fixed sample data for local MCP testing                 |
-| `kiwoom` | Public quote local verification hardened |  No by default | Yes, for manual token/quote verification and local-only smoke tests |      No | Guarded public quote tool; real lookup disabled by default |
+| `kiwoom` | Public quote smoke test result capture added |  No by default | Yes, for manual token/quote verification and local-only smoke tests |      No | Guarded public quote tool; real lookup disabled by default |
 
 ---
 
@@ -196,6 +196,9 @@ local verification hardening docs and examples
 real local smoke test documentation
 sanitized public quote smoke test result template
 public quote smoke test checklist
+smoke test result capture documentation
+sanitized smoke test result sample
+GitHub smoke test report template
 normalized auth errors
 no-network safety tests
 read-only provider skeleton
@@ -267,6 +270,7 @@ Real Kiwoom API calls must remain disabled by default.
 | Kiwoom public quote local verification | Documented for local MCP clients |
 | Kiwoom public quote local verification hardening | Env matrix, blocked reasons, and examples added |
 | Kiwoom public quote real local smoke test docs | Added; local-only and sanitized result recording only |
+| Kiwoom public quote smoke test result capture | Added; sanitized capture and sharing templates only |
 | Public real Kiwoom quote lookup   | Not enabled by default |
 | Mock/test quote response          | Available for response validation only |
 | Mocked quote response                 | Can be normalized safely          |
@@ -486,6 +490,7 @@ public quote real path requires KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH=true
 local verification docs and MCP request example exist
 local verification env matrix and blocked reason matrix exist
 real local smoke test docs, checklist, and sanitized result template exist
+smoke test result capture docs, sample, and GitHub report template exist
 ```
 
 Kiwoom tests must not require real credentials.
@@ -903,6 +908,30 @@ Kiwoom Public Quote Tool Real Local Smoke Test
 ```
 
 This release documents a local-only real path smoke test for `get_kiwoom_stock_quote` and adds a sanitized result recording template. It must not be described as public live Kiwoom quote support. Public real Kiwoom quote lookup, account access, orders, balance lookup, holdings lookup, trading, auto-trading, investment recommendations, centralized credential storage, and centralized data redistribution proxy behavior remain disabled by default or forbidden.
+
+---
+
+## v0.19.0-alpha
+
+Provider status:
+
+```text
+mock provider implemented
+Kiwoom public quote smoke test result capture docs added
+sanitized smoke test result sample added
+GitHub report template added
+public real Kiwoom quote lookup disabled by default
+account/order/trading explicitly out of scope
+centralized data redistribution proxy out of scope
+```
+
+Recommended release description:
+
+```text
+Kiwoom Public Quote Tool Smoke Test Result Capture
+```
+
+This release documents how to capture and share sanitized local smoke test results for `get_kiwoom_stock_quote`. It must not be described as public live Kiwoom quote support. Public real Kiwoom quote lookup, account access, orders, balance lookup, holdings lookup, trading, auto-trading, investment recommendations, centralized credential storage, and centralized data redistribution proxy behavior remain disabled by default or forbidden.
 
 ---
 

@@ -10,13 +10,15 @@ const requiredDocs = [
   "docs/providers/kiwoom-compliance-notes.md",
   "docs/providers/kiwoom-public-quote-local-verification.md",
   "docs/providers/kiwoom-public-quote-real-local-smoke-test.md",
+  "docs/providers/kiwoom-public-quote-smoke-test-result-capture.md",
   "docs/security/credential-handling.md",
   "docs/release/public-quote-tool-readiness-checklist.md",
   "docs/release/kiwoom-public-quote-smoke-test-checklist.md",
   "docs/release/v0.11.0-alpha-checklist.md",
   "docs/release/v0.16.0-alpha-checklist.md",
   "docs/release/v0.17.0-alpha-checklist.md",
-  "docs/release/v0.18.0-alpha-checklist.md"
+  "docs/release/v0.18.0-alpha-checklist.md",
+  "docs/release/v0.19.0-alpha-checklist.md"
 ];
 
 const kiwoomPublicQuoteExamplePaths = [
@@ -28,9 +30,13 @@ const kiwoomPublicQuoteExamplePaths = [
 
 const kiwoomPublicQuoteSmokeTestPaths = [
   "docs/providers/kiwoom-public-quote-real-local-smoke-test.md",
+  "docs/providers/kiwoom-public-quote-smoke-test-result-capture.md",
   "docs/providers/templates/kiwoom-public-quote-smoke-test-result.md",
+  "docs/providers/templates/kiwoom-public-quote-smoke-test-result.sample.md",
+  "docs/providers/templates/kiwoom-public-quote-smoke-test-github-report.md",
   "docs/release/kiwoom-public-quote-smoke-test-checklist.md",
-  "docs/release/v0.18.0-alpha-checklist.md"
+  "docs/release/v0.18.0-alpha-checklist.md",
+  "docs/release/v0.19.0-alpha-checklist.md"
 ];
 
 describe("provider compliance and security review docs", () => {
@@ -137,7 +143,10 @@ describe("provider compliance and security review docs", () => {
       "README.md",
       "docs/providers/kiwoom-public-quote-local-verification.md",
       "docs/providers/kiwoom-public-quote-real-local-smoke-test.md",
+      "docs/providers/kiwoom-public-quote-smoke-test-result-capture.md",
       "docs/providers/templates/kiwoom-public-quote-smoke-test-result.md",
+      "docs/providers/templates/kiwoom-public-quote-smoke-test-result.sample.md",
+      "docs/providers/templates/kiwoom-public-quote-smoke-test-github-report.md",
       "docs/release/public-quote-tool-readiness-checklist.md",
       "docs/release/kiwoom-public-quote-smoke-test-checklist.md",
       ...kiwoomPublicQuoteExamplePaths
@@ -162,6 +171,7 @@ describe("provider compliance and security review docs", () => {
     const smokeDoc = readFileSync("docs/providers/kiwoom-public-quote-real-local-smoke-test.md", "utf8");
     const localVerificationDoc = readFileSync("docs/providers/kiwoom-public-quote-local-verification.md", "utf8");
     const template = readFileSync("docs/providers/templates/kiwoom-public-quote-smoke-test-result.md", "utf8");
+    const sample = readFileSync("docs/providers/templates/kiwoom-public-quote-smoke-test-result.sample.md", "utf8");
     const checklist = readFileSync("docs/release/kiwoom-public-quote-smoke-test-checklist.md", "utf8");
 
     expect(readme).toContain("local-only real path smoke test");
@@ -177,8 +187,28 @@ describe("provider compliance and security review docs", () => {
     expect(template).toContain("Redaction Confirmation Checklist");
     expect(template).toContain("token_present");
     expect(template).toContain("quote_present");
+    expect(template).toContain("Safe-To-Share Confirmation");
+    expect(sample).toContain("invented normalized data only");
+    expect(sample).toContain("Safe to share: yes");
     expect(checklist).toContain("Result Redaction Checklist");
     expect(checklist).toContain("Rollback And Cleanup Checklist");
+  });
+
+  it("documents smoke test result capture and GitHub sharing templates", () => {
+    const readme = readFileSync("README.md", "utf8");
+    const captureDoc = readFileSync("docs/providers/kiwoom-public-quote-smoke-test-result-capture.md", "utf8");
+    const reportTemplate = readFileSync("docs/providers/templates/kiwoom-public-quote-smoke-test-github-report.md", "utf8");
+    const readinessChecklist = readFileSync("docs/release/public-quote-tool-readiness-checklist.md", "utf8");
+
+    expect(readme).toContain("sanitized smoke test result capture");
+    expect(readme).toContain("kiwoom-public-quote-smoke-test-github-report.md");
+    expect(captureDoc).toContain("Record only sanitized results");
+    expect(captureDoc).toContain("GitHub Issue Or PR Sharing Format");
+    expect(captureDoc).toContain("Public real quote lookup remains disabled by default");
+    expect(reportTemplate).toContain("Do-Not-Include Checklist");
+    expect(reportTemplate).toContain("Reproduction Steps Without Credentials");
+    expect(reportTemplate).toContain("No raw quote response");
+    expect(readinessChecklist).toContain("## v0.19 Smoke Test Result Capture");
   });
 
   it("keeps smoke test artifacts sanitized and read-only", () => {
