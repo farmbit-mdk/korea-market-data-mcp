@@ -192,6 +192,7 @@ mock/test integration for guarded public quote response shape
 guard hardening for Kiwoom public quote tool
 explicit opt-in guard for Kiwoom public quote real path
 local verification documentation for Kiwoom public quote tool
+local verification hardening docs and examples
 normalized auth errors
 no-network safety tests
 read-only provider skeleton
@@ -261,6 +262,7 @@ Real Kiwoom API calls must remain disabled by default.
 | Kiwoom public quote tool guards   | Hardened validation and redaction |
 | Kiwoom public quote real path      | Explicit opt-in only, not default |
 | Kiwoom public quote local verification | Documented for local MCP clients |
+| Kiwoom public quote local verification hardening | Env matrix, blocked reasons, and examples added |
 | Public real Kiwoom quote lookup   | Not enabled by default |
 | Mock/test quote response          | Available for response validation only |
 | Mocked quote response                 | Can be normalized safely          |
@@ -478,6 +480,7 @@ mock/test public quote success path returns stable nested quote shape
 public quote guard rejects malformed symbols and forbidden fields safely
 public quote real path requires KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH=true
 local verification docs and MCP request example exist
+local verification env matrix and blocked reason matrix exist
 ```
 
 Kiwoom tests must not require real credentials.
@@ -846,6 +849,31 @@ Kiwoom Public Quote Tool Local Verification Docs
 ```
 
 This release documents local-only verification for `get_kiwoom_stock_quote`. It must not be described as live Kiwoom quote support. Public real Kiwoom quote lookup, account access, orders, balance lookup, holdings lookup, trading, auto-trading, investment recommendations, centralized credential storage, and centralized data redistribution proxy behavior remain disabled by default or forbidden.
+
+---
+
+## v0.17.0-alpha
+
+Provider status:
+
+```text
+mock provider implemented
+Kiwoom public quote local verification docs hardened
+environment matrix documented
+blocked reason matrix documented
+MCP request and response examples added
+public real Kiwoom quote lookup disabled by default
+account/order/trading explicitly out of scope
+centralized data redistribution proxy out of scope
+```
+
+Recommended release description:
+
+```text
+Kiwoom Public Quote Tool Local Verification Hardening
+```
+
+This release hardens local-only verification documentation and examples for `get_kiwoom_stock_quote`. It must not be described as live Kiwoom quote support. Public real Kiwoom quote lookup, account access, orders, balance lookup, holdings lookup, trading, auto-trading, investment recommendations, centralized credential storage, and centralized data redistribution proxy behavior remain disabled by default or forbidden.
 
 ---
 

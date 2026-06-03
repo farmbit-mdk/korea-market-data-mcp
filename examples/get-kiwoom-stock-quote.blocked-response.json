@@ -1,0 +1,7 @@
+{
+  "status": "blocked",
+  "provider": "kiwoom",
+  "symbol": "005930",
+  "quote_present": false,
+  "reason": "KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH must be true."
+}

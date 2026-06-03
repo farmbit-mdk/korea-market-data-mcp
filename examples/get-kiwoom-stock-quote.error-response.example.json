@@ -1,0 +1,11 @@
+{
+  "status": "error",
+  "provider": "kiwoom",
+  "symbol": "005930",
+  "quote_present": false,
+  "error": {
+    "code": "KIWOOM_QUOTE_REQUEST_FAILED",
+    "provider": "kiwoom",
+    "retryable": true
+  }
+}

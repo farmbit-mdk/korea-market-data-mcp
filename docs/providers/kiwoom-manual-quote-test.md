@@ -237,3 +237,31 @@ Do not expose this workflow as an MCP tool.
 Do not add account, order, balance, holdings, trading, auto-trading, or recommendation behavior.
 
 Manual quote verification is not public real quote support.
+
+## 9. Manual vs Public Tool Verification
+
+Manual quote verification is a CLI workflow:
+
+```text
+npm run kiwoom:quote:manual
+```
+
+Public quote local verification is an MCP client workflow:
+
+```text
+get_kiwoom_stock_quote
+```
+
+Both are blocked by default. Manual verification checks the CLI token/quote flow. Public tool verification checks MCP request handling, public quote guards, and response shape.
+
+`token_present=false` means token verification was blocked or failed before a usable token was available.
+
+`quote_present=false` means quote verification was blocked or failed before a usable quote was returned.
+
+Endpoint states:
+
+```text
+enabled=false: no quote request should be sent
+exposesPublicTool=false: public MCP tool real path remains blocked
+readOnly=false: do not proceed
+```

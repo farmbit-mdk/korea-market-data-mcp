@@ -495,9 +495,14 @@ See also:
 
 ```text
 examples/get-kiwoom-stock-quote.request.json
+examples/get-kiwoom-stock-quote.blocked-response.json
+examples/get-kiwoom-stock-quote.ok-response.example.json
+examples/get-kiwoom-stock-quote.error-response.example.json
 ```
 
 The local verification flow is not a public default. It does not add account, order, balance, holdings, trading, auto-trading, investment recommendation, centralized credential storage, or centralized data redistribution behavior.
+
+Before sharing logs, screenshots, issues, or pull requests, verify that app keys, secret keys, access tokens, authorization headers, raw token responses, and raw quote responses are not included.
 
 Mock/test integration is used only to validate the response format. It must not be treated as provider fallback or live quote availability.
 
