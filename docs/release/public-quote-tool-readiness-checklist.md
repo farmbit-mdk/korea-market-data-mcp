@@ -43,6 +43,7 @@ Confirm:
 
 ```text
 real quote lookup policy is explicit
+KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH policy is explicit
 endpoint enabled policy is reviewed
 exposesPublicTool policy is reviewed
 enabled/manualOnly/readOnly policy is reviewed
@@ -110,4 +111,19 @@ blocked/error/ok response shapes remain stable
 raw request bodies and raw provider payloads are not returned
 real lookup remains disabled by default
 provider terms review is still required before real public enablement
+```
+
+## v0.15 Explicit Opt-in Verification
+
+Confirm:
+
+```text
+KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH=false by default
+real quote path requires KIWOOM_ENABLE_REAL_API_CALLS=true
+real quote path requires KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH=true
+real quote path requires endpoint enabled=true
+real quote path requires exposesPublicTool=true
+real quote path requires readOnly=true
+blocked guards do not call token or quote transport
+provider terms review is still required before wider enablement
 ```
