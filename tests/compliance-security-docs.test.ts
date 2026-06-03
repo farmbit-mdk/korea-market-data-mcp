@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import { kiwoomQuoteEndpointMappings } from "../src/providers/kiwoom/quote-endpoints.js";
 import { redactSecrets } from "../src/safety/redact-secret.js";
 import { getRegisteredToolNames } from "../src/tools/index.js";
 
@@ -8,11 +9,14 @@ const requiredDocs = [
   "docs/providers/provider-compliance.md",
   "docs/providers/kiwoom-compliance-notes.md",
   "docs/providers/kiwoom-public-quote-local-verification.md",
+  "docs/providers/kiwoom-public-quote-real-local-smoke-test.md",
   "docs/security/credential-handling.md",
   "docs/release/public-quote-tool-readiness-checklist.md",
+  "docs/release/kiwoom-public-quote-smoke-test-checklist.md",
   "docs/release/v0.11.0-alpha-checklist.md",
   "docs/release/v0.16.0-alpha-checklist.md",
-  "docs/release/v0.17.0-alpha-checklist.md"
+  "docs/release/v0.17.0-alpha-checklist.md",
+  "docs/release/v0.18.0-alpha-checklist.md"
 ];
 
 const kiwoomPublicQuoteExamplePaths = [
@@ -20,6 +24,13 @@ const kiwoomPublicQuoteExamplePaths = [
   "examples/get-kiwoom-stock-quote.blocked-response.json",
   "examples/get-kiwoom-stock-quote.ok-response.example.json",
   "examples/get-kiwoom-stock-quote.error-response.example.json"
+];
+
+const kiwoomPublicQuoteSmokeTestPaths = [
+  "docs/providers/kiwoom-public-quote-real-local-smoke-test.md",
+  "docs/providers/templates/kiwoom-public-quote-smoke-test-result.md",
+  "docs/release/kiwoom-public-quote-smoke-test-checklist.md",
+  "docs/release/v0.18.0-alpha-checklist.md"
 ];
 
 describe("provider compliance and security review docs", () => {
@@ -55,6 +66,17 @@ describe("provider compliance and security review docs", () => {
     expect(envExample).not.toMatch(/KIWOOM_SECRET_KEY=(?!YOUR_KIWOOM_SECRET_KEY\s*$).+/m);
     expect(envExample).not.toMatch(/access_token\s*=/i);
     expect(envExample).not.toMatch(/Bearer\s+[A-Za-z0-9._~+/=-]{12,}/);
+  });
+
+  it("keeps public quote real-path defaults disabled", () => {
+    const envExample = readFileSync(".env.example", "utf8");
+
+    expect(envExample).toContain("MARKET_DATA_PROVIDER=mock");
+    expect(envExample).toContain("KIWOOM_ENABLE_REAL_API_CALLS=false");
+    expect(envExample).toContain("KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH=false");
+    expect(kiwoomQuoteEndpointMappings.quote.enabled).toBe(false);
+    expect(kiwoomQuoteEndpointMappings.quote.readOnly).toBe(true);
+    expect(kiwoomQuoteEndpointMappings.quote.exposesPublicTool).toBe(false);
   });
 
   it("keeps the Kiwoom public quote example request read-only", () => {
@@ -114,7 +136,10 @@ describe("provider compliance and security review docs", () => {
     const docsAndExamples = [
       "README.md",
       "docs/providers/kiwoom-public-quote-local-verification.md",
+      "docs/providers/kiwoom-public-quote-real-local-smoke-test.md",
+      "docs/providers/templates/kiwoom-public-quote-smoke-test-result.md",
       "docs/release/public-quote-tool-readiness-checklist.md",
+      "docs/release/kiwoom-public-quote-smoke-test-checklist.md",
       ...kiwoomPublicQuoteExamplePaths
     ].map((path) => readFileSync(path, "utf8")).join("\n");
 
@@ -128,6 +153,52 @@ describe("provider compliance and security review docs", () => {
     expect(docsAndExamples).not.toMatch(/KIWOOM_SECRET_KEY[ \t]*=[ \t]*(?!<local-secret-key>|YOUR_KIWOOM_SECRET_KEY|your-secret-key)[A-Za-z0-9._~-]{8,}/);
   });
 
+  it("documents real local smoke test workflow and sanitized result recording", () => {
+    for (const path of kiwoomPublicQuoteSmokeTestPaths) {
+      expect(existsSync(path), `${path} should exist`).toBe(true);
+    }
+
+    const readme = readFileSync("README.md", "utf8");
+    const smokeDoc = readFileSync("docs/providers/kiwoom-public-quote-real-local-smoke-test.md", "utf8");
+    const localVerificationDoc = readFileSync("docs/providers/kiwoom-public-quote-local-verification.md", "utf8");
+    const template = readFileSync("docs/providers/templates/kiwoom-public-quote-smoke-test-result.md", "utf8");
+    const checklist = readFileSync("docs/release/kiwoom-public-quote-smoke-test-checklist.md", "utf8");
+
+    expect(readme).toContain("local-only real path smoke test");
+    expect(readme).toContain("real quote lookup is disabled by default");
+    expect(readme).toContain("no centralized data redistribution proxy");
+    expect(localVerificationDoc).toContain("## Real Local Smoke Test");
+    expect(smokeDoc).toContain("local-only smoke test");
+    expect(smokeDoc).toContain("KIWOOM_ENABLE_REAL_API_CALLS=true");
+    expect(smokeDoc).toContain("KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH=true");
+    expect(smokeDoc).toContain("readOnly=true");
+    expect(smokeDoc).toContain("exposesPublicTool=true");
+    expect(smokeDoc).toContain("enabled=true");
+    expect(template).toContain("Redaction Confirmation Checklist");
+    expect(template).toContain("token_present");
+    expect(template).toContain("quote_present");
+    expect(checklist).toContain("Result Redaction Checklist");
+    expect(checklist).toContain("Rollback And Cleanup Checklist");
+  });
+
+  it("keeps smoke test artifacts sanitized and read-only", () => {
+    const combinedSmokeArtifacts = kiwoomPublicQuoteSmokeTestPaths
+      .map((path) => readFileSync(path, "utf8"))
+      .join("\n");
+
+    expect(combinedSmokeArtifacts).not.toMatch(/Bearer\s+[A-Za-z0-9._~+/=-]{12,}/);
+    expect(combinedSmokeArtifacts).not.toMatch(/access_token\s*[:=]\s*[A-Za-z0-9._~+/=-]{8,}/i);
+    expect(combinedSmokeArtifacts).not.toMatch(/KIWOOM_APP_KEY[ \t]*=[ \t]*(?!<local-app-key>|YOUR_KIWOOM_APP_KEY|your-app-key)[A-Za-z0-9._~-]{8,}/);
+    expect(combinedSmokeArtifacts).not.toMatch(/KIWOOM_SECRET_KEY[ \t]*=[ \t]*(?!<local-secret-key>|YOUR_KIWOOM_SECRET_KEY|your-secret-key)[A-Za-z0-9._~-]{8,}/);
+    expect(combinedSmokeArtifacts).not.toMatch(/"account(_no|No|Number)?"\s*:/i);
+    expect(combinedSmokeArtifacts).not.toMatch(/"order(_no|No)?"\s*:/i);
+    expect(combinedSmokeArtifacts).not.toMatch(/"balance"\s*:/i);
+    expect(combinedSmokeArtifacts).not.toMatch(/"holdings"\s*:/i);
+    expect(combinedSmokeArtifacts).not.toMatch(/"trading"\s*:/i);
+    expect(combinedSmokeArtifacts).not.toMatch(/"recommendation"\s*:/i);
+    expect(combinedSmokeArtifacts).not.toMatch(/"raw(_payload|_response)?"\s*:/i);
+  });
+
   it("keeps the MCP registry at allowed read-only tools with guarded Kiwoom quote only", () => {
     expect(getRegisteredToolNames()).toEqual([
       "search_korean_symbol",
@@ -139,6 +210,9 @@ describe("provider compliance and security review docs", () => {
     ]);
     expect(getRegisteredToolNames()).not.toContain("get_kiwoom_quote");
     expect(getRegisteredToolNames()).not.toContain("get_real_quote");
+    expect(getRegisteredToolNames()).not.toContain("place_order");
+    expect(getRegisteredToolNames()).not.toContain("get_account_balance");
+    expect(getRegisteredToolNames()).not.toContain("get_holdings");
   });
 
   it("keeps fetch isolated to the Kiwoom transport boundary", () => {

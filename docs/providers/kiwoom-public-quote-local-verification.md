@@ -258,3 +258,19 @@ raw request body
 Do not include real credentials in GitHub issues, pull requests, logs, screenshots, or test snapshots.
 
 This tool does not support account, order, balance, holdings, trading, auto-trading, or investment recommendation behavior.
+
+## Real Local Smoke Test
+
+Local verification checks the guarded MCP tool behavior, response shapes, and blocked/error handling. The real local smoke test is a narrower opt-in procedure for users who have local Kiwoom credentials and want to verify the real path in their own local environment.
+
+The smoke test still does not enable public real quote lookup by default.
+
+Use:
+
+```text
+docs/providers/kiwoom-public-quote-real-local-smoke-test.md
+docs/providers/templates/kiwoom-public-quote-smoke-test-result.md
+docs/release/kiwoom-public-quote-smoke-test-checklist.md
+```
+
+Before sharing smoke test notes, remove app keys, secret keys, access tokens, authorization headers, raw token responses, raw quote responses, IP addresses, account identifiers, and any personal information.
