@@ -11,14 +11,17 @@ const requiredDocs = [
   "docs/providers/kiwoom-public-quote-local-verification.md",
   "docs/providers/kiwoom-public-quote-real-local-smoke-test.md",
   "docs/providers/kiwoom-public-quote-smoke-test-result-capture.md",
+  "docs/providers/kiwoom-real-quote-endpoint-activation-review.md",
   "docs/security/credential-handling.md",
   "docs/release/public-quote-tool-readiness-checklist.md",
   "docs/release/kiwoom-public-quote-smoke-test-checklist.md",
+  "docs/release/kiwoom-real-quote-activation-review-checklist.md",
   "docs/release/v0.11.0-alpha-checklist.md",
   "docs/release/v0.16.0-alpha-checklist.md",
   "docs/release/v0.17.0-alpha-checklist.md",
   "docs/release/v0.18.0-alpha-checklist.md",
-  "docs/release/v0.19.0-alpha-checklist.md"
+  "docs/release/v0.19.0-alpha-checklist.md",
+  "docs/release/v0.20.0-alpha-checklist.md"
 ];
 
 const kiwoomPublicQuoteExamplePaths = [
@@ -37,6 +40,13 @@ const kiwoomPublicQuoteSmokeTestPaths = [
   "docs/release/kiwoom-public-quote-smoke-test-checklist.md",
   "docs/release/v0.18.0-alpha-checklist.md",
   "docs/release/v0.19.0-alpha-checklist.md"
+];
+
+const kiwoomRealQuoteActivationReviewPaths = [
+  "docs/providers/kiwoom-real-quote-endpoint-activation-review.md",
+  "docs/providers/templates/kiwoom-real-quote-activation-decision-record.md",
+  "docs/release/kiwoom-real-quote-activation-review-checklist.md",
+  "docs/release/v0.20.0-alpha-checklist.md"
 ];
 
 describe("provider compliance and security review docs", () => {
@@ -83,6 +93,8 @@ describe("provider compliance and security review docs", () => {
     expect(kiwoomQuoteEndpointMappings.quote.enabled).toBe(false);
     expect(kiwoomQuoteEndpointMappings.quote.readOnly).toBe(true);
     expect(kiwoomQuoteEndpointMappings.quote.exposesPublicTool).toBe(false);
+    expect(kiwoomQuoteEndpointMappings.quote.manualOnly).toBe(true);
+    expect(kiwoomQuoteEndpointMappings.quote.requiresToken).toBe(true);
   });
 
   it("keeps the Kiwoom public quote example request read-only", () => {
@@ -147,6 +159,9 @@ describe("provider compliance and security review docs", () => {
       "docs/providers/templates/kiwoom-public-quote-smoke-test-result.md",
       "docs/providers/templates/kiwoom-public-quote-smoke-test-result.sample.md",
       "docs/providers/templates/kiwoom-public-quote-smoke-test-github-report.md",
+      "docs/providers/kiwoom-real-quote-endpoint-activation-review.md",
+      "docs/providers/templates/kiwoom-real-quote-activation-decision-record.md",
+      "docs/release/kiwoom-real-quote-activation-review-checklist.md",
       "docs/release/public-quote-tool-readiness-checklist.md",
       "docs/release/kiwoom-public-quote-smoke-test-checklist.md",
       ...kiwoomPublicQuoteExamplePaths
@@ -209,6 +224,49 @@ describe("provider compliance and security review docs", () => {
     expect(reportTemplate).toContain("Reproduction Steps Without Credentials");
     expect(reportTemplate).toContain("No raw quote response");
     expect(readinessChecklist).toContain("## v0.19 Smoke Test Result Capture");
+  });
+
+  it("documents real quote activation review without enabling endpoint defaults", () => {
+    for (const path of kiwoomRealQuoteActivationReviewPaths) {
+      expect(existsSync(path), `${path} should exist`).toBe(true);
+    }
+
+    const readme = readFileSync("README.md", "utf8");
+    const activationDoc = readFileSync("docs/providers/kiwoom-real-quote-endpoint-activation-review.md", "utf8");
+    const decisionRecord = readFileSync("docs/providers/templates/kiwoom-real-quote-activation-decision-record.md", "utf8");
+    const activationChecklist = readFileSync("docs/release/kiwoom-real-quote-activation-review-checklist.md", "utf8");
+    const endpointMappingDoc = readFileSync("docs/providers/kiwoom-quote-endpoint-mapping.md", "utf8");
+    const providerCompliance = readFileSync("docs/providers/provider-compliance.md", "utf8");
+
+    expect(readme).toContain("real quote endpoint activation review");
+    expect(readme).toContain("This is not activation");
+    expect(activationDoc).toContain("Activation review is not activation itself");
+    expect(activationDoc).toContain("kiwoomQuoteEndpointMappings.quote.enabled=false");
+    expect(activationDoc).toContain("kiwoomQuoteEndpointMappings.quote.exposesPublicTool=false");
+    expect(decisionRecord).toContain("not approved / approved for local-only opt-in / approved for wider opt-in / rejected");
+    expect(decisionRecord).toContain("Final Decision");
+    expect(activationChecklist).toContain("enabled remains false unless decision record approves otherwise");
+    expect(activationChecklist).toContain("exposesPublicTool remains false unless decision record approves otherwise");
+    expect(endpointMappingDoc).toContain("Changing `enabled:true` or `exposesPublicTool:true` is forbidden unless an activation decision record explicitly approves it");
+    expect(providerCompliance).toContain("Real Quote Endpoint Activation Gate");
+  });
+
+  it("keeps activation review artifacts sanitized and out of forbidden scopes", () => {
+    const combinedActivationArtifacts = kiwoomRealQuoteActivationReviewPaths
+      .map((path) => readFileSync(path, "utf8"))
+      .join("\n");
+
+    expect(combinedActivationArtifacts).not.toMatch(/Bearer\s+[A-Za-z0-9._~+/=-]{12,}/);
+    expect(combinedActivationArtifacts).not.toMatch(/access_token\s*[:=]\s*[A-Za-z0-9._~+/=-]{8,}/i);
+    expect(combinedActivationArtifacts).not.toMatch(/KIWOOM_APP_KEY[ \t]*=[ \t]*(?!<local-app-key>|YOUR_KIWOOM_APP_KEY|your-app-key)[A-Za-z0-9._~-]{8,}/);
+    expect(combinedActivationArtifacts).not.toMatch(/KIWOOM_SECRET_KEY[ \t]*=[ \t]*(?!<local-secret-key>|YOUR_KIWOOM_SECRET_KEY|your-secret-key)[A-Za-z0-9._~-]{8,}/);
+    expect(combinedActivationArtifacts).not.toMatch(/"account(_no|No|Number)?"\s*:/i);
+    expect(combinedActivationArtifacts).not.toMatch(/"order(_no|No)?"\s*:/i);
+    expect(combinedActivationArtifacts).not.toMatch(/"balance"\s*:/i);
+    expect(combinedActivationArtifacts).not.toMatch(/"holdings"\s*:/i);
+    expect(combinedActivationArtifacts).not.toMatch(/"trading"\s*:/i);
+    expect(combinedActivationArtifacts).not.toMatch(/"recommendation"\s*:/i);
+    expect(combinedActivationArtifacts).not.toMatch(/"raw(_payload|_response)?"\s*:/i);
   });
 
   it("keeps smoke test artifacts sanitized and read-only", () => {

@@ -95,3 +95,26 @@ data redistribution risk is reviewed
 ```
 
 Enabling endpoint mapping must not automatically expose a public MCP tool.
+
+## Real Quote Endpoint Activation Review
+
+Before changing the Kiwoom quote endpoint mapping to `enabled:true` or `exposesPublicTool:true`, maintainers must complete:
+
+```text
+docs/providers/kiwoom-real-quote-endpoint-activation-review.md
+docs/providers/templates/kiwoom-real-quote-activation-decision-record.md
+docs/release/kiwoom-real-quote-activation-review-checklist.md
+```
+
+The default must remain:
+
+```text
+enabled=false
+exposesPublicTool=false
+KIWOOM_ENABLE_REAL_API_CALLS=false
+KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH=false
+```
+
+Activation review must verify provider terms, data redistribution restrictions, local credential handling, token redaction, quote response normalization, and rollback criteria.
+
+The Kiwoom public quote tool is data access only. It must not add investment advice, recommendations, account access, orders, balance lookup, holdings lookup, trading, auto-trading, centralized credential storage, or a centralized data redistribution proxy.
