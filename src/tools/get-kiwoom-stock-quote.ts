@@ -81,6 +81,16 @@ const forbiddenInputFields = [
 ];
 
 const kiwoomQuoteMarketValues = new Set(["KRX", "KOSPI", "KOSDAQ", "KONEX", "UNKNOWN"]);
+const placeholderCredentialValues = new Set([
+  "YOUR_APP_KEY",
+  "YOUR_SECRET_KEY",
+  "YOUR_KIWOOM_APP_KEY",
+  "YOUR_KIWOOM_APP_SECRET",
+  "YOUR_KIWOOM_SECRET_KEY",
+  "CHANGE_ME",
+  "REPLACE_ME",
+  ""
+]);
 
 export const getKiwoomStockQuoteTool: ToolDefinition = {
   name: "get_kiwoom_stock_quote",
@@ -110,24 +120,30 @@ export async function runGuardedKiwoomPublicQuote(
     }
 
     if (!mapping.exposesPublicTool) {
-      return blocked(
-        normalizedInput.symbol,
-        "Kiwoom public quote tool is registered as a guarded skeleton but real quote lookup is not enabled."
-      );
+      return blocked(normalizedInput.symbol, "Kiwoom quote endpoint is not exposed as a public tool.");
+    }
+
+    if (!mapping.enabled) {
+      return blocked(normalizedInput.symbol, "Kiwoom quote endpoint is not enabled.");
     }
 
     const config = loadKiwoomAuthConfig(dependencies.env);
 
     if (!config.enableRealApiCalls) {
-      return blocked(normalizedInput.symbol, "KIWOOM_ENABLE_REAL_API_CALLS must be set to true for guarded Kiwoom public quote lookup.");
+      return blocked(normalizedInput.symbol, "KIWOOM_ENABLE_REAL_API_CALLS must be true.");
     }
 
-    if (!mapping.enabled) {
-      return blocked(normalizedInput.symbol, "Kiwoom quote endpoint mapping is disabled.");
+    if (!isPublicQuoteRealPathEnabled(dependencies.env)) {
+      return blocked(normalizedInput.symbol, "KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH must be true.");
     }
 
-    if (config.appKey === undefined || config.appSecret === undefined) {
-      return blocked(normalizedInput.symbol, "Kiwoom credentials are required for guarded Kiwoom public quote lookup.");
+    if (
+      config.appKey === undefined ||
+      config.appSecret === undefined ||
+      isPlaceholderCredential(config.appKey) ||
+      isPlaceholderCredential(config.appSecret)
+    ) {
+      return blocked(normalizedInput.symbol, "Kiwoom credentials are missing or invalid.");
     }
 
     const tokenClient = dependencies.tokenClient ?? createKiwoomAuthClient(config);
@@ -248,6 +264,14 @@ function getSafeErrorSymbol(input: unknown): string | undefined {
 
 function isPlainInputRecord(input: unknown): input is Record<string, unknown> {
   return input !== null && typeof input === "object" && !Array.isArray(input);
+}
+
+function isPublicQuoteRealPathEnabled(env: NodeJS.ProcessEnv | undefined): boolean {
+  return env?.KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH === "true";
+}
+
+function isPlaceholderCredential(value: string): boolean {
+  return placeholderCredentialValues.has(value.trim().toUpperCase());
 }
 
 function blocked(symbol: string | undefined, reason: string): KiwoomPublicQuoteBlockedResponse {

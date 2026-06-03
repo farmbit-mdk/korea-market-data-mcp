@@ -36,6 +36,7 @@ describe("provider compliance and security review docs", () => {
     const envExample = readFileSync(".env.example", "utf8");
 
     expect(envExample).toContain("KIWOOM_ENABLE_REAL_API_CALLS=false");
+    expect(envExample).toContain("KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH=false");
     expect(envExample).toContain("KIWOOM_APP_KEY=YOUR_KIWOOM_APP_KEY");
     expect(envExample).toContain("KIWOOM_APP_SECRET=YOUR_KIWOOM_APP_SECRET");
     expect(envExample).toContain("KIWOOM_SECRET_KEY=YOUR_KIWOOM_SECRET_KEY");

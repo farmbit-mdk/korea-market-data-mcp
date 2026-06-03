@@ -382,13 +382,13 @@ docs/release/public-quote-tool-readiness-checklist.md
 
 ### Kiwoom public quote guarded skeleton
 
-`v0.14.0-alpha` hardens the guarded public MCP tool skeleton:
+`v0.15.0-alpha` adds an explicit opt-in guard for the guarded public MCP tool skeleton:
 
 ```text
 get_kiwoom_stock_quote
 ```
 
-The tool is registered so clients can validate the future public Kiwoom quote shape, but real Kiwoom quote lookup remains disabled by default. The guard returns `blocked` unless public exposure, real API opt-in, endpoint mapping, credentials, token, and read-only checks are all explicitly satisfied.
+The tool is registered so clients can validate the future public Kiwoom quote shape, but real Kiwoom quote lookup remains disabled by default. The guard returns `blocked` unless public exposure, endpoint mapping, real API opt-in, public quote real-path opt-in, credentials, token, and read-only checks are all explicitly satisfied.
 
 Example input:
 
@@ -446,8 +446,9 @@ symbol validation
 provider validation
 endpoint readOnly check
 public exposure check
-real API opt-in check
 endpoint enabled check
+real API opt-in check
+public quote real-path opt-in check
 credential and token checks
 quote client call
 ```
@@ -459,10 +460,20 @@ This release does not enable live Kiwoom quote support:
 ```text
 public real Kiwoom quote lookup is not enabled by default
 KIWOOM_ENABLE_REAL_API_CALLS=false remains the default
+KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH=false remains the default
 provider credentials must remain local
 centralized data redistribution proxy is not included
 account, order, balance, holdings, trading, auto-trading, and recommendation features remain excluded
 ```
+
+Real public Kiwoom quote lookup would require all of the following, and remains unavailable by default:
+
+```env
+KIWOOM_ENABLE_REAL_API_CALLS=true
+KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH=true
+```
+
+The endpoint mapping must also be enabled, marked read-only, and explicitly exposed as a public tool, with valid local credentials available. Account, order, balance, holdings, and trading behavior remain out of scope.
 
 Mock/test integration is used only to validate the response format. It must not be treated as provider fallback or live quote availability.
 

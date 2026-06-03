@@ -190,6 +190,7 @@ public quote tool readiness checklist
 guarded Kiwoom public quote MCP tool skeleton
 mock/test integration for guarded public quote response shape
 guard hardening for Kiwoom public quote tool
+explicit opt-in guard for Kiwoom public quote real path
 normalized auth errors
 no-network safety tests
 read-only provider skeleton
@@ -257,6 +258,7 @@ Real Kiwoom API calls must remain disabled by default.
 | Provider compliance review        | Added documentation and tests |
 | Kiwoom public quote tool          | Guarded skeleton registered |
 | Kiwoom public quote tool guards   | Hardened validation and redaction |
+| Kiwoom public quote real path      | Explicit opt-in only, not default |
 | Public real Kiwoom quote lookup   | Not enabled by default |
 | Mock/test quote response          | Available for response validation only |
 | Mocked quote response                 | Can be normalized safely          |
@@ -472,6 +474,7 @@ guarded Kiwoom public quote tool is registered
 public real Kiwoom quote lookup remains blocked by default
 mock/test public quote success path returns stable nested quote shape
 public quote guard rejects malformed symbols and forbidden fields safely
+public quote real path requires KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH=true
 ```
 
 Kiwoom tests must not require real credentials.
@@ -793,6 +796,29 @@ Kiwoom Public Quote Tool Guard Hardening
 ```
 
 This release hardens `get_kiwoom_stock_quote` guard order, validation edge cases, forbidden-field handling, and redaction tests. It must not be described as live Kiwoom quote support. Public real Kiwoom quote lookup, account access, orders, balance lookup, holdings lookup, trading, auto-trading, investment recommendations, centralized credential storage, and centralized data redistribution proxy behavior remain unimplemented or forbidden.
+
+---
+
+## v0.15.0-alpha
+
+Provider status:
+
+```text
+mock provider implemented
+Kiwoom public quote tool guarded skeleton registered
+Kiwoom public quote real path split behind explicit opt-in guard
+KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH=false by default
+public real Kiwoom quote lookup disabled by default
+account/order/trading explicitly out of scope
+```
+
+Recommended release description:
+
+```text
+Kiwoom Public Quote Tool Explicit Opt-in Verification
+```
+
+This release separates public quote real-path activation behind `KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH=true` in addition to the existing real API opt-in and endpoint guards. It must not be described as live Kiwoom quote support. Public real Kiwoom quote lookup, account access, orders, balance lookup, holdings lookup, trading, auto-trading, investment recommendations, centralized credential storage, and centralized data redistribution proxy behavior remain disabled by default or forbidden.
 
 ---
 

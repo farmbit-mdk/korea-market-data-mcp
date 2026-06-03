@@ -26,7 +26,7 @@ describe("Kiwoom public quote guarded skeleton", () => {
       provider: "kiwoom",
       symbol: "005930",
       quote_present: false,
-      reason: expect.stringContaining("guarded skeleton")
+      reason: expect.stringContaining("not exposed")
     });
     expect(tokenClient.getAccessToken).not.toHaveBeenCalled();
     expect(quoteClient.getQuote).not.toHaveBeenCalled();
@@ -201,6 +201,32 @@ describe("Kiwoom public quote guarded skeleton", () => {
     expect(quoteClient.getQuote).not.toHaveBeenCalled();
   });
 
+  it("returns blocked when public quote real path opt-in is disabled and does not call clients", async () => {
+    const tokenClient = createMockTokenClient();
+    const quoteClient = createMockQuoteClient();
+
+    const response = await runGuardedKiwoomPublicQuote(
+      { symbol: "005930" },
+      {
+        env: {
+          ...validEnabledEnv,
+          KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH: "false"
+        },
+        quoteEndpointMapping: enabledPublicMapping,
+        tokenClient,
+        quoteClient
+      }
+    );
+
+    expect(response).toMatchObject({
+      status: "blocked",
+      quote_present: false,
+      reason: "KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH must be true."
+    });
+    expect(tokenClient.getAccessToken).not.toHaveBeenCalled();
+    expect(quoteClient.getQuote).not.toHaveBeenCalled();
+  });
+
   it("returns blocked when endpoint mapping is disabled and does not call clients", async () => {
     const tokenClient = createMockTokenClient();
     const quoteClient = createMockQuoteClient();
@@ -221,8 +247,65 @@ describe("Kiwoom public quote guarded skeleton", () => {
     expect(response).toMatchObject({
       status: "blocked",
       quote_present: false,
-      reason: expect.stringContaining("disabled")
+      reason: expect.stringContaining("not enabled")
     });
+    expect(tokenClient.getAccessToken).not.toHaveBeenCalled();
+    expect(quoteClient.getQuote).not.toHaveBeenCalled();
+  });
+
+  it("returns blocked when endpoint mapping is not read-only and does not call clients", async () => {
+    const tokenClient = createMockTokenClient();
+    const quoteClient = createMockQuoteClient();
+
+    const response = await runGuardedKiwoomPublicQuote(
+      { symbol: "005930" },
+      {
+        env: validEnabledEnv,
+        quoteEndpointMapping: {
+          ...enabledPublicMapping,
+          readOnly: false
+        },
+        tokenClient,
+        quoteClient
+      }
+    );
+
+    expect(response).toMatchObject({
+      status: "blocked",
+      quote_present: false,
+      reason: expect.stringContaining("not marked read-only")
+    });
+    expect(tokenClient.getAccessToken).not.toHaveBeenCalled();
+    expect(quoteClient.getQuote).not.toHaveBeenCalled();
+  });
+
+  it("returns blocked when credentials are missing or placeholders", async () => {
+    const tokenClient = createMockTokenClient();
+    const quoteClient = createMockQuoteClient();
+
+    const response = await runGuardedKiwoomPublicQuote(
+      { symbol: "005930" },
+      {
+        env: {
+          KIWOOM_ENABLE_REAL_API_CALLS: "true",
+          KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH: "true",
+          KIWOOM_APP_KEY: "YOUR_KIWOOM_APP_KEY",
+          KIWOOM_SECRET_KEY: "YOUR_KIWOOM_SECRET_KEY",
+          KIWOOM_ENV: "mock"
+        },
+        quoteEndpointMapping: enabledPublicMapping,
+        tokenClient,
+        quoteClient
+      }
+    );
+
+    expect(response).toMatchObject({
+      status: "blocked",
+      quote_present: false,
+      reason: "Kiwoom credentials are missing or invalid."
+    });
+    expect(JSON.stringify(response)).not.toContain("YOUR_KIWOOM_APP_KEY");
+    expect(JSON.stringify(response)).not.toContain("YOUR_KIWOOM_SECRET_KEY");
     expect(tokenClient.getAccessToken).not.toHaveBeenCalled();
     expect(quoteClient.getQuote).not.toHaveBeenCalled();
   });
@@ -360,6 +443,7 @@ describe("Kiwoom public quote guarded skeleton", () => {
 
   const validEnabledEnv = {
     KIWOOM_ENABLE_REAL_API_CALLS: "true",
+    KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH: "true",
     KIWOOM_APP_KEY: "dummy_app_key",
     KIWOOM_SECRET_KEY: "dummy_secret_key",
     KIWOOM_ENV: "mock"
