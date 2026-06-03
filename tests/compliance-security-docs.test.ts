@@ -7,9 +7,11 @@ const requiredDocs = [
   "SECURITY.md",
   "docs/providers/provider-compliance.md",
   "docs/providers/kiwoom-compliance-notes.md",
+  "docs/providers/kiwoom-public-quote-local-verification.md",
   "docs/security/credential-handling.md",
   "docs/release/public-quote-tool-readiness-checklist.md",
-  "docs/release/v0.11.0-alpha-checklist.md"
+  "docs/release/v0.11.0-alpha-checklist.md",
+  "docs/release/v0.16.0-alpha-checklist.md"
 ];
 
 describe("provider compliance and security review docs", () => {
@@ -45,6 +47,43 @@ describe("provider compliance and security review docs", () => {
     expect(envExample).not.toMatch(/KIWOOM_SECRET_KEY=(?!YOUR_KIWOOM_SECRET_KEY\s*$).+/m);
     expect(envExample).not.toMatch(/access_token\s*=/i);
     expect(envExample).not.toMatch(/Bearer\s+[A-Za-z0-9._~+/=-]{12,}/);
+  });
+
+  it("keeps the Kiwoom public quote example request read-only", () => {
+    const example = JSON.parse(readFileSync("examples/get-kiwoom-stock-quote.request.json", "utf8")) as Record<string, unknown>;
+
+    expect(example).toEqual({
+      symbol: "005930",
+      market: "KOSPI",
+      provider: "kiwoom"
+    });
+    expect(Object.keys(example)).toEqual(["symbol", "market", "provider"]);
+    expect(example).not.toHaveProperty("account");
+    expect(example).not.toHaveProperty("account_no");
+    expect(example).not.toHaveProperty("order");
+    expect(example).not.toHaveProperty("order_no");
+    expect(example).not.toHaveProperty("balance");
+    expect(example).not.toHaveProperty("holdings");
+    expect(example).not.toHaveProperty("trading");
+    expect(example).not.toHaveProperty("recommendation");
+  });
+
+  it("documents local verification without real-looking credentials", () => {
+    const docsAndExamples = [
+      "README.md",
+      "docs/providers/kiwoom-public-quote-local-verification.md",
+      "docs/release/public-quote-tool-readiness-checklist.md",
+      "examples/get-kiwoom-stock-quote.request.json"
+    ].map((path) => readFileSync(path, "utf8")).join("\n");
+
+    expect(docsAndExamples).toContain("KIWOOM_ENABLE_REAL_API_CALLS=true");
+    expect(docsAndExamples).toContain("KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH=true");
+    expect(docsAndExamples).toContain("KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH=false");
+    expect(docsAndExamples).toContain("local");
+    expect(docsAndExamples).not.toMatch(/Bearer\s+[A-Za-z0-9._~+/=-]{12,}/);
+    expect(docsAndExamples).not.toMatch(/access_token\s*[:=]\s*[A-Za-z0-9._~+/=-]{8,}/i);
+    expect(docsAndExamples).not.toMatch(/KIWOOM_APP_KEY[ \t]*=[ \t]*(?!<local-app-key>|YOUR_KIWOOM_APP_KEY|your-app-key)[A-Za-z0-9._~-]{8,}/);
+    expect(docsAndExamples).not.toMatch(/KIWOOM_SECRET_KEY[ \t]*=[ \t]*(?!<local-secret-key>|YOUR_KIWOOM_SECRET_KEY|your-secret-key)[A-Za-z0-9._~-]{8,}/);
   });
 
   it("keeps the MCP registry at allowed read-only tools with guarded Kiwoom quote only", () => {

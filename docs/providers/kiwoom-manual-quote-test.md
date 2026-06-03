@@ -179,6 +179,7 @@ placeholder credentials: replace YOUR_APP_KEY, YOUR_SECRET_KEY, CHANGE_ME, or RE
 missing symbol: set KIWOOM_QUOTE_SYMBOL or pass a CLI symbol argument
 disabled endpoint mapping: expected until quote endpoint is verified
 token request blocked or failed: verify token manual workflow first
+public quote real-path opt-in false: set KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH=true only for local public tool verification
 ```
 
 Error cases:
@@ -192,6 +193,8 @@ missing symbol in response: verify response mapping or request symbol fallback
 mock/production mismatch: confirm KIWOOM_ENV matches the issued credentials
 IP not registered: confirm Kiwoom REST API access setup
 incorrect app key or secret: update local shell environment only
+token_present=false: token verification did not produce a usable token
+quote_present=false: quote verification did not produce a usable quote
 ```
 
 Endpoint mapping transition guidance:

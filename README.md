@@ -475,6 +475,30 @@ KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH=true
 
 The endpoint mapping must also be enabled, marked read-only, and explicitly exposed as a public tool, with valid local credentials available. Account, order, balance, holdings, and trading behavior remain out of scope.
 
+Local verification is documented in:
+
+```text
+docs/providers/kiwoom-public-quote-local-verification.md
+```
+
+MCP request example:
+
+```json
+{
+  "symbol": "005930",
+  "market": "KOSPI",
+  "provider": "kiwoom"
+}
+```
+
+See also:
+
+```text
+examples/get-kiwoom-stock-quote.request.json
+```
+
+The local verification flow is not a public default. It does not add account, order, balance, holdings, trading, auto-trading, investment recommendation, centralized credential storage, or centralized data redistribution behavior.
+
 Mock/test integration is used only to validate the response format. It must not be treated as provider fallback or live quote availability.
 
 ---
