@@ -15,7 +15,7 @@ This document is especially important because different providers may have diffe
 | Provider | Status        | Real API calls |     Credentials required | Default | Notes                                                   |
 | -------- | ------------- | -------------: | -----------------------: | ------: | ------------------------------------------------------- |
 | `mock`   | Implemented   |             No |                       No |     Yes | Fixed sample data for local MCP testing                 |
-| `kiwoom` | Real quote endpoint activation review added |  No by default | Yes, for manual token/quote verification and local-only smoke tests |      No | Guarded public quote tool; real lookup disabled by default |
+| `kiwoom` | Real quote local opt-in activation clarified |  No by default | Yes, for manual token/quote verification and local-only smoke tests |      No | Guarded public quote tool; real lookup disabled by default |
 
 ---
 
@@ -202,6 +202,7 @@ GitHub smoke test report template
 real quote endpoint activation review documentation
 real quote activation decision record template
 real quote activation review checklist
+local opt-in activation guard requiring approved_for_local_only decision record
 normalized auth errors
 no-network safety tests
 read-only provider skeleton
@@ -275,6 +276,7 @@ Real Kiwoom API calls must remain disabled by default.
 | Kiwoom public quote real local smoke test docs | Added; local-only and sanitized result recording only |
 | Kiwoom public quote smoke test result capture | Added; sanitized capture and sharing templates only |
 | Kiwoom real quote endpoint activation review | Added; decision record required before endpoint flag activation |
+| Kiwoom real quote local opt-in activation | Clarified; `approved_for_local_only` decision required for local/test simulation |
 | Public real Kiwoom quote lookup   | Not enabled by default |
 | Mock/test quote response          | Available for response validation only |
 | Mocked quote response                 | Can be normalized safely          |
@@ -496,6 +498,7 @@ local verification env matrix and blocked reason matrix exist
 real local smoke test docs, checklist, and sanitized result template exist
 smoke test result capture docs, sample, and GitHub report template exist
 activation review docs, decision record template, and activation checklist exist
+local opt-in activation requires approved_for_local_only decision record
 ```
 
 Kiwoom tests must not require real credentials.
@@ -963,6 +966,34 @@ Kiwoom Real Quote Endpoint Activation Review
 ```
 
 This release documents the review and decision record required before any real Kiwoom quote endpoint activation. It must not be described as public live Kiwoom quote support. Public real Kiwoom quote lookup, endpoint enabled defaults, public exposure defaults, account access, orders, balance lookup, holdings lookup, trading, auto-trading, investment recommendations, centralized credential storage, and centralized data redistribution proxy behavior remain disabled by default or forbidden.
+
+---
+
+## v0.21.0-alpha
+
+Provider status:
+
+```text
+mock provider implemented
+Kiwoom public quote tool remains guarded
+Kiwoom real quote local opt-in activation path clarified
+KIWOOM_ENABLE_REAL_API_CALLS=true alone is insufficient
+KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH=true is separately required
+activation decision record decision=approved_for_local_only is required for local/test verification
+endpoint enabled default remains false
+endpoint exposesPublicTool default remains false
+public real Kiwoom quote lookup disabled by default
+account/order/trading explicitly out of scope
+centralized data redistribution proxy out of scope
+```
+
+Recommended release description:
+
+```text
+Kiwoom Real Quote Local Opt-in Activation
+```
+
+This release clarifies the local/test-only activation path for the guarded `get_kiwoom_stock_quote` real path. It must not be described as public live Kiwoom quote support. Public real Kiwoom quote lookup, endpoint enabled defaults, public exposure defaults, account access, orders, balance lookup, holdings lookup, trading, auto-trading, investment recommendations, centralized credential storage, and centralized data redistribution proxy behavior remain disabled by default or forbidden.
 
 ---
 

@@ -3,6 +3,7 @@ import { MockMarketDataProvider } from "../src/providers/mock/client.js";
 import type { KiwoomQuoteEndpointMapping, NormalizedKiwoomQuote } from "../src/providers/kiwoom/index.js";
 import {
   getKiwoomStockQuoteTool,
+  type KiwoomPublicQuoteActivationDecisionRecord,
   normalizeMockQuoteForKiwoomPublicTool,
   runGuardedKiwoomPublicQuote
 } from "../src/tools/get-kiwoom-stock-quote.js";
@@ -227,6 +228,34 @@ describe("Kiwoom public quote guarded skeleton", () => {
     expect(quoteClient.getQuote).not.toHaveBeenCalled();
   });
 
+  it("returns blocked when only public quote real path opt-in is enabled and does not call clients", async () => {
+    const tokenClient = createMockTokenClient();
+    const quoteClient = createMockQuoteClient();
+
+    const response = await runGuardedKiwoomPublicQuote(
+      { symbol: "005930" },
+      {
+        env: {
+          ...validEnabledEnv,
+          KIWOOM_ENABLE_REAL_API_CALLS: "false",
+          KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH: "true"
+        },
+        quoteEndpointMapping: enabledPublicMapping,
+        activationDecisionRecord: approvedLocalOnlyDecisionRecord,
+        tokenClient,
+        quoteClient
+      }
+    );
+
+    expect(response).toMatchObject({
+      status: "blocked",
+      quote_present: false,
+      reason: expect.stringContaining("KIWOOM_ENABLE_REAL_API_CALLS")
+    });
+    expect(tokenClient.getAccessToken).not.toHaveBeenCalled();
+    expect(quoteClient.getQuote).not.toHaveBeenCalled();
+  });
+
   it("returns blocked when endpoint mapping is disabled and does not call clients", async () => {
     const tokenClient = createMockTokenClient();
     const quoteClient = createMockQuoteClient();
@@ -294,6 +323,7 @@ describe("Kiwoom public quote guarded skeleton", () => {
           KIWOOM_ENV: "mock"
         },
         quoteEndpointMapping: enabledPublicMapping,
+        activationDecisionRecord: approvedLocalOnlyDecisionRecord,
         tokenClient,
         quoteClient
       }
@@ -306,6 +336,85 @@ describe("Kiwoom public quote guarded skeleton", () => {
     });
     expect(JSON.stringify(response)).not.toContain("YOUR_KIWOOM_APP_KEY");
     expect(JSON.stringify(response)).not.toContain("YOUR_KIWOOM_SECRET_KEY");
+    expect(tokenClient.getAccessToken).not.toHaveBeenCalled();
+    expect(quoteClient.getQuote).not.toHaveBeenCalled();
+  });
+
+  it("returns blocked when activation decision record is missing and does not call clients", async () => {
+    const tokenClient = createMockTokenClient();
+    const quoteClient = createMockQuoteClient();
+
+    const response = await runGuardedKiwoomPublicQuote(
+      { symbol: "005930" },
+      {
+        env: validEnabledEnv,
+        quoteEndpointMapping: enabledPublicMapping,
+        tokenClient,
+        quoteClient
+      }
+    );
+
+    expect(response).toMatchObject({
+      status: "blocked",
+      quote_present: false,
+      reason: expect.stringContaining("approved local-only activation decision record")
+    });
+    expect(tokenClient.getAccessToken).not.toHaveBeenCalled();
+    expect(quoteClient.getQuote).not.toHaveBeenCalled();
+  });
+
+  it.each(["pending", "rejected"] as const)(
+    "returns blocked when activation decision record is %s and does not call clients",
+    async (decision) => {
+      const tokenClient = createMockTokenClient();
+      const quoteClient = createMockQuoteClient();
+
+      const response = await runGuardedKiwoomPublicQuote(
+        { symbol: "005930" },
+        {
+          env: validEnabledEnv,
+          quoteEndpointMapping: enabledPublicMapping,
+          activationDecisionRecord: {
+            ...approvedLocalOnlyDecisionRecord,
+            decision
+          },
+          tokenClient,
+          quoteClient
+        }
+      );
+
+      expect(response).toMatchObject({
+        status: "blocked",
+        quote_present: false,
+        reason: expect.stringContaining("approved local-only activation decision record")
+      });
+      expect(tokenClient.getAccessToken).not.toHaveBeenCalled();
+      expect(quoteClient.getQuote).not.toHaveBeenCalled();
+    }
+  );
+
+  it("returns blocked when activation decision record targets a different scope and does not call clients", async () => {
+    const tokenClient = createMockTokenClient();
+    const quoteClient = createMockQuoteClient();
+
+    const response = await runGuardedKiwoomPublicQuote(
+      { symbol: "005930" },
+      {
+        env: validEnabledEnv,
+        quoteEndpointMapping: enabledPublicMapping,
+        activationDecisionRecord: {
+          ...approvedLocalOnlyDecisionRecord,
+          scope: "local_only_wrong" as "local_only"
+        },
+        tokenClient,
+        quoteClient
+      }
+    );
+
+    expect(response).toMatchObject({
+      status: "blocked",
+      quote_present: false
+    });
     expect(tokenClient.getAccessToken).not.toHaveBeenCalled();
     expect(quoteClient.getQuote).not.toHaveBeenCalled();
   });
@@ -345,6 +454,7 @@ describe("Kiwoom public quote guarded skeleton", () => {
       {
         env: validEnabledEnv,
         quoteEndpointMapping: enabledPublicMapping,
+        activationDecisionRecord: approvedLocalOnlyDecisionRecord,
         tokenClient,
         quoteClient
       }
@@ -377,6 +487,7 @@ describe("Kiwoom public quote guarded skeleton", () => {
       {
         env: validEnabledEnv,
         quoteEndpointMapping: enabledPublicMapping,
+        activationDecisionRecord: approvedLocalOnlyDecisionRecord,
         tokenClient,
         quoteClient
       }
@@ -417,6 +528,7 @@ describe("Kiwoom public quote guarded skeleton", () => {
       {
         env: validEnabledEnv,
         quoteEndpointMapping: enabledPublicMapping,
+        activationDecisionRecord: approvedLocalOnlyDecisionRecord,
         tokenClient,
         quoteClient
       }
@@ -461,6 +573,17 @@ describe("Kiwoom public quote guarded skeleton", () => {
     apiId: "ka10001",
     description: "Test-only public guarded quote mapping.",
     verified: false
+  };
+
+  const approvedLocalOnlyDecisionRecord: KiwoomPublicQuoteActivationDecisionRecord = {
+    provider: "kiwoom",
+    feature: "public_quote_real_path",
+    scope: "local_only",
+    decision: "approved_for_local_only",
+    reviewed_at: "2026-06-03",
+    reviewer: "test-reviewer",
+    linked_smoke_test_result: "sanitized-fixture",
+    notes: "Test-only local opt-in activation decision fixture."
   };
 
   function createMockTokenClient() {

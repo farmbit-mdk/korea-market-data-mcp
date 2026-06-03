@@ -9,8 +9,14 @@ Do not include tokens, app keys, secret keys, raw request bodies, raw response b
 | Field | Value |
 | --- | --- |
 | Decision date | YYYY-MM-DD |
-| Target version | v0.20.0-alpha |
-| Decision status | not approved / approved for local-only opt-in / approved for wider opt-in / rejected |
+| Target version | v0.21.0-alpha |
+| Provider | kiwoom |
+| Feature | public_quote_real_path |
+| Scope | local_only |
+| Decision status | approved_for_local_only / pending / rejected |
+| Reviewed at | YYYY-MM-DD |
+| Reviewer | sanitized reviewer id |
+| Linked smoke test result | sanitized result reference |
 
 ## Reviewed Endpoint Flags
 
@@ -35,6 +41,15 @@ Do not include tokens, app keys, secret keys, raw request bodies, raw response b
 Use sanitized smoke test summary only.
 Include status, token_present, quote_present, normalized field presence, sanitized error code, sanitized return_code, and sanitized return_msg.
 Do not include raw provider payloads.
+```
+
+## Decision Scope
+
+```text
+This decision record is only a local/test verification gate.
+It is not approval for public default real quote lookup.
+It is not approval for centralized data redistribution.
+It is not approval for account, order, balance, holdings, trading, auto-trading, or recommendation features.
 ```
 
 ## Compliance Review Summary
@@ -65,7 +80,7 @@ Confirm no token, app key, secret key, authorization header, raw request body, r
 ## Final Decision
 
 ```text
-not approved
+pending
 ```
 
 ## Required Follow-Up
