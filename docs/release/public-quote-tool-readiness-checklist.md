@@ -18,6 +18,8 @@ docs/providers/provider-status.md is current
 guarded skeleton status is documented if a public skeleton exists
 public tool response format is documented
 mock/test integration status is documented
+local verification docs exist
+MCP client request example exists
 ```
 
 ## Provider Review
@@ -126,4 +128,20 @@ real quote path requires exposesPublicTool=true
 real quote path requires readOnly=true
 blocked guards do not call token or quote transport
 provider terms review is still required before wider enablement
+```
+
+## v0.16 Local Verification Docs
+
+Confirm:
+
+```text
+docs/providers/kiwoom-public-quote-local-verification.md exists
+examples/get-kiwoom-stock-quote.request.json exists
+explicit opt-in variables are documented
+environment variable checklist is documented
+troubleshooting is documented
+default disabled behavior is documented
+provider terms review is still required before wider enablement
+no account/order/trading schema is introduced
+no centralized proxy is introduced
 ```
