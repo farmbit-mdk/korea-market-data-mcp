@@ -42,9 +42,23 @@ export interface KiwoomPublicQuoteErrorResponse {
   error: ReturnType<typeof toToolErrorResponse>["error"];
 }
 
+export type KiwoomPublicQuoteActivationDecision = "approved_for_local_only" | "pending" | "rejected";
+
+export interface KiwoomPublicQuoteActivationDecisionRecord {
+  provider: "kiwoom";
+  feature: "public_quote_real_path";
+  scope: "local_only";
+  decision: KiwoomPublicQuoteActivationDecision;
+  reviewed_at?: string;
+  reviewer?: string;
+  linked_smoke_test_result?: string;
+  notes?: string;
+}
+
 interface KiwoomPublicQuoteDependencies {
   env?: NodeJS.ProcessEnv;
   quoteEndpointMapping?: KiwoomQuoteEndpointMapping;
+  activationDecisionRecord?: KiwoomPublicQuoteActivationDecisionRecord;
   tokenClient?: {
     getAccessToken(): Promise<{ accessToken: string }>;
   };
@@ -144,6 +158,10 @@ export async function runGuardedKiwoomPublicQuote(
       isPlaceholderCredential(config.appSecret)
     ) {
       return blocked(normalizedInput.symbol, "Kiwoom credentials are missing or invalid.");
+    }
+
+    if (!isLocalOnlyActivationApproved(dependencies.activationDecisionRecord)) {
+      return blocked(normalizedInput.symbol, "Kiwoom public quote real path requires an approved local-only activation decision record.");
     }
 
     const tokenClient = dependencies.tokenClient ?? createKiwoomAuthClient(config);
@@ -272,6 +290,15 @@ function isPublicQuoteRealPathEnabled(env: NodeJS.ProcessEnv | undefined): boole
 
 function isPlaceholderCredential(value: string): boolean {
   return placeholderCredentialValues.has(value.trim().toUpperCase());
+}
+
+function isLocalOnlyActivationApproved(record: KiwoomPublicQuoteActivationDecisionRecord | undefined): boolean {
+  return (
+    record?.provider === "kiwoom" &&
+    record.feature === "public_quote_real_path" &&
+    record.scope === "local_only" &&
+    record.decision === "approved_for_local_only"
+  );
 }
 
 function blocked(symbol: string | undefined, reason: string): KiwoomPublicQuoteBlockedResponse {

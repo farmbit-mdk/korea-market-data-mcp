@@ -274,3 +274,23 @@ docs/release/kiwoom-public-quote-smoke-test-checklist.md
 ```
 
 Before sharing smoke test notes, remove app keys, secret keys, access tokens, authorization headers, raw token responses, raw quote responses, IP addresses, account identifiers, and any personal information.
+
+## Local Opt-In Activation Gate
+
+`v0.21.0-alpha` clarifies that the local real path requires all opt-in gates at once:
+
+```text
+KIWOOM_ENABLE_REAL_API_CALLS=true
+KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH=true
+endpoint mapping is enabled in local/test context
+endpoint mapping remains read-only
+activation decision record decision=approved_for_local_only
+credentials are present and are not placeholders
+symbol validation passes
+```
+
+`KIWOOM_ENABLE_REAL_API_CALLS=true` alone is insufficient. `KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH=true` alone is also insufficient.
+
+If the activation decision record is missing, `pending`, or `rejected`, the real path remains blocked before token or quote transport calls.
+
+The decision record is only for local/test verification. It is not approval for public default runtime activation, endpoint default flag changes, account/order/trading functionality, or centralized data redistribution.

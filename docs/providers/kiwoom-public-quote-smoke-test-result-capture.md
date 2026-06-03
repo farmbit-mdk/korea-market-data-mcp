@@ -277,3 +277,13 @@ docs/providers/templates/kiwoom-real-quote-activation-decision-record.md
 Do not submit raw results, raw provider payloads, request bodies, response bodies, credentials, tokens, full IP addresses, account identifiers, order information, or personal information.
 
 Failed smoke test results may inform an activation decision when sanitized. A failure should usually keep the decision status as `not approved` or `rejected` until the cause is understood and safely resolved.
+
+For `v0.21.0-alpha`, decision statuses are:
+
+```text
+approved_for_local_only
+pending
+rejected
+```
+
+Only `approved_for_local_only` may be used for local/test verification. A sanitized smoke test result is not evidence for public default enablement.

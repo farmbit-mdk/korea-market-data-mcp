@@ -21,7 +21,8 @@ const requiredDocs = [
   "docs/release/v0.17.0-alpha-checklist.md",
   "docs/release/v0.18.0-alpha-checklist.md",
   "docs/release/v0.19.0-alpha-checklist.md",
-  "docs/release/v0.20.0-alpha-checklist.md"
+  "docs/release/v0.20.0-alpha-checklist.md",
+  "docs/release/v0.21.0-alpha-checklist.md"
 ];
 
 const kiwoomPublicQuoteExamplePaths = [
@@ -46,7 +47,8 @@ const kiwoomRealQuoteActivationReviewPaths = [
   "docs/providers/kiwoom-real-quote-endpoint-activation-review.md",
   "docs/providers/templates/kiwoom-real-quote-activation-decision-record.md",
   "docs/release/kiwoom-real-quote-activation-review-checklist.md",
-  "docs/release/v0.20.0-alpha-checklist.md"
+  "docs/release/v0.20.0-alpha-checklist.md",
+  "docs/release/v0.21.0-alpha-checklist.md"
 ];
 
 describe("provider compliance and security review docs", () => {
@@ -243,12 +245,34 @@ describe("provider compliance and security review docs", () => {
     expect(activationDoc).toContain("Activation review is not activation itself");
     expect(activationDoc).toContain("kiwoomQuoteEndpointMappings.quote.enabled=false");
     expect(activationDoc).toContain("kiwoomQuoteEndpointMappings.quote.exposesPublicTool=false");
-    expect(decisionRecord).toContain("not approved / approved for local-only opt-in / approved for wider opt-in / rejected");
+    expect(decisionRecord).toContain("approved_for_local_only / pending / rejected");
     expect(decisionRecord).toContain("Final Decision");
     expect(activationChecklist).toContain("enabled remains false unless decision record approves otherwise");
     expect(activationChecklist).toContain("exposesPublicTool remains false unless decision record approves otherwise");
     expect(endpointMappingDoc).toContain("Changing `enabled:true` or `exposesPublicTool:true` is forbidden unless an activation decision record explicitly approves it");
     expect(providerCompliance).toContain("Real Quote Endpoint Activation Gate");
+  });
+
+  it("documents local opt-in activation path without changing endpoint defaults", () => {
+    const readme = readFileSync("README.md", "utf8");
+    const providerStatus = readFileSync("docs/providers/provider-status.md", "utf8");
+    const localVerification = readFileSync("docs/providers/kiwoom-public-quote-local-verification.md", "utf8");
+    const decisionRecord = readFileSync("docs/providers/templates/kiwoom-real-quote-activation-decision-record.md", "utf8");
+    const releaseChecklist = readFileSync("docs/release/v0.21.0-alpha-checklist.md", "utf8");
+    const readinessChecklist = readFileSync("docs/release/public-quote-tool-readiness-checklist.md", "utf8");
+
+    expect(readme).toContain("v0.21.0-alpha");
+    expect(readme).toContain("`KIWOOM_ENABLE_REAL_API_CALLS=true` alone is insufficient");
+    expect(readme).toContain("endpoint `enabled` and `exposesPublicTool` defaults remain false");
+    expect(providerStatus).toContain("Kiwoom Real Quote Local Opt-in Activation");
+    expect(providerStatus).toContain("approved_for_local_only");
+    expect(localVerification).toContain("## Local Opt-In Activation Gate");
+    expect(localVerification).toContain("activation decision record decision=approved_for_local_only");
+    expect(decisionRecord).toContain("approved_for_local_only / pending / rejected");
+    expect(decisionRecord).toContain("This decision record is only a local/test verification gate.");
+    expect(releaseChecklist).toContain("KIWOOM_ENABLE_REAL_API_CALLS=true alone remains blocked");
+    expect(releaseChecklist).toContain("approved_for_local_only decision record allows only local/test simulation path");
+    expect(readinessChecklist).toContain("## v0.21 Real Quote Local Opt-in Activation");
   });
 
   it("keeps activation review artifacts sanitized and out of forbidden scopes", () => {

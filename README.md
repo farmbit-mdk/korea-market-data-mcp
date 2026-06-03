@@ -558,6 +558,20 @@ docs/release/kiwoom-real-quote-activation-review-checklist.md
 
 The current model remains local-only opt-in with no account access, orders, balance lookup, holdings lookup, trading, auto-trading, investment recommendations, centralized credential storage, or centralized data redistribution proxy.
 
+`v0.21.0-alpha` clarifies the local opt-in activation path for `get_kiwoom_stock_quote`.
+
+The real path remains blocked unless all local/test gates are satisfied:
+
+```text
+KIWOOM_ENABLE_REAL_API_CALLS=true
+KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH=true
+endpoint mapping is enabled in local/test context
+activation decision record decision=approved_for_local_only
+credentials are present and not placeholders
+```
+
+`KIWOOM_ENABLE_REAL_API_CALLS=true` alone is insufficient. The endpoint `enabled` and `exposesPublicTool` defaults remain false, and public runtime remains blocked by default.
+
 ---
 
 ## Claude Desktop example

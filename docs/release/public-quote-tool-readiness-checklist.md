@@ -220,3 +220,24 @@ no account/order/trading schema is introduced
 no account/order/balance/holdings fields are introduced
 no centralized data redistribution proxy is introduced
 ```
+
+## v0.21 Real Quote Local Opt-in Activation
+
+Confirm:
+
+```text
+local opt-in activation path is clarified
+KIWOOM_ENABLE_REAL_API_CALLS=true alone remains insufficient
+KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH=true is separately required
+activation decision record decision=approved_for_local_only is required for local/test verification
+missing decision record remains blocked
+pending decision record remains blocked
+rejected decision record remains blocked
+endpoint enabled remains false by default
+endpoint exposesPublicTool remains false by default
+default real quote lookup remains disabled
+tests pass without real credentials
+no account/order/trading schema is introduced
+no account/order/balance/holdings fields are introduced
+no centralized data redistribution proxy is introduced
+```

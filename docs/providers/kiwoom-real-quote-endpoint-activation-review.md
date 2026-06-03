@@ -148,13 +148,16 @@ docs/providers/templates/kiwoom-real-quote-activation-decision-record.md
 The decision record must state one of:
 
 ```text
-not approved
-approved for local-only opt-in
-approved for wider opt-in
+approved_for_local_only
+pending
 rejected
 ```
 
-The default decision status is `not approved`.
+The default decision status is `pending`.
+
+Only `approved_for_local_only` may be used as a local/test verification gate for the real path. It is not approval for public default activation.
+
+`pending` and `rejected` must keep the real path blocked.
 
 ## Rollback Criteria
 
