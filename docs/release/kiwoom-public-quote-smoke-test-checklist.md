@@ -79,6 +79,9 @@ environment
 symbol tested
 command or tool tested
 result status
+result capture category
+endpoint flag summary
+opt-in flag summary
 token_present true or false
 quote_present true or false
 normalized field presence only
@@ -86,6 +89,8 @@ sanitized error code
 sanitized return_code
 sanitized return_msg
 sanitized notes only
+safe-to-share confirmation
+maintainer review notes if needed
 ```
 
 Confirm the saved result does not contain:
@@ -108,6 +113,34 @@ IP address
 personal information
 ```
 
+## Result Capture Checklist
+
+Confirm:
+
+```text
+docs/providers/kiwoom-public-quote-smoke-test-result-capture.md was followed
+docs/providers/templates/kiwoom-public-quote-smoke-test-result.md was used
+result category is ok, blocked, or error
+tested command is manual token, manual quote, or MCP get_kiwoom_stock_quote
+endpoint flags are recorded as booleans only
+opt-in flags are recorded as booleans only
+normalized field presence is recorded without raw provider payloads
+safe-to-share confirmation is completed
+```
+
+## GitHub Sharing Checklist
+
+Before opening or updating a GitHub issue or pull request, confirm:
+
+```text
+docs/providers/templates/kiwoom-public-quote-smoke-test-github-report.md was used
+all reproduction steps omit credentials
+no terminal history with environment variable assignments is pasted
+no screenshots contain credentials or tokens
+failure details include only normalized error code, return_code, and return_msg
+redaction checklist is marked complete
+```
+
 ## Rollback And Cleanup Checklist
 
 After the smoke test:
@@ -119,6 +152,8 @@ remove KIWOOM_APP_KEY from the shell session
 remove KIWOOM_SECRET_KEY from the shell session
 delete any unsanitized local notes
 confirm git status does not include credential files
+clear terminal scrollback or shell history if it contains sensitive assignments
+delete unredacted screenshots
 ```
 
 ## Do-Not-Share Checklist

@@ -13,7 +13,25 @@ Do not paste tokens, app keys, secret keys, raw request bodies, raw token respon
 | Environment | mock / production |
 | Symbol tested | 005930 |
 | Command or tool tested | get_kiwoom_stock_quote |
-| Result status | ok / blocked / error |
+| Tested command category | manual token / manual quote / MCP get_kiwoom_stock_quote |
+| Result category | ok / blocked / error |
+
+## Endpoint Flags
+
+| Field | Value |
+| --- | --- |
+| readOnly | true / false / N/A |
+| exposesPublicTool | true / false / N/A |
+| enabled | true / false / N/A |
+
+## Opt-In Flags
+
+Record boolean flag state only. Do not record credential values.
+
+| Field | Value |
+| --- | --- |
+| KIWOOM_ENABLE_REAL_API_CALLS | true / false |
+| KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH | true / false / N/A |
 
 ## Result Summary
 
@@ -51,6 +69,13 @@ Do not include request headers.
 Do not include credential values.
 ```
 
+## Maintainer Review Notes
+
+```text
+Optional sanitized maintainer notes.
+Do not include environment dumps, terminal history, or screenshots containing sensitive values.
+```
+
 ## Redaction Confirmation Checklist
 
 Confirm before saving or sharing:
@@ -68,4 +93,11 @@ No account number included
 No order details included
 No IP address included
 No personal information included
+```
+
+## Safe-To-Share Confirmation
+
+```text
+Safe to share in GitHub issue or pull request: yes / no
+Reviewed by maintainer: yes / no
 ```

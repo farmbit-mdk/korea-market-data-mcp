@@ -180,3 +180,23 @@ no account/order/balance/holdings fields are introduced
 no centralized data redistribution proxy is introduced
 smoke test results do not store credentials, tokens, or raw provider payloads
 ```
+
+## v0.19 Smoke Test Result Capture
+
+Confirm:
+
+```text
+smoke test result capture docs are added
+sanitized result sample is added
+GitHub report template is added
+result sharing redaction checklist is confirmed
+README result capture section is added
+default real quote lookup remains disabled
+KIWOOM_ENABLE_REAL_API_CALLS=false remains the default
+KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH=false remains the default
+provider terms review is still required before wider enablement
+no account/order/trading schema is introduced
+no account/order/balance/holdings fields are introduced
+no centralized data redistribution proxy is introduced
+result captures do not store credentials, tokens, raw request bodies, or raw provider payloads
+```

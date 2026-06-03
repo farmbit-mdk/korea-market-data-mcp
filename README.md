@@ -528,6 +528,22 @@ docs/providers/templates/kiwoom-public-quote-smoke-test-result.md
 docs/release/kiwoom-public-quote-smoke-test-checklist.md
 ```
 
+`v0.19.0-alpha` adds sanitized smoke test result capture guidance.
+
+Use these templates before sharing any local smoke test result in a GitHub issue or pull request:
+
+```text
+docs/providers/kiwoom-public-quote-smoke-test-result-capture.md
+docs/providers/templates/kiwoom-public-quote-smoke-test-result.sample.md
+docs/providers/templates/kiwoom-public-quote-smoke-test-github-report.md
+```
+
+Result captures must include only sanitized fields such as status, environment label, symbol, `token_present`, `quote_present`, normalized field presence, sanitized error code, sanitized `return_code`, and sanitized `return_msg`.
+
+Do not share credentials, access tokens, authorization headers, raw request bodies, raw provider responses, screenshots containing sensitive values, account data, order data, balance data, holdings data, trading data, IP addresses, or personal information.
+
+Public real Kiwoom quote lookup remains disabled by default. This project still does not add account, order, trading, recommendation, or centralized proxy behavior.
+
 ---
 
 ## Claude Desktop example
