@@ -1,0 +1,19 @@
+{
+  "status": "ok",
+  "provider": "kiwoom",
+  "symbol": "005930",
+  "quote_present": true,
+  "quote": {
+    "provider": "kiwoom",
+    "symbol": "005930",
+    "name": "Samsung Electronics",
+    "market": "KOSPI",
+    "currency": "KRW",
+    "price": 70000,
+    "change": 500,
+    "change_rate": 0.72,
+    "volume": 12000000,
+    "as_of": "2026-06-03T09:00:00.000Z",
+    "raw_available": false
+  }
+}

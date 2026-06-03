@@ -6,6 +6,8 @@ This document describes how to locally verify the guarded `get_kiwoom_stock_quot
 
 This is local-only verification. It does not enable public real Kiwoom quote lookup by default, and it does not add a centralized data redistribution proxy.
 
+Local verification is intended to confirm that a user's local MCP client, local environment variables, endpoint mapping review, token flow, and quote response normalization work together without exposing secrets.
+
 ## Scope
 
 Included:
@@ -64,6 +66,15 @@ KIWOOM_ENABLE_REAL_API_CALLS=false
 KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH=false
 ```
 
+## Environment Matrix
+
+| `KIWOOM_ENABLE_REAL_API_CALLS` | `KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH` | Expected result |
+| --- | --- | --- |
+| `false` | `false` | `blocked`; no token or quote request |
+| `false` | `true` | `blocked`; real API calls are still disabled |
+| `true` | `false` | `blocked`; public quote real path is disabled |
+| `true` | `true` | May proceed only if endpoint mapping and credentials also pass |
+
 ## Endpoint Mapping Conditions
 
 The Kiwoom quote endpoint mapping must be reviewed separately before real public quote verification:
@@ -75,6 +86,15 @@ enabled=true
 ```
 
 If any condition is false, `get_kiwoom_stock_quote` returns `blocked` before token acquisition or quote transport.
+
+## Endpoint Mapping Matrix
+
+| `readOnly` | `exposesPublicTool` | `enabled` | Expected result |
+| --- | --- | --- | --- |
+| `false` | any | any | `blocked`; endpoint is not marked read-only |
+| `true` | `false` | any | `blocked`; endpoint is not exposed as a public tool |
+| `true` | `true` | `false` | `blocked`; endpoint is not enabled |
+| `true` | `true` | `true` | May proceed only if opt-in and credentials also pass |
 
 ## Verification Flow
 
@@ -88,6 +108,8 @@ Recommended order:
 5. Confirm token, app key, secret key, and raw payloads are not printed
 ```
 
+Manual token and manual quote commands are CLI verification flows. `get_kiwoom_stock_quote` is an MCP client verification flow. Both are blocked by default, and both are expected to remain blocked until their explicit local opt-in conditions are satisfied.
+
 Example tool input:
 
 ```json
@@ -96,6 +118,15 @@ Example tool input:
   "market": "KOSPI",
   "provider": "kiwoom"
 }
+```
+
+Example files:
+
+```text
+examples/get-kiwoom-stock-quote.request.json
+examples/get-kiwoom-stock-quote.blocked-response.json
+examples/get-kiwoom-stock-quote.ok-response.example.json
+examples/get-kiwoom-stock-quote.error-response.example.json
 ```
 
 ## Response Shapes
@@ -153,6 +184,23 @@ Error shape:
 
 ## Troubleshooting
 
+## Blocked Reason Matrix
+
+| Case | Safe reason | Next check |
+| --- | --- | --- |
+| `KIWOOM_ENABLE_REAL_API_CALLS=false` | `KIWOOM_ENABLE_REAL_API_CALLS must be true.` | Enable only in local verification |
+| `KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH=false` | `KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH must be true.` | Enable only in local verification |
+| `KIWOOM_APP_KEY` missing | `Kiwoom credentials are missing or invalid.` | Set local environment variable |
+| `KIWOOM_SECRET_KEY` missing | `Kiwoom credentials are missing or invalid.` | Set local environment variable |
+| Placeholder credentials | `Kiwoom credentials are missing or invalid.` | Replace placeholders locally |
+| `enabled=false` | `Kiwoom quote endpoint is not enabled.` | Verify endpoint mapping review |
+| `exposesPublicTool=false` | `Kiwoom quote endpoint is not exposed as a public tool.` | Verify public exposure review |
+| `readOnly=false` | `Kiwoom quote endpoint mapping is not marked read-only.` | Do not proceed |
+| Missing symbol | `symbol is required.` | Use a 6-digit symbol |
+| Invalid symbol | `symbol must be a 6-digit Korean stock code.` | Use a valid Korean stock code |
+
+Blocked reasons must not include app key, secret key, token, raw environment objects, or raw endpoint configuration objects.
+
 Common blocked cases:
 
 ```text
@@ -175,6 +223,18 @@ malformed quote response
 IP not registered
 mock/production environment mismatch
 wrong App Key or Secret Key for selected Kiwoom environment
+```
+
+Failure triage order:
+
+```text
+1. Confirm both opt-in environment variables are explicitly true only in the local session.
+2. Confirm endpoint mapping is read-only, exposed, and enabled.
+3. Confirm placeholder credentials were not copied from .env.example.
+4. Confirm KIWOOM_ENV matches the issued credential environment.
+5. Confirm IP registration if Kiwoom requires it.
+6. Confirm manual token verification before investigating quote response mapping.
+7. Confirm quote response normalization without printing raw provider payloads.
 ```
 
 `token_present=false` means a token was not available or token verification was blocked.

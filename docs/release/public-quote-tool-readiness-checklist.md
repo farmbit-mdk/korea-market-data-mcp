@@ -145,3 +145,19 @@ provider terms review is still required before wider enablement
 no account/order/trading schema is introduced
 no centralized proxy is introduced
 ```
+
+## v0.17 Local Verification Hardening
+
+Confirm:
+
+```text
+local verification docs include environment matrix
+local verification docs include blocked reason matrix
+blocked response example exists
+ok response example exists and is labeled example data
+error response example exists
+examples contain no credentials or tokens
+examples contain no account/order/balance/holdings fields
+real path remains disabled by default
+provider terms review is still required before wider enablement
+```

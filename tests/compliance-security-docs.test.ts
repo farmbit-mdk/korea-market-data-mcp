@@ -11,7 +11,15 @@ const requiredDocs = [
   "docs/security/credential-handling.md",
   "docs/release/public-quote-tool-readiness-checklist.md",
   "docs/release/v0.11.0-alpha-checklist.md",
-  "docs/release/v0.16.0-alpha-checklist.md"
+  "docs/release/v0.16.0-alpha-checklist.md",
+  "docs/release/v0.17.0-alpha-checklist.md"
+];
+
+const kiwoomPublicQuoteExamplePaths = [
+  "examples/get-kiwoom-stock-quote.request.json",
+  "examples/get-kiwoom-stock-quote.blocked-response.json",
+  "examples/get-kiwoom-stock-quote.ok-response.example.json",
+  "examples/get-kiwoom-stock-quote.error-response.example.json"
 ];
 
 describe("provider compliance and security review docs", () => {
@@ -68,12 +76,46 @@ describe("provider compliance and security review docs", () => {
     expect(example).not.toHaveProperty("recommendation");
   });
 
+  it("keeps Kiwoom public quote response examples safe", () => {
+    for (const path of kiwoomPublicQuoteExamplePaths) {
+      expect(existsSync(path), `${path} should exist`).toBe(true);
+      const serialized = readFileSync(path, "utf8");
+      const parsed = JSON.parse(serialized) as Record<string, unknown>;
+
+      expect(serialized).not.toMatch(/Bearer\s+[A-Za-z0-9._~+/=-]{12,}/);
+      expect(serialized).not.toMatch(/access_token/i);
+      expect(serialized).not.toMatch(/appkey/i);
+      expect(serialized).not.toMatch(/secretkey/i);
+      expect(serialized).not.toMatch(/account/i);
+      expect(serialized).not.toMatch(/order/i);
+      expect(serialized).not.toMatch(/balance/i);
+      expect(serialized).not.toMatch(/holdings/i);
+      expect(parsed).not.toHaveProperty("raw");
+      expect(parsed).not.toHaveProperty("raw_payload");
+    }
+  });
+
+  it("documents local verification matrices and blocked reasons", () => {
+    const localVerificationDoc = readFileSync("docs/providers/kiwoom-public-quote-local-verification.md", "utf8");
+
+    expect(localVerificationDoc).toContain("## Environment Matrix");
+    expect(localVerificationDoc).toContain("## Endpoint Mapping Matrix");
+    expect(localVerificationDoc).toContain("## Blocked Reason Matrix");
+    expect(localVerificationDoc).toContain("KIWOOM_ENABLE_REAL_API_CALLS=false");
+    expect(localVerificationDoc).toContain("KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH=false");
+    expect(localVerificationDoc).toContain("endpoint enabled=false");
+    expect(localVerificationDoc).toContain("exposesPublicTool=false");
+    expect(localVerificationDoc).toContain("readOnly=false");
+    expect(localVerificationDoc).toContain("placeholder credentials");
+    expect(localVerificationDoc).toContain("invalid symbol");
+  });
+
   it("documents local verification without real-looking credentials", () => {
     const docsAndExamples = [
       "README.md",
       "docs/providers/kiwoom-public-quote-local-verification.md",
       "docs/release/public-quote-tool-readiness-checklist.md",
-      "examples/get-kiwoom-stock-quote.request.json"
+      ...kiwoomPublicQuoteExamplePaths
     ].map((path) => readFileSync(path, "utf8")).join("\n");
 
     expect(docsAndExamples).toContain("KIWOOM_ENABLE_REAL_API_CALLS=true");
