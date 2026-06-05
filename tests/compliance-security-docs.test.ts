@@ -5,6 +5,7 @@ import { redactSecrets } from "../src/safety/redact-secret.js";
 import { getRegisteredToolNames } from "../src/tools/index.js";
 
 const requiredDocs = [
+  "CHANGELOG.md",
   "SECURITY.md",
   "docs/providers/provider-compliance.md",
   "docs/providers/kiwoom-compliance-notes.md",
@@ -29,7 +30,10 @@ const requiredDocs = [
   "docs/release/v0.20.0-alpha-checklist.md",
   "docs/release/v0.21.0-alpha-checklist.md",
   "docs/release/v0.22.0-alpha-checklist.md",
-  "docs/release/v0.23.0-alpha-checklist.md"
+  "docs/release/v0.23.0-alpha-checklist.md",
+  "docs/release/v0.24.0-alpha-checklist.md",
+  "docs/release/alpha-known-limitations.md",
+  "examples/README.md"
 ];
 
 const kiwoomPublicQuoteExamplePaths = [
@@ -40,6 +44,7 @@ const kiwoomPublicQuoteExamplePaths = [
 ];
 
 const mcpClientSetupExamplePaths = [
+  "examples/README.md",
   "examples/claude-desktop.mock.json",
   "examples/claude-desktop.kiwoom-local.example.json",
   "examples/cursor.mock.json",
@@ -223,6 +228,39 @@ describe("provider compliance and security review docs", () => {
         expect(parsed).toHaveProperty("mcpServers");
       }
     }
+  });
+
+  it("documents the v0.24 alpha launch candidate scope without runtime expansion", () => {
+    const launchCandidateDocs = [
+      "README.md",
+      "CHANGELOG.md",
+      "SECURITY.md",
+      "docs/providers/provider-status.md",
+      "docs/release/alpha-known-limitations.md",
+      "docs/release/v0.24.0-alpha-checklist.md",
+      "examples/README.md"
+    ].map((path) => readFileSync(path, "utf8")).join("\n");
+
+    expect(launchCandidateDocs).toContain("v0.24.0-alpha");
+    expect(launchCandidateDocs).toContain("Read-only Kiwoom Quote MCP Alpha Launch Candidate");
+    expect(launchCandidateDocs).toContain("mock provider");
+    expect(launchCandidateDocs).toContain("real Kiwoom quote lookup remains disabled by default");
+    expect(launchCandidateDocs).toContain("Kiwoom real local verification is explicit opt-in only");
+    expect(launchCandidateDocs).toContain("get_kiwoom_stock_quote is the only Kiwoom public quote tool");
+    expect(launchCandidateDocs).toContain("KIWOOM_ENABLE_REAL_API_CALLS=false");
+    expect(launchCandidateDocs).toContain("KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH=false");
+    expect(launchCandidateDocs).toContain("endpoint enabled default remains false");
+    expect(launchCandidateDocs).toContain("endpoint exposesPublicTool default remains false");
+    expect(launchCandidateDocs).toContain("known limitations");
+    expect(launchCandidateDocs).toContain("no runtime scope expansion");
+    expect(launchCandidateDocs).toContain("no account access");
+    expect(launchCandidateDocs).toContain("no orders");
+    expect(launchCandidateDocs).toContain("no balance lookup");
+    expect(launchCandidateDocs).toContain("no holdings lookup");
+    expect(launchCandidateDocs).toContain("no trading");
+    expect(launchCandidateDocs).toContain("no auto-trading");
+    expect(launchCandidateDocs).toContain("no investment recommendations");
+    expect(launchCandidateDocs).toContain("no centralized data redistribution proxy");
   });
 
   it("documents local verification matrices and blocked reasons", () => {

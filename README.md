@@ -63,6 +63,82 @@ The initial scope is strictly limited to **read-only market data access**.
 
 ---
 
+## Alpha launch candidate status
+
+`v0.24.0-alpha` is a read-only Kiwoom quote MCP alpha launch candidate documentation pass.
+
+This project is:
+
+```text
+a read-only MCP server
+mock-provider first for setup and testing
+local credential only for Kiwoom verification
+guarded by safe defaults
+```
+
+This project is not:
+
+```text
+a brokerage client
+a trading bot
+an account access tool
+a centralized market data redistribution proxy
+an investment recommendation system
+```
+
+Current alpha scope:
+
+```text
+mock provider tools for local MCP testing
+guarded get_kiwoom_stock_quote public tool skeleton
+manual Kiwoom token and quote verification commands
+documentation for Claude Desktop and Cursor setup
+known limitations and release checklists
+```
+
+Real Kiwoom quote lookup remains disabled by default:
+
+```env
+KIWOOM_ENABLE_REAL_API_CALLS=false
+KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH=false
+```
+
+Kiwoom real local verification is explicit opt-in only. Endpoint `enabled` and `exposesPublicTool` defaults remain false.
+
+Start with mock provider setup:
+
+```text
+docs/getting-started/quickstart.md
+docs/getting-started/mcp-client-setup.md
+docs/getting-started/claude-desktop-setup.md
+docs/getting-started/cursor-setup.md
+docs/getting-started/troubleshooting.md
+examples/README.md
+```
+
+Review safety and limitations:
+
+```text
+SECURITY.md
+docs/providers/provider-status.md
+docs/release/alpha-known-limitations.md
+```
+
+Unsupported features remain explicitly out of scope:
+
+```text
+no account access
+no orders
+no balance lookup
+no holdings lookup
+no trading
+no auto-trading
+no investment recommendations
+no centralized data redistribution proxy
+```
+
+---
+
 ## Planned MCP tools
 
 Initial MCP tools may include:
