@@ -22,7 +22,8 @@ const requiredDocs = [
   "docs/release/v0.18.0-alpha-checklist.md",
   "docs/release/v0.19.0-alpha-checklist.md",
   "docs/release/v0.20.0-alpha-checklist.md",
-  "docs/release/v0.21.0-alpha-checklist.md"
+  "docs/release/v0.21.0-alpha-checklist.md",
+  "docs/release/v0.22.0-alpha-checklist.md"
 ];
 
 const kiwoomPublicQuoteExamplePaths = [
@@ -48,7 +49,24 @@ const kiwoomRealQuoteActivationReviewPaths = [
   "docs/providers/templates/kiwoom-real-quote-activation-decision-record.md",
   "docs/release/kiwoom-real-quote-activation-review-checklist.md",
   "docs/release/v0.20.0-alpha-checklist.md",
-  "docs/release/v0.21.0-alpha-checklist.md"
+  "docs/release/v0.21.0-alpha-checklist.md",
+  "docs/release/v0.22.0-alpha-checklist.md"
+];
+
+const standardBlockedReasonCodes = [
+  "REAL_API_CALLS_DISABLED",
+  "PUBLIC_QUOTE_REAL_PATH_DISABLED",
+  "ACTIVATION_DECISION_RECORD_MISSING",
+  "ACTIVATION_DECISION_NOT_APPROVED_FOR_LOCAL_ONLY",
+  "ENDPOINT_DISABLED",
+  "PUBLIC_TOOL_EXPOSURE_DISABLED",
+  "CREDENTIALS_MISSING",
+  "CREDENTIALS_PLACEHOLDER",
+  "TOKEN_REQUEST_BLOCKED",
+  "TOKEN_REQUEST_FAILED",
+  "INVALID_SYMBOL",
+  "QUOTE_ENDPOINT_NOT_READ_ONLY",
+  "QUOTE_RESPONSE_INVALID"
 ];
 
 describe("provider compliance and security review docs", () => {
@@ -273,6 +291,27 @@ describe("provider compliance and security review docs", () => {
     expect(releaseChecklist).toContain("KIWOOM_ENABLE_REAL_API_CALLS=true alone remains blocked");
     expect(releaseChecklist).toContain("approved_for_local_only decision record allows only local/test simulation path");
     expect(readinessChecklist).toContain("## v0.21 Real Quote Local Opt-in Activation");
+  });
+
+  it("documents final hardening blocked reason codes and manual output shape", () => {
+    const readme = readFileSync("README.md", "utf8");
+    const localVerification = readFileSync("docs/providers/kiwoom-public-quote-local-verification.md", "utf8");
+    const manualQuoteDoc = readFileSync("docs/providers/kiwoom-manual-quote-test.md", "utf8");
+    const providerStatus = readFileSync("docs/providers/provider-status.md", "utf8");
+    const releaseChecklist = readFileSync("docs/release/v0.22.0-alpha-checklist.md", "utf8");
+    const blockedExample = readFileSync("examples/get-kiwoom-stock-quote.blocked-response.json", "utf8");
+
+    expect(readme).toContain("v0.22.0-alpha");
+    expect(readme).toContain("blocked responses include a safe reason_code");
+    expect(providerStatus).toContain("Kiwoom Real Quote Local Activation Final Hardening");
+    expect(localVerification).toContain("## v0.22 Final Hardening");
+    expect(manualQuoteDoc).toContain("Common blocked reason codes");
+    expect(manualQuoteDoc).toContain("\"feature\": \"public_quote_real_path\"");
+    expect(blockedExample).toContain("\"reason_code\"");
+
+    for (const code of standardBlockedReasonCodes) {
+      expect(releaseChecklist).toContain(code);
+    }
   });
 
   it("keeps activation review artifacts sanitized and out of forbidden scopes", () => {

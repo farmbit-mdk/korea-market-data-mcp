@@ -287,3 +287,18 @@ rejected
 ```
 
 Only `approved_for_local_only` may be used for local/test verification. A sanitized smoke test result is not evidence for public default enablement.
+
+For v0.22 final hardening, the linked smoke test result field is required for an approved local-only decision record. The value must be a sanitized reference only, not the raw output.
+
+Safe activation review summary fields:
+
+```text
+status
+reason_code
+token_present
+quote_present
+sanitized error code
+sanitized return_code
+sanitized return_msg
+redaction checklist status
+```

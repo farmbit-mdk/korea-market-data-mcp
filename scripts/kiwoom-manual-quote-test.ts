@@ -15,13 +15,23 @@ import { redactSecrets } from "../src/safety/redact-secret.js";
 export interface ManualKiwoomQuoteSummary {
   status: "blocked" | "ok" | "error";
   provider: "kiwoom";
+  feature: "public_quote_real_path";
   environment: "mock" | "production";
   symbol?: string;
   quote_present: boolean;
   quote?: NormalizedKiwoomQuote;
+  reason_code?: ManualKiwoomQuoteBlockedReasonCode;
   reason?: string;
   error?: unknown;
 }
+
+export type ManualKiwoomQuoteBlockedReasonCode =
+  | "REAL_API_CALLS_DISABLED"
+  | "ENDPOINT_DISABLED"
+  | "CREDENTIALS_MISSING"
+  | "CREDENTIALS_PLACEHOLDER"
+  | "TOKEN_REQUEST_BLOCKED"
+  | "INVALID_SYMBOL";
 
 interface ManualKiwoomQuoteEnv {
   KIWOOM_ENABLE_REAL_API_CALLS?: string;
@@ -67,23 +77,28 @@ export async function runManualKiwoomQuoteVerification(
   const quoteEndpointMapping = dependencies.quoteEndpointMapping ?? kiwoomQuoteEndpointMappings.quote;
 
   if (env.KIWOOM_ENABLE_REAL_API_CALLS !== "true") {
-    return blocked(environment, symbol, "KIWOOM_ENABLE_REAL_API_CALLS must be set to true for manual quote verification.");
+    return blocked(
+      environment,
+      symbol,
+      "REAL_API_CALLS_DISABLED",
+      "KIWOOM_ENABLE_REAL_API_CALLS must be set to true for manual quote verification."
+    );
   }
 
   if (isPlaceholderCredential(rawAppKey) || isPlaceholderCredential(rawSecretKey)) {
-    return blocked(environment, symbol, "Placeholder credentials cannot be used for manual quote verification.");
+    return blocked(environment, symbol, "CREDENTIALS_PLACEHOLDER", "Placeholder credentials cannot be used for manual quote verification.");
   }
 
   if (appKey === undefined || secretKey === undefined) {
-    return blocked(environment, symbol, "KIWOOM_APP_KEY and KIWOOM_SECRET_KEY are required for manual quote verification.");
+    return blocked(environment, symbol, "CREDENTIALS_MISSING", "KIWOOM_APP_KEY and KIWOOM_SECRET_KEY are required for manual quote verification.");
   }
 
   if (symbol === undefined) {
-    return blocked(environment, symbol, "KIWOOM_QUOTE_SYMBOL or a CLI symbol argument is required for manual quote verification.");
+    return blocked(environment, symbol, "INVALID_SYMBOL", "KIWOOM_QUOTE_SYMBOL or a CLI symbol argument is required for manual quote verification.");
   }
 
   if (!quoteEndpointMapping.enabled || !quoteEndpointMapping.manualOnly || !quoteEndpointMapping.readOnly) {
-    return blocked(environment, symbol, "Kiwoom quote endpoint mapping is disabled for manual verification.");
+    return blocked(environment, symbol, "ENDPOINT_DISABLED", "Kiwoom quote endpoint mapping is disabled for manual verification.");
   }
 
   const config: KiwoomAuthConfig = {
@@ -103,7 +118,7 @@ export async function runManualKiwoomQuoteVerification(
     }).getAccessToken();
 
     if (token.accessToken.trim() === "") {
-      return blocked(environment, symbol, "A token must be present before manual quote verification.");
+      return blocked(environment, symbol, "TOKEN_REQUEST_BLOCKED", "A token must be present before manual quote verification.");
     }
 
     const quote = await createKiwoomQuoteClient({
@@ -115,6 +130,7 @@ export async function runManualKiwoomQuoteVerification(
     return {
       status: "ok",
       provider: "kiwoom",
+      feature: "public_quote_real_path",
       environment,
       symbol,
       quote_present: true,
@@ -124,6 +140,7 @@ export async function runManualKiwoomQuoteVerification(
     return {
       status: "error",
       provider: "kiwoom",
+      feature: "public_quote_real_path",
       environment,
       symbol,
       quote_present: false,
@@ -135,14 +152,17 @@ export async function runManualKiwoomQuoteVerification(
 function blocked(
   environment: "mock" | "production",
   symbol: string | undefined,
+  reasonCode: ManualKiwoomQuoteBlockedReasonCode,
   reason: string
 ): ManualKiwoomQuoteSummary {
   return {
     status: "blocked",
     provider: "kiwoom",
+    feature: "public_quote_real_path",
     environment,
     symbol,
     quote_present: false,
+    reason_code: reasonCode,
     reason
   };
 }

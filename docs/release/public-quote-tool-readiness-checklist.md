@@ -241,3 +241,23 @@ no account/order/trading schema is introduced
 no account/order/balance/holdings fields are introduced
 no centralized data redistribution proxy is introduced
 ```
+
+## v0.22 Real Quote Local Activation Final Hardening
+
+Confirm:
+
+```text
+blocked reason codes are standardized
+manual command blocked output includes reason_code
+activation decision fixtures cover missing, pending, rejected, wrong scope, wrong feature, and missing linked smoke test result
+KIWOOM_ENABLE_REAL_API_CALLS=true alone remains insufficient
+KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH=true alone remains insufficient
+approved_for_local_only is local/test verification only
+endpoint enabled remains false by default
+endpoint exposesPublicTool remains false by default
+default real quote lookup remains disabled
+tests pass without real credentials
+no account/order/trading schema is introduced
+no account/order/balance/holdings fields are introduced
+no centralized data redistribution proxy is introduced
+```
