@@ -77,6 +77,17 @@ Rules:
 9. Keep provider credentials local to the user's machine unless a future design is explicitly reviewed.
 10. Do not build a centralized credential collection or proxy service without a separate security review.
 
+For first-time MCP client setup, use mock provider examples before using any local Kiwoom credential flow:
+
+```text
+docs/getting-started/quickstart.md
+docs/getting-started/mcp-client-setup.md
+examples/claude-desktop.mock.json
+examples/cursor.mock.json
+```
+
+Never paste real app keys, secret keys, access tokens, `.env.local` contents, screenshots containing credentials, or raw provider responses into GitHub issues or pull requests.
+
 ---
 
 ## 5. Environment files

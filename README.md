@@ -275,6 +275,51 @@ get_daily_chart
 
 `get_kiwoom_stock_quote` is a guarded Kiwoom-only skeleton. It is registered, but real Kiwoom quote lookup remains blocked by default.
 
+### Quick start and MCP client setup
+
+`v0.23.0-alpha` adds user onboarding docs and MCP client setup examples.
+
+Start here:
+
+```text
+docs/getting-started/quickstart.md
+docs/getting-started/mcp-client-setup.md
+docs/getting-started/claude-desktop-setup.md
+docs/getting-started/cursor-setup.md
+docs/getting-started/troubleshooting.md
+```
+
+Use mock provider first:
+
+```text
+examples/claude-desktop.mock.json
+examples/cursor.mock.json
+examples/env.mock.example
+```
+
+Kiwoom local verification examples are advanced and explicit opt-in only:
+
+```text
+examples/claude-desktop.kiwoom-local.example.json
+examples/cursor.kiwoom-local.example.json
+examples/env.kiwoom-local.example
+```
+
+Real Kiwoom quote lookup remains disabled by default. `KIWOOM_ENABLE_REAL_API_CALLS=false` and `KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH=false` remain the safe defaults.
+
+This project remains read-only:
+
+```text
+no account access
+no orders
+no balance lookup
+no holdings lookup
+no trading
+no auto-trading
+no investment recommendations
+no centralized data redistribution proxy
+```
+
 ### Kiwoom auth skeleton
 
 The repository includes a Kiwoom provider auth skeleton for future adapter work. It can load Kiwoom-related environment variables and return normalized credential errors, but it does not request tokens or call the Kiwoom REST API by default.
@@ -612,6 +657,15 @@ A complete example will be maintained in:
 
 ```text
 examples/claude-desktop-config.json
+```
+
+Additional MCP client examples:
+
+```text
+examples/claude-desktop.mock.json
+examples/claude-desktop.kiwoom-local.example.json
+examples/cursor.mock.json
+examples/cursor.kiwoom-local.example.json
 ```
 
 ---

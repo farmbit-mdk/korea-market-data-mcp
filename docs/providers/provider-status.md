@@ -15,7 +15,7 @@ This document is especially important because different providers may have diffe
 | Provider | Status        | Real API calls |     Credentials required | Default | Notes                                                   |
 | -------- | ------------- | -------------: | -----------------------: | ------: | ------------------------------------------------------- |
 | `mock`   | Implemented   |             No |                       No |     Yes | Fixed sample data for local MCP testing                 |
-| `kiwoom` | Real quote local activation guard hardened |  No by default | Yes, for manual token/quote verification and local-only smoke tests |      No | Guarded public quote tool; real lookup disabled by default |
+| `kiwoom` | MCP client setup docs added |  No by default | Yes, for manual token/quote verification and local-only smoke tests |      No | Guarded public quote tool; real lookup disabled by default |
 
 ---
 
@@ -206,6 +206,10 @@ local opt-in activation guard requiring approved_for_local_only decision record
 standardized public quote blocked reason codes
 activation decision record fixtures for local/test verification
 manual quote blocked output reason_code
+MCP client setup docs
+Claude Desktop setup docs
+Cursor setup docs
+user onboarding docs
 normalized auth errors
 no-network safety tests
 read-only provider skeleton
@@ -281,6 +285,7 @@ Real Kiwoom API calls must remain disabled by default.
 | Kiwoom real quote endpoint activation review | Added; decision record required before endpoint flag activation |
 | Kiwoom real quote local opt-in activation | Clarified; `approved_for_local_only` decision required for local/test simulation |
 | Kiwoom real quote local activation final hardening | Added blocked `reason_code` values and stricter activation decision checks |
+| MCP client setup and user onboarding docs | Added quickstart, Claude Desktop, Cursor, troubleshooting, and safe examples |
 | Public real Kiwoom quote lookup   | Not enabled by default |
 | Mock/test quote response          | Available for response validation only |
 | Mocked quote response                 | Can be normalized safely          |
@@ -504,6 +509,7 @@ smoke test result capture docs, sample, and GitHub report template exist
 activation review docs, decision record template, and activation checklist exist
 local opt-in activation requires approved_for_local_only decision record
 blocked reason codes are standardized between docs and tests
+MCP client setup docs and examples use mock provider first
 ```
 
 Kiwoom tests must not require real credentials.
@@ -1027,6 +1033,35 @@ Kiwoom Real Quote Local Activation Final Hardening
 ```
 
 This release final-hardens local/test-only activation guards and blocked diagnostics for `get_kiwoom_stock_quote`. It must not be described as public live Kiwoom quote support. Public real Kiwoom quote lookup, endpoint enabled defaults, public exposure defaults, account access, orders, balance lookup, holdings lookup, trading, auto-trading, investment recommendations, centralized credential storage, and centralized data redistribution proxy behavior remain disabled by default or forbidden.
+
+---
+
+## v0.23.0-alpha
+
+Provider status:
+
+```text
+mock provider implemented
+MCP client setup docs added
+Claude Desktop setup docs added
+Cursor setup docs added
+user onboarding docs added
+mock provider recommended for first setup
+Kiwoom real local verification remains explicit opt-in only
+endpoint enabled default remains false
+endpoint exposesPublicTool default remains false
+public real Kiwoom quote lookup disabled by default
+account/order/trading explicitly out of scope
+centralized data redistribution proxy out of scope
+```
+
+Recommended release description:
+
+```text
+MCP Client Setup and User Onboarding Docs
+```
+
+This release adds user-facing setup docs and MCP client examples. It must not be described as public live Kiwoom quote support. Public real Kiwoom quote lookup, endpoint enabled defaults, public exposure defaults, account access, orders, balance lookup, holdings lookup, trading, auto-trading, investment recommendations, centralized credential storage, and centralized data redistribution proxy behavior remain disabled by default or forbidden.
 
 ---
 
