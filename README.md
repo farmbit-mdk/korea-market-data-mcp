@@ -65,7 +65,7 @@ The initial scope is strictly limited to **read-only market data access**.
 
 ## Alpha launch candidate status
 
-`v0.26.0-alpha` is the alpha release final review for the read-only Kiwoom quote MCP alpha.
+`v0.27.0-alpha` is an npm pack dry run and publish readiness review for the read-only Kiwoom quote MCP alpha.
 
 This project is:
 
@@ -96,6 +96,7 @@ documentation for Claude Desktop and Cursor setup
 known limitations and release checklists
 package metadata and local install/run documentation
 alpha launch announcement and final review documentation
+npm pack dry run and publish readiness documentation
 ```
 
 Real Kiwoom quote lookup remains disabled by default:
@@ -127,6 +128,8 @@ docs/release/v0.25.0-alpha-checklist.md
 docs/release/alpha-launch-announcement.md
 docs/release/alpha-final-review.md
 docs/release/v0.26.0-alpha-checklist.md
+docs/release/npm-pack-dry-run.md
+docs/release/v0.27.0-alpha-checklist.md
 ```
 
 Review safety and limitations:
@@ -391,17 +394,28 @@ get_kiwoom_stock_quote is the only Kiwoom public quote tool.
 
 The package metadata is prepared for future npm distribution, but `npm publish` has not been performed for this release.
 
+GitHub clone/local setup remains the primary distribution path. The npm package is not published yet, and npm publish readiness is still under review.
+
+Do not install from unofficial npm packages claiming this project name. Use GitHub releases/source until an official npm package is published from this repository.
+
 Current package command shape:
 
 ```text
 package name: korea-market-data-mcp
-package version: 0.26.0-alpha
+package version: 0.27.0-alpha
 main: dist/index.js
 bin: korea-market-data-mcp -> dist/index.js
 start: node dist/index.js
 ```
 
 Until a package is actually published, use the GitHub clone path above.
+
+See:
+
+```text
+docs/release/npm-pack-dry-run.md
+docs/release/distribution-readiness.md
+```
 
 ### Option C: MCP client local node command
 

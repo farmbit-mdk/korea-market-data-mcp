@@ -1,7 +1,23 @@
 {
   "name": "korea-market-data-mcp",
-  "version": "0.26.0-alpha",
+  "version": "0.27.0-alpha",
   "description": "Read-only MCP server for Korean financial market data.",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "korean-market-data",
+    "kiwoom",
+    "finance",
+    "read-only"
+  ],
+  "homepage": "https://github.com/farmbit-mdk/korea-market-data-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/farmbit-mdk/korea-market-data-mcp/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/farmbit-mdk/korea-market-data-mcp.git"
+  },
   "type": "module",
   "main": "dist/index.js",
   "bin": {
