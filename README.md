@@ -572,6 +572,18 @@ credentials are present and not placeholders
 
 `KIWOOM_ENABLE_REAL_API_CALLS=true` alone is insufficient. The endpoint `enabled` and `exposesPublicTool` defaults remain false, and public runtime remains blocked by default.
 
+`v0.22.0-alpha` final-hardens the local activation guard:
+
+```text
+blocked responses include a safe reason_code
+activation decision fixtures cover missing, pending, rejected, wrong scope, wrong feature, and missing linked smoke test result
+manual quote verification separates ok, blocked, and error output
+endpoint enabled/exposesPublicTool defaults remain false
+real Kiwoom quote lookup remains disabled by default
+```
+
+Blocked `reason_code` values are safe diagnostics only. They must not include app keys, secret keys, access tokens, raw request bodies, or raw provider responses.
+
 ---
 
 ## Claude Desktop example

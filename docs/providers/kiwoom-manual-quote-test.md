@@ -138,9 +138,11 @@ Blocked output shape:
 {
   "status": "blocked",
   "provider": "kiwoom",
+  "feature": "public_quote_real_path",
   "environment": "mock",
   "symbol": "005930",
   "quote_present": false,
+  "reason_code": "ENDPOINT_DISABLED",
   "reason": "..."
 }
 ```
@@ -165,6 +167,19 @@ Error output shape:
 ```
 
 Access token values are never printed.
+
+Blocked output is not error output. `blocked` means a local configuration or safety guard stopped verification before quote lookup. `error` means token, provider, transport, or response normalization failed after the workflow was allowed to proceed.
+
+Common blocked reason codes:
+
+```text
+REAL_API_CALLS_DISABLED
+ENDPOINT_DISABLED
+CREDENTIALS_MISSING
+CREDENTIALS_PLACEHOLDER
+TOKEN_REQUEST_BLOCKED
+INVALID_SYMBOL
+```
 
 ---
 

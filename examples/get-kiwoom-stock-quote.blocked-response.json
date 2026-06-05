@@ -3,5 +3,6 @@
   "provider": "kiwoom",
   "symbol": "005930",
   "quote_present": false,
+  "reason_code": "PUBLIC_QUOTE_REAL_PATH_DISABLED",
   "reason": "KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH must be true."
 }

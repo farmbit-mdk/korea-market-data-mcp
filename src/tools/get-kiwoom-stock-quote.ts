@@ -23,6 +23,7 @@ export interface KiwoomPublicQuoteBlockedResponse {
   status: "blocked";
   symbol?: string;
   quote_present: false;
+  reason_code: KiwoomPublicQuoteBlockedReasonCode;
   reason: string;
 }
 
@@ -54,6 +55,21 @@ export interface KiwoomPublicQuoteActivationDecisionRecord {
   linked_smoke_test_result?: string;
   notes?: string;
 }
+
+export type KiwoomPublicQuoteBlockedReasonCode =
+  | "REAL_API_CALLS_DISABLED"
+  | "PUBLIC_QUOTE_REAL_PATH_DISABLED"
+  | "ACTIVATION_DECISION_RECORD_MISSING"
+  | "ACTIVATION_DECISION_NOT_APPROVED_FOR_LOCAL_ONLY"
+  | "ENDPOINT_DISABLED"
+  | "PUBLIC_TOOL_EXPOSURE_DISABLED"
+  | "CREDENTIALS_MISSING"
+  | "CREDENTIALS_PLACEHOLDER"
+  | "TOKEN_REQUEST_BLOCKED"
+  | "TOKEN_REQUEST_FAILED"
+  | "INVALID_SYMBOL"
+  | "QUOTE_ENDPOINT_NOT_READ_ONLY"
+  | "QUOTE_RESPONSE_INVALID";
 
 interface KiwoomPublicQuoteDependencies {
   env?: NodeJS.ProcessEnv;
@@ -130,45 +146,45 @@ export async function runGuardedKiwoomPublicQuote(
     const mapping = dependencies.quoteEndpointMapping ?? kiwoomQuoteEndpointMappings.quote;
 
     if (!mapping.readOnly) {
-      return blocked(normalizedInput.symbol, "Kiwoom quote endpoint mapping is not marked read-only.");
+      return blocked(normalizedInput.symbol, "QUOTE_ENDPOINT_NOT_READ_ONLY", "Kiwoom quote endpoint mapping is not marked read-only.");
     }
 
     if (!mapping.exposesPublicTool) {
-      return blocked(normalizedInput.symbol, "Kiwoom quote endpoint is not exposed as a public tool.");
+      return blocked(normalizedInput.symbol, "PUBLIC_TOOL_EXPOSURE_DISABLED", "Kiwoom quote endpoint is not exposed as a public tool.");
     }
 
     if (!mapping.enabled) {
-      return blocked(normalizedInput.symbol, "Kiwoom quote endpoint is not enabled.");
+      return blocked(normalizedInput.symbol, "ENDPOINT_DISABLED", "Kiwoom quote endpoint is not enabled.");
     }
 
     const config = loadKiwoomAuthConfig(dependencies.env);
 
     if (!config.enableRealApiCalls) {
-      return blocked(normalizedInput.symbol, "KIWOOM_ENABLE_REAL_API_CALLS must be true.");
+      return blocked(normalizedInput.symbol, "REAL_API_CALLS_DISABLED", "KIWOOM_ENABLE_REAL_API_CALLS must be true.");
     }
 
     if (!isPublicQuoteRealPathEnabled(dependencies.env)) {
-      return blocked(normalizedInput.symbol, "KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH must be true.");
+      return blocked(normalizedInput.symbol, "PUBLIC_QUOTE_REAL_PATH_DISABLED", "KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH must be true.");
     }
 
-    if (
-      config.appKey === undefined ||
-      config.appSecret === undefined ||
-      isPlaceholderCredential(config.appKey) ||
-      isPlaceholderCredential(config.appSecret)
-    ) {
-      return blocked(normalizedInput.symbol, "Kiwoom credentials are missing or invalid.");
+    if (config.appKey === undefined || config.appSecret === undefined) {
+      return blocked(normalizedInput.symbol, "CREDENTIALS_MISSING", "Kiwoom credentials are missing or invalid.");
     }
 
-    if (!isLocalOnlyActivationApproved(dependencies.activationDecisionRecord)) {
-      return blocked(normalizedInput.symbol, "Kiwoom public quote real path requires an approved local-only activation decision record.");
+    if (isPlaceholderCredential(config.appKey) || isPlaceholderCredential(config.appSecret)) {
+      return blocked(normalizedInput.symbol, "CREDENTIALS_PLACEHOLDER", "Kiwoom credentials are missing or invalid.");
+    }
+
+    const activationBlock = getActivationDecisionBlockReason(dependencies.activationDecisionRecord);
+    if (activationBlock !== undefined) {
+      return blocked(normalizedInput.symbol, activationBlock.reasonCode, activationBlock.reason);
     }
 
     const tokenClient = dependencies.tokenClient ?? createKiwoomAuthClient(config);
     const token = await tokenClient.getAccessToken();
 
     if (token.accessToken.trim() === "") {
-      return blocked(normalizedInput.symbol, "A Kiwoom access token must be present before quote lookup.");
+      return blocked(normalizedInput.symbol, "TOKEN_REQUEST_BLOCKED", "A Kiwoom access token must be present before quote lookup.");
     }
 
     const quoteClient = dependencies.quoteClient ?? createKiwoomQuoteClient({
@@ -188,6 +204,11 @@ export async function runGuardedKiwoomPublicQuote(
       quote: redactSecrets(quote)
     };
   } catch (error) {
+    const blockedInput = getInputBlockedReason(error);
+    if (blockedInput !== undefined) {
+      return blocked(symbolForError, blockedInput.reasonCode, blockedInput.reason);
+    }
+
     return {
       status: "error",
       provider: "kiwoom",
@@ -292,21 +313,66 @@ function isPlaceholderCredential(value: string): boolean {
   return placeholderCredentialValues.has(value.trim().toUpperCase());
 }
 
-function isLocalOnlyActivationApproved(record: KiwoomPublicQuoteActivationDecisionRecord | undefined): boolean {
-  return (
-    record?.provider === "kiwoom" &&
-    record.feature === "public_quote_real_path" &&
-    record.scope === "local_only" &&
-    record.decision === "approved_for_local_only"
-  );
+function getActivationDecisionBlockReason(record: KiwoomPublicQuoteActivationDecisionRecord | undefined): {
+  reasonCode: KiwoomPublicQuoteBlockedReasonCode;
+  reason: string;
+} | undefined {
+  if (record === undefined) {
+    return {
+      reasonCode: "ACTIVATION_DECISION_RECORD_MISSING",
+      reason: "Kiwoom real quote local verification requires an approved local-only activation decision record."
+    };
+  }
+
+  if (
+    record.provider !== "kiwoom" ||
+    record.feature !== "public_quote_real_path" ||
+    record.scope !== "local_only" ||
+    record.decision !== "approved_for_local_only" ||
+    record.linked_smoke_test_result === undefined ||
+    record.linked_smoke_test_result.trim() === ""
+  ) {
+    return {
+      reasonCode: "ACTIVATION_DECISION_NOT_APPROVED_FOR_LOCAL_ONLY",
+      reason: "Kiwoom real quote local verification requires an approved local-only activation decision record."
+    };
+  }
+
+  return undefined;
 }
 
-function blocked(symbol: string | undefined, reason: string): KiwoomPublicQuoteBlockedResponse {
+function getInputBlockedReason(error: unknown): {
+  reasonCode: KiwoomPublicQuoteBlockedReasonCode;
+  reason: string;
+} | undefined {
+  if (!(error instanceof MarketDataProviderError)) {
+    return undefined;
+  }
+
+  if (
+    error.code === "INVALID_INPUT" &&
+    (error.message.includes("symbol is required") || error.message.includes("symbol must be"))
+  ) {
+    return {
+      reasonCode: "INVALID_SYMBOL",
+      reason: error.message
+    };
+  }
+
+  return undefined;
+}
+
+function blocked(
+  symbol: string | undefined,
+  reasonCode: KiwoomPublicQuoteBlockedReasonCode,
+  reason: string
+): KiwoomPublicQuoteBlockedResponse {
   return {
     provider: "kiwoom",
     status: "blocked",
     symbol,
     quote_present: false,
+    reason_code: reasonCode,
     reason
   };
 }

@@ -31,6 +31,8 @@ describe("Kiwoom manual quote verification workflow", () => {
     expect(summary).toMatchObject({
       status: "blocked",
       provider: "kiwoom",
+      feature: "public_quote_real_path",
+      reason_code: "REAL_API_CALLS_DISABLED",
       quote_present: false
     });
     expect(tokenTransport.requestToken).not.toHaveBeenCalled();
@@ -49,6 +51,10 @@ describe("Kiwoom manual quote verification workflow", () => {
     );
 
     expect(summary.status).toBe("blocked");
+    expect(summary).toMatchObject({
+      feature: "public_quote_real_path",
+      reason_code: "CREDENTIALS_MISSING"
+    });
     expect(tokenTransport.requestToken).not.toHaveBeenCalled();
     expect(quoteTransport.requestQuote).not.toHaveBeenCalled();
   });
@@ -69,6 +75,7 @@ describe("Kiwoom manual quote verification workflow", () => {
     expect(summary).toMatchObject({
       status: "blocked",
       quote_present: false,
+      reason_code: "CREDENTIALS_PLACEHOLDER",
       reason: expect.stringContaining("Placeholder credentials")
     });
     expect(JSON.stringify(summary)).not.toContain("YOUR_APP_KEY");
@@ -93,6 +100,7 @@ describe("Kiwoom manual quote verification workflow", () => {
     expect(summary).toMatchObject({
       status: "blocked",
       quote_present: false,
+      reason_code: "CREDENTIALS_PLACEHOLDER",
       reason: expect.stringContaining("Placeholder credentials")
     });
     expect(JSON.stringify(summary)).not.toContain("YOUR_KIWOOM_APP_KEY");
@@ -116,6 +124,7 @@ describe("Kiwoom manual quote verification workflow", () => {
     expect(summary).toMatchObject({
       status: "blocked",
       quote_present: false,
+      reason_code: "INVALID_SYMBOL",
       reason: expect.stringContaining("symbol")
     });
     expect(tokenTransport.requestToken).not.toHaveBeenCalled();
@@ -134,6 +143,7 @@ describe("Kiwoom manual quote verification workflow", () => {
       status: "blocked",
       symbol: "005930",
       quote_present: false,
+      reason_code: "ENDPOINT_DISABLED",
       reason: expect.stringContaining("disabled")
     });
     expect(tokenTransport.requestToken).not.toHaveBeenCalled();
@@ -172,6 +182,7 @@ describe("Kiwoom manual quote verification workflow", () => {
     expect(summary).toMatchObject({
       status: "ok",
       provider: "kiwoom",
+      feature: "public_quote_real_path",
       environment: "mock",
       symbol: "005930",
       quote_present: true,
@@ -200,6 +211,7 @@ describe("Kiwoom manual quote verification workflow", () => {
 
     expect(summary).toMatchObject({
       status: "error",
+      feature: "public_quote_real_path",
       quote_present: false,
       error: {
         code: "KIWOOM_QUOTE_REQUEST_FAILED",

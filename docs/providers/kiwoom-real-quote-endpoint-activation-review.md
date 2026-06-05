@@ -159,6 +159,17 @@ Only `approved_for_local_only` may be used as a local/test verification gate for
 
 `pending` and `rejected` must keep the real path blocked.
 
+For final local activation hardening, approved records must also include a sanitized `linked_smoke_test_result`. If the linked result is missing or blank, the guard treats the record as not approved for local-only verification.
+
+The guard reports these decision-related blocked reason codes:
+
+```text
+ACTIVATION_DECISION_RECORD_MISSING
+ACTIVATION_DECISION_NOT_APPROVED_FOR_LOCAL_ONLY
+```
+
+These codes are for safe local/test diagnostics only. They must not include credentials, tokens, raw request bodies, or raw provider responses.
+
 ## Rollback Criteria
 
 Rollback or reject activation if:

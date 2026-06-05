@@ -162,6 +162,7 @@ Blocked shape:
   "provider": "kiwoom",
   "symbol": "005930",
   "quote_present": false,
+  "reason_code": "PUBLIC_QUOTE_REAL_PATH_DISABLED",
   "reason": "KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH must be true."
 }
 ```
@@ -186,20 +187,23 @@ Error shape:
 
 ## Blocked Reason Matrix
 
-| Case | Safe reason | Next check |
-| --- | --- | --- |
-| `KIWOOM_ENABLE_REAL_API_CALLS=false` | `KIWOOM_ENABLE_REAL_API_CALLS must be true.` | Enable only in local verification |
-| `KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH=false` | `KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH must be true.` | Enable only in local verification |
-| `KIWOOM_APP_KEY` missing | `Kiwoom credentials are missing or invalid.` | Set local environment variable |
-| `KIWOOM_SECRET_KEY` missing | `Kiwoom credentials are missing or invalid.` | Set local environment variable |
-| Placeholder credentials | `Kiwoom credentials are missing or invalid.` | Replace placeholders locally |
-| `enabled=false` | `Kiwoom quote endpoint is not enabled.` | Verify endpoint mapping review |
-| `exposesPublicTool=false` | `Kiwoom quote endpoint is not exposed as a public tool.` | Verify public exposure review |
-| `readOnly=false` | `Kiwoom quote endpoint mapping is not marked read-only.` | Do not proceed |
-| Missing symbol | `symbol is required.` | Use a 6-digit symbol |
-| Invalid symbol | `symbol must be a 6-digit Korean stock code.` | Use a valid Korean stock code |
+| Case | `reason_code` | Safe reason | Next check |
+| --- | --- | --- | --- |
+| `KIWOOM_ENABLE_REAL_API_CALLS=false` | `REAL_API_CALLS_DISABLED` | `KIWOOM_ENABLE_REAL_API_CALLS must be true.` | Enable only in local verification |
+| `KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH=false` | `PUBLIC_QUOTE_REAL_PATH_DISABLED` | `KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH must be true.` | Enable only in local verification |
+| Activation decision record missing | `ACTIVATION_DECISION_RECORD_MISSING` | Approved local-only decision record required. | Use sanitized decision fixture only |
+| Activation decision record pending/rejected/wrong scope/wrong feature/missing linked result | `ACTIVATION_DECISION_NOT_APPROVED_FOR_LOCAL_ONLY` | Approved local-only decision record required. | Do not proceed |
+| `KIWOOM_APP_KEY` or `KIWOOM_SECRET_KEY` missing | `CREDENTIALS_MISSING` | `Kiwoom credentials are missing or invalid.` | Set local environment variable |
+| Placeholder credentials | `CREDENTIALS_PLACEHOLDER` | `Kiwoom credentials are missing or invalid.` | Replace placeholders locally |
+| `enabled=false` | `ENDPOINT_DISABLED` | `Kiwoom quote endpoint is not enabled.` | Verify endpoint mapping review |
+| `exposesPublicTool=false` | `PUBLIC_TOOL_EXPOSURE_DISABLED` | `Kiwoom quote endpoint is not exposed as a public tool.` | Verify public exposure review |
+| `readOnly=false` | `QUOTE_ENDPOINT_NOT_READ_ONLY` | `Kiwoom quote endpoint mapping is not marked read-only.` | Do not proceed |
+| Missing or invalid symbol | `INVALID_SYMBOL` | Symbol must be a 6-digit Korean stock code. | Use a valid Korean stock code |
+| Empty token after token request | `TOKEN_REQUEST_BLOCKED` | Access token must be present before quote lookup. | Verify token workflow |
 
 Blocked reasons must not include app key, secret key, token, raw environment objects, or raw endpoint configuration objects.
+
+Blocked is separate from error. `blocked` means configuration, environment, or guard policy stopped the workflow before provider quote lookup. `error` means token, provider, transport, or response normalization failed after the guard allowed the workflow to proceed.
 
 Common blocked cases:
 
@@ -294,3 +298,9 @@ symbol validation passes
 If the activation decision record is missing, `pending`, or `rejected`, the real path remains blocked before token or quote transport calls.
 
 The decision record is only for local/test verification. It is not approval for public default runtime activation, endpoint default flag changes, account/order/trading functionality, or centralized data redistribution.
+
+## v0.22 Final Hardening
+
+`v0.22.0-alpha` standardizes blocked reason codes for the local activation guard. Tests and docs use the same `reason_code` values.
+
+The public default runtime still remains blocked. An `approved_for_local_only` decision record is only for local/test verification and does not enable production/public default real quote lookup.
