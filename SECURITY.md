@@ -116,6 +116,18 @@ no account/order/trading scope is supported
 redaction principles remain required
 ```
 
+Package distribution security:
+
+```text
+do not install unofficial npm packages claiming this project name
+verify the GitHub repository before installing source or release artifacts
+verify release tags before trusting package artifacts
+never package or publish credentials
+report suspicious package impersonation
+no hosted proxy is provided by this project
+npm publish was not performed for v0.27.0-alpha
+```
+
 ---
 
 ## 5. Environment files

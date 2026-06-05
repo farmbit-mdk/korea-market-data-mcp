@@ -18,7 +18,7 @@ Package metadata is aligned for a future npm package:
 
 ```text
 name: korea-market-data-mcp
-version: 0.26.0-alpha
+version: 0.27.0-alpha
 type: module
 main: dist/index.js
 bin: korea-market-data-mcp -> dist/index.js
@@ -90,19 +90,80 @@ account/order/balance/holdings/trading data
 
 ## Version And Tag Consistency
 
-For v0.26.0-alpha readiness:
+For v0.27.0-alpha readiness:
 
 ```text
-package.json version: 0.26.0-alpha
-package-lock.json root version: 0.26.0-alpha
-recommended release tag: v0.26.0-alpha
+package.json version: 0.27.0-alpha
+package-lock.json root version: 0.27.0-alpha
+recommended release tag: v0.27.0-alpha
 ```
 
 ## npm Publish Decision
 
-For v0.26.0-alpha, npm publish was not performed.
+For v0.27.0-alpha, npm publish was not performed.
 
 GitHub clone/local setup remains the primary distribution path.
+
+Official distribution channels for this alpha:
+
+```text
+GitHub source repository
+GitHub release artifacts if explicitly published by the maintainer
+```
+
+Do not trust unofficial npm packages or hosted MCP proxies claiming to be this project.
+
+## npm Pack Dry Run Status
+
+`npm pack --dry-run` is the required publish-readiness check for this release.
+
+The dry run must verify:
+
+```text
+dist files are included
+README is included
+LICENSE is included
+package.json is included
+docs are included
+examples are included
+tests are not required in the package
+.env.local is not included
+real credentials are not included
+private scratch or log files are not included
+```
+
+## Package Contents Policy
+
+Allowed package contents:
+
+```text
+dist
+docs
+examples
+.env.example
+CHANGELOG.md
+README.md
+SECURITY.md
+LICENSE
+package.json
+```
+
+Forbidden package contents:
+
+```text
+.env.local
+real credentials
+access tokens
+authorization headers
+private scratch files
+local logs
+account numbers
+order identifiers
+balance data
+holdings data
+trading data
+centralized proxy config
+```
 
 npm publish requires a separate readiness review after:
 

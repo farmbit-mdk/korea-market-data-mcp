@@ -2,6 +2,34 @@
 
 All notable alpha release documentation and safety-scope changes are tracked here.
 
+## v0.27.0-alpha - npm Pack Dry Run and Publish Readiness
+
+npm package publish-readiness review without publishing to npm.
+
+- Updated package metadata for `0.27.0-alpha`, including repository, homepage, bugs URL, and keywords.
+- Added npm pack dry run and publish readiness documentation.
+- Added v0.27.0-alpha release checklist.
+- Updated README npm status and unofficial package warning.
+- Updated distribution readiness docs with npm pack dry run status, package contents policy, publish blockers, and official distribution channels.
+- Updated SECURITY package distribution warning.
+- Added tests for package metadata, package contents policy, and npm publish status documentation.
+- Confirmed no runtime scope expansion in this release.
+
+`npm publish` was not performed. No hosted proxy was added. Real Kiwoom quote lookup remains disabled by default, mock provider remains the recommended first setup path, Kiwoom real local verification remains explicit opt-in only, and `get_kiwoom_stock_quote` public tool scope is unchanged.
+
+Explicitly excluded:
+
+```text
+account access
+orders
+balance lookup
+holdings lookup
+trading
+auto-trading
+investment recommendations
+centralized data redistribution proxy
+```
+
 ## v0.26.0-alpha - Alpha Release Final Review
 
 Final alpha release review before the first public alpha release.
