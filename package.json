@@ -1,6 +1,6 @@
 {
   "name": "korea-market-data-mcp",
-  "version": "0.25.0-alpha",
+  "version": "0.26.0-alpha",
   "description": "Read-only MCP server for Korean financial market data.",
   "type": "module",
   "main": "dist/index.js",

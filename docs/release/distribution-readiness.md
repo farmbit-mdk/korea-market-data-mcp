@@ -18,7 +18,7 @@ Package metadata is aligned for a future npm package:
 
 ```text
 name: korea-market-data-mcp
-version: 0.25.0-alpha
+version: 0.26.0-alpha
 type: module
 main: dist/index.js
 bin: korea-market-data-mcp -> dist/index.js
@@ -90,12 +90,31 @@ account/order/balance/holdings/trading data
 
 ## Version And Tag Consistency
 
-For v0.25.0-alpha readiness:
+For v0.26.0-alpha readiness:
 
 ```text
-package.json version: 0.25.0-alpha
-package-lock.json root version: 0.25.0-alpha
-recommended release tag: v0.25.0-alpha
+package.json version: 0.26.0-alpha
+package-lock.json root version: 0.26.0-alpha
+recommended release tag: v0.26.0-alpha
+```
+
+## npm Publish Decision
+
+For v0.26.0-alpha, npm publish was not performed.
+
+GitHub clone/local setup remains the primary distribution path.
+
+npm publish requires a separate readiness review after:
+
+```text
+package bin entry final verification
+clean package contents via npm pack dry run
+license/readme/files field verification
+versioning policy review
+install smoke test on a clean machine
+security review
+confirmation that no real credentials are packaged
+confirmation that users will not confuse the package with a hosted proxy
 ```
 
 ## Install Smoke Test Checklist

@@ -103,6 +103,19 @@ real Kiwoom verification requires user-owned credentials
 no account/order/trading scope is supported
 ```
 
+Final alpha review confirms:
+
+```text
+credentials stay local
+never commit .env.local
+never paste credentials into issues, pull requests, logs, or screenshots
+use mock provider first
+Kiwoom local verification requires user-owned credentials
+no centralized hosted proxy is provided
+no account/order/trading scope is supported
+redaction principles remain required
+```
+
 ---
 
 ## 5. Environment files

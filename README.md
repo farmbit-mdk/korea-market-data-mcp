@@ -65,7 +65,7 @@ The initial scope is strictly limited to **read-only market data access**.
 
 ## Alpha launch candidate status
 
-`v0.25.0-alpha` is a package and distribution readiness pass for the read-only Kiwoom quote MCP alpha.
+`v0.26.0-alpha` is the alpha release final review for the read-only Kiwoom quote MCP alpha.
 
 This project is:
 
@@ -95,6 +95,7 @@ manual Kiwoom token and quote verification commands
 documentation for Claude Desktop and Cursor setup
 known limitations and release checklists
 package metadata and local install/run documentation
+alpha launch announcement and final review documentation
 ```
 
 Real Kiwoom quote lookup remains disabled by default:
@@ -123,6 +124,9 @@ Package and distribution readiness docs:
 docs/release/distribution-readiness.md
 docs/release/alpha-install-smoke-test.md
 docs/release/v0.25.0-alpha-checklist.md
+docs/release/alpha-launch-announcement.md
+docs/release/alpha-final-review.md
+docs/release/v0.26.0-alpha-checklist.md
 ```
 
 Review safety and limitations:
@@ -136,14 +140,14 @@ docs/release/alpha-known-limitations.md
 Unsupported features remain explicitly out of scope:
 
 ```text
-no account access
-no orders
-no balance lookup
-no holdings lookup
-no trading
-no auto-trading
-no investment recommendations
-no centralized data redistribution proxy
+No account access.
+No orders.
+No balance lookup.
+No holdings lookup.
+No trading.
+No auto-trading.
+No investment recommendations.
+No centralized data redistribution proxy.
 ```
 
 ---
@@ -368,6 +372,21 @@ get_daily_chart
 
 `get_kiwoom_stock_quote` is a guarded Kiwoom-only skeleton. It is registered, but real Kiwoom quote lookup remains blocked by default.
 
+Public MCP tool list:
+
+```text
+search_korean_symbol
+get_stock_quote
+get_kiwoom_stock_quote
+get_etf_quote
+get_market_index
+get_daily_chart
+```
+
+`get_kiwoom_stock_quote` is the only Kiwoom public quote tool. The tool is guarded, mock path is recommended first, real Kiwoom path remains local opt-in only, no account/order/trading tools exist, and future tools require separate review.
+
+get_kiwoom_stock_quote is the only Kiwoom public quote tool.
+
 ### Option B: Packaged or npm-ready setup
 
 The package metadata is prepared for future npm distribution, but `npm publish` has not been performed for this release.
@@ -376,7 +395,7 @@ Current package command shape:
 
 ```text
 package name: korea-market-data-mcp
-package version: 0.25.0-alpha
+package version: 0.26.0-alpha
 main: dist/index.js
 bin: korea-market-data-mcp -> dist/index.js
 start: node dist/index.js
