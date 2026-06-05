@@ -22,7 +22,10 @@ Windows PowerShell:
 npm install
 npm run build
 npm test
+npm start
 ```
+
+`npm start` runs `node dist/index.js`. MCP clients should use the same built output path with `command: "node"` and `args` pointing to an absolute `dist/index.js` path.
 
 ## Recommended Mock Provider Configuration
 

@@ -65,7 +65,7 @@ The initial scope is strictly limited to **read-only market data access**.
 
 ## Alpha launch candidate status
 
-`v0.24.0-alpha` is a read-only Kiwoom quote MCP alpha launch candidate documentation pass.
+`v0.25.0-alpha` is a package and distribution readiness pass for the read-only Kiwoom quote MCP alpha.
 
 This project is:
 
@@ -94,6 +94,7 @@ guarded get_kiwoom_stock_quote public tool skeleton
 manual Kiwoom token and quote verification commands
 documentation for Claude Desktop and Cursor setup
 known limitations and release checklists
+package metadata and local install/run documentation
 ```
 
 Real Kiwoom quote lookup remains disabled by default:
@@ -114,6 +115,14 @@ docs/getting-started/claude-desktop-setup.md
 docs/getting-started/cursor-setup.md
 docs/getting-started/troubleshooting.md
 examples/README.md
+```
+
+Package and distribution readiness docs:
+
+```text
+docs/release/distribution-readiness.md
+docs/release/alpha-install-smoke-test.md
+docs/release/v0.25.0-alpha-checklist.md
 ```
 
 Review safety and limitations:
@@ -299,10 +308,12 @@ Fetch current Korean ETF market data for my macro dashboard.
 
 ## Local development
 
+### Option A: GitHub clone local setup
+
 Clone the repository:
 
 ```bash
-git clone https://github.com/YOUR_GITHUB_USERNAME/korea-market-data-mcp.git
+git clone https://github.com/farmbit-mdk/korea-market-data-mcp.git
 cd korea-market-data-mcp
 ```
 
@@ -324,6 +335,12 @@ Run the development server:
 
 ```bash
 npm run dev
+```
+
+Run the built MCP server locally:
+
+```bash
+npm start
 ```
 
 Build:
@@ -350,6 +367,48 @@ get_daily_chart
 ```
 
 `get_kiwoom_stock_quote` is a guarded Kiwoom-only skeleton. It is registered, but real Kiwoom quote lookup remains blocked by default.
+
+### Option B: Packaged or npm-ready setup
+
+The package metadata is prepared for future npm distribution, but `npm publish` has not been performed for this release.
+
+Current package command shape:
+
+```text
+package name: korea-market-data-mcp
+package version: 0.25.0-alpha
+main: dist/index.js
+bin: korea-market-data-mcp -> dist/index.js
+start: node dist/index.js
+```
+
+Until a package is actually published, use the GitHub clone path above.
+
+### Option C: MCP client local node command
+
+For Claude Desktop, Cursor, and other MCP clients, build first and point the client at the built output:
+
+```json
+{
+  "command": "node",
+  "args": [
+    "/absolute/path/to/korea-market-data-mcp/dist/index.js"
+  ],
+  "env": {
+    "MARKET_DATA_PROVIDER": "mock",
+    "KIWOOM_ENABLE_REAL_API_CALLS": "false",
+    "KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH": "false"
+  }
+}
+```
+
+Windows paths in JSON need escaped backslashes:
+
+```json
+"C:\\absolute\\path\\to\\korea-market-data-mcp\\dist\\index.js"
+```
+
+See `examples/README.md` before editing client configuration.
 
 ### Quick start and MCP client setup
 

@@ -2,6 +2,33 @@
 
 All notable alpha release documentation and safety-scope changes are tracked here.
 
+## v0.25.0-alpha - Package and Distribution Readiness
+
+Package and distribution readiness pass for local install, build, and MCP client setup.
+
+- Reviewed and aligned package metadata, scripts, `main`, `bin`, and package file inclusion.
+- Updated README install/run documentation with GitHub clone, future npm-ready, and MCP client local command paths.
+- Added distribution readiness documentation.
+- Added alpha install smoke test documentation.
+- Reviewed examples command/args alignment with `dist/index.js`.
+- Added v0.25.0-alpha release checklist.
+- Confirmed no runtime scope expansion in this release.
+
+`npm publish` was not performed. No hosted proxy was added. Real Kiwoom quote lookup remains disabled by default, mock provider remains the recommended first setup path, Kiwoom real local verification remains explicit opt-in only, and `get_kiwoom_stock_quote` public tool scope is unchanged.
+
+Explicitly excluded:
+
+```text
+account access
+orders
+balance lookup
+holdings lookup
+trading
+auto-trading
+investment recommendations
+centralized data redistribution proxy
+```
+
 ## v0.24.0-alpha - Read-only Kiwoom Quote MCP Alpha Launch Candidate
 
 Launch candidate documentation pass for the current read-only MCP scope.
