@@ -12,6 +12,11 @@ const requiredDocs = [
   "docs/providers/kiwoom-public-quote-real-local-smoke-test.md",
   "docs/providers/kiwoom-public-quote-smoke-test-result-capture.md",
   "docs/providers/kiwoom-real-quote-endpoint-activation-review.md",
+  "docs/getting-started/quickstart.md",
+  "docs/getting-started/mcp-client-setup.md",
+  "docs/getting-started/claude-desktop-setup.md",
+  "docs/getting-started/cursor-setup.md",
+  "docs/getting-started/troubleshooting.md",
   "docs/security/credential-handling.md",
   "docs/release/public-quote-tool-readiness-checklist.md",
   "docs/release/kiwoom-public-quote-smoke-test-checklist.md",
@@ -23,7 +28,8 @@ const requiredDocs = [
   "docs/release/v0.19.0-alpha-checklist.md",
   "docs/release/v0.20.0-alpha-checklist.md",
   "docs/release/v0.21.0-alpha-checklist.md",
-  "docs/release/v0.22.0-alpha-checklist.md"
+  "docs/release/v0.22.0-alpha-checklist.md",
+  "docs/release/v0.23.0-alpha-checklist.md"
 ];
 
 const kiwoomPublicQuoteExamplePaths = [
@@ -31,6 +37,23 @@ const kiwoomPublicQuoteExamplePaths = [
   "examples/get-kiwoom-stock-quote.blocked-response.json",
   "examples/get-kiwoom-stock-quote.ok-response.example.json",
   "examples/get-kiwoom-stock-quote.error-response.example.json"
+];
+
+const mcpClientSetupExamplePaths = [
+  "examples/claude-desktop.mock.json",
+  "examples/claude-desktop.kiwoom-local.example.json",
+  "examples/cursor.mock.json",
+  "examples/cursor.kiwoom-local.example.json",
+  "examples/env.mock.example",
+  "examples/env.kiwoom-local.example"
+];
+
+const gettingStartedDocPaths = [
+  "docs/getting-started/quickstart.md",
+  "docs/getting-started/mcp-client-setup.md",
+  "docs/getting-started/claude-desktop-setup.md",
+  "docs/getting-started/cursor-setup.md",
+  "docs/getting-started/troubleshooting.md"
 ];
 
 const kiwoomPublicQuoteSmokeTestPaths = [
@@ -102,6 +125,9 @@ describe("provider compliance and security review docs", () => {
     expect(envExample).not.toMatch(/KIWOOM_SECRET_KEY=(?!YOUR_KIWOOM_SECRET_KEY\s*$).+/m);
     expect(envExample).not.toMatch(/access_token\s*=/i);
     expect(envExample).not.toMatch(/Bearer\s+[A-Za-z0-9._~+/=-]{12,}/);
+    expect(envExample).toContain("KIWOOM_ENABLE_REAL_API_CALLS=false");
+    expect(envExample).toContain("KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH=false");
+    expect(envExample).toContain("Do not add KIWOOM_ACCOUNT_NO");
   });
 
   it("keeps public quote real-path defaults disabled", () => {
@@ -152,6 +178,50 @@ describe("provider compliance and security review docs", () => {
       expect(serialized).not.toMatch(/holdings/i);
       expect(parsed).not.toHaveProperty("raw");
       expect(parsed).not.toHaveProperty("raw_payload");
+    }
+  });
+
+  it("adds safe MCP client setup docs and examples", () => {
+    for (const path of [...gettingStartedDocPaths, ...mcpClientSetupExamplePaths]) {
+      expect(existsSync(path), `${path} should exist`).toBe(true);
+    }
+
+    const combinedDocs = [
+      "README.md",
+      "SECURITY.md",
+      "docs/providers/provider-status.md",
+      "docs/release/v0.23.0-alpha-checklist.md",
+      ...gettingStartedDocPaths
+    ].map((path) => readFileSync(path, "utf8")).join("\n");
+
+    expect(combinedDocs).toContain("mock provider");
+    expect(combinedDocs).toContain("Claude Desktop");
+    expect(combinedDocs).toContain("Cursor");
+    expect(combinedDocs).toContain("KIWOOM_ENABLE_REAL_API_CALLS=false");
+    expect(combinedDocs).toContain("KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH=false");
+    expect(combinedDocs).toContain("real Kiwoom quote lookup remains disabled by default");
+    expect(combinedDocs).toContain("no account access");
+    expect(combinedDocs).toContain("no orders");
+    expect(combinedDocs).toContain("no trading");
+    expect(combinedDocs).toContain("no centralized data redistribution proxy");
+  });
+
+  it("keeps MCP client setup examples placeholder-only and read-only", () => {
+    for (const path of mcpClientSetupExamplePaths) {
+      const serialized = readFileSync(path, "utf8");
+
+      expect(serialized).not.toMatch(/Bearer\s+[A-Za-z0-9._~+/=-]{12,}/);
+      expect(serialized).not.toMatch(/access_token/i);
+      expect(serialized).not.toMatch(/KIWOOM_APP_KEY[ \t]*[:=][ \t]*["']?(?!YOUR_KIWOOM_APP_KEY)[A-Za-z0-9._~-]{8,}/);
+      expect(serialized).not.toMatch(/KIWOOM_SECRET_KEY[ \t]*[:=][ \t]*["']?(?!YOUR_KIWOOM_SECRET_KEY)[A-Za-z0-9._~-]{8,}/);
+      expect(serialized).not.toMatch(/ACCOUNT_NO/i);
+      expect(serialized).not.toMatch(/ORDER_NO/i);
+      expect(serialized).not.toMatch(/ENABLE_TRADING_TOOLS["']?\s*[:=]\s*["']?true/i);
+
+      if (path.endsWith(".json")) {
+        const parsed = JSON.parse(serialized) as Record<string, unknown>;
+        expect(parsed).toHaveProperty("mcpServers");
+      }
     }
   });
 
