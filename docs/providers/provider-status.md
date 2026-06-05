@@ -15,7 +15,7 @@ This document is especially important because different providers may have diffe
 | Provider | Status        | Real API calls |     Credentials required | Default | Notes                                                   |
 | -------- | ------------- | -------------: | -----------------------: | ------: | ------------------------------------------------------- |
 | `mock`   | Implemented   |             No |                       No |     Yes | Fixed sample data for local MCP testing                 |
-| `kiwoom` | Package and distribution readiness added |  No by default | Yes, for manual token/quote verification and local-only smoke tests |      No | Guarded public quote tool; real lookup disabled by default |
+| `kiwoom` | Alpha release final review prepared |  No by default | Yes, for manual token/quote verification and local-only smoke tests |      No | Guarded public quote tool; real lookup disabled by default |
 
 ---
 
@@ -217,6 +217,9 @@ v0.24.0-alpha release checklist
 package and distribution readiness documentation
 alpha install smoke test documentation
 package metadata review for local install/run commands
+alpha launch announcement draft
+alpha final review documentation
+v0.26.0-alpha final release checklist
 normalized auth errors
 no-network safety tests
 read-only provider skeleton
@@ -295,6 +298,7 @@ Real Kiwoom API calls must remain disabled by default.
 | MCP client setup and user onboarding docs | Added quickstart, Claude Desktop, Cursor, troubleshooting, and safe examples |
 | Read-only Kiwoom quote MCP alpha launch candidate | Added README cleanup, CHANGELOG, examples review, known limitations, and v0.24 checklist |
 | Package and distribution readiness | Added package metadata review, distribution readiness docs, install smoke test docs, and v0.25 checklist |
+| Alpha release final review | Prepared final review docs, launch announcement draft, and v0.26 checklist |
 | Public real Kiwoom quote lookup   | Not enabled by default |
 | Mock/test quote response          | Available for response validation only |
 | Mocked quote response                 | Can be normalized safely          |
@@ -523,6 +527,7 @@ blocked reason codes are standardized between docs and tests
 MCP client setup docs and examples use mock provider first
 alpha launch candidate docs cover known limitations and examples review
 package/distribution docs keep mock provider as recommended first path
+alpha final review confirms public tool scope and unsupported scope
 ```
 
 Kiwoom tests must not require real credentials.
@@ -1138,6 +1143,43 @@ Package and Distribution Readiness
 ```
 
 This release prepares package and distribution documentation for local alpha users. It must not be described as an npm-published package or hosted MCP service unless those actions are performed separately. Public real Kiwoom quote lookup, endpoint enabled defaults, public exposure defaults, account access, orders, balance lookup, holdings lookup, trading, auto-trading, investment recommendations, centralized credential storage, and centralized data redistribution proxy behavior remain disabled by default or forbidden.
+
+---
+
+## v0.26.0-alpha
+
+Provider status:
+
+```text
+mock provider implemented
+alpha release final review prepared
+README final review completed
+SECURITY final review completed
+examples final review completed
+package metadata final review completed
+alpha launch announcement draft added
+alpha final review document added
+final release checklist added
+distribution remains GitHub clone/local setup
+npm publishing not performed
+hosted proxy not provided
+public tool list reviewed
+get_kiwoom_stock_quote public tool scope unchanged
+endpoint enabled default remains false
+endpoint exposesPublicTool default remains false
+public real Kiwoom quote lookup disabled by default
+Kiwoom real local verification remains explicit opt-in only
+account/order/trading explicitly out of scope
+centralized data redistribution proxy out of scope
+```
+
+Recommended release description:
+
+```text
+Alpha Release Final Review
+```
+
+This release prepares final alpha release review documentation. It must not be described as live Kiwoom quote support, an npm-published package, or a hosted MCP service. Public real Kiwoom quote lookup, endpoint enabled defaults, public exposure defaults, account access, orders, balance lookup, holdings lookup, trading, auto-trading, investment recommendations, centralized credential storage, and centralized data redistribution proxy behavior remain disabled by default or forbidden.
 
 ---
 

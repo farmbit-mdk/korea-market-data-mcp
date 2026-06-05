@@ -2,6 +2,34 @@
 
 All notable alpha release documentation and safety-scope changes are tracked here.
 
+## v0.26.0-alpha - Alpha Release Final Review
+
+Final alpha release review before the first public alpha release.
+
+- Completed README final review for alpha positioning, mock-first setup, local install/build/start, client setup links, public tool scope, safety, and unsupported scope.
+- Completed SECURITY final review for local credentials, issue/PR/log safety, mock-first setup, no hosted proxy, and no account/order/trading scope.
+- Completed examples final review for mock-first setup, placeholder-only Kiwoom local examples, Windows path guidance, and `node dist/index.js` command alignment.
+- Completed package metadata final review for `0.26.0-alpha`.
+- Added alpha launch announcement draft.
+- Added alpha final review document.
+- Added v0.26.0-alpha final release checklist.
+- Confirmed no runtime scope expansion in this release.
+
+`npm publish` was not performed. No hosted proxy was added. Real Kiwoom quote lookup remains disabled by default, mock provider remains the recommended first setup path, Kiwoom real local verification remains explicit opt-in only, and `get_kiwoom_stock_quote` public tool scope is unchanged.
+
+Explicitly excluded:
+
+```text
+account access
+orders
+balance lookup
+holdings lookup
+trading
+auto-trading
+investment recommendations
+centralized data redistribution proxy
+```
+
 ## v0.25.0-alpha - Package and Distribution Readiness
 
 Package and distribution readiness pass for local install, build, and MCP client setup.

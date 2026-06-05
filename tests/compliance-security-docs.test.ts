@@ -33,9 +33,12 @@ const requiredDocs = [
   "docs/release/v0.23.0-alpha-checklist.md",
   "docs/release/v0.24.0-alpha-checklist.md",
   "docs/release/v0.25.0-alpha-checklist.md",
+  "docs/release/v0.26.0-alpha-checklist.md",
   "docs/release/alpha-known-limitations.md",
   "docs/release/distribution-readiness.md",
   "docs/release/alpha-install-smoke-test.md",
+  "docs/release/alpha-launch-announcement.md",
+  "docs/release/alpha-final-review.md",
   "examples/README.md"
 ];
 
@@ -324,7 +327,7 @@ describe("provider compliance and security review docs", () => {
     };
 
     expect(packageJson.name).toBe("korea-market-data-mcp");
-    expect(packageJson.version).toBe("0.25.0-alpha");
+    expect(packageJson.version).toBe("0.26.0-alpha");
     expect(packageLock.version).toBe(packageJson.version);
     expect(packageLock.packages[""].version).toBe(packageJson.version);
     expect(packageJson.description).toContain("Read-only MCP server");
@@ -347,9 +350,47 @@ describe("provider compliance and security review docs", () => {
     expect(packageJson.scripts?.test).toBe("vitest run");
     expect(packageJson.scripts?.["kiwoom:token:manual"]).toContain("scripts/kiwoom-manual-token-test.ts");
     expect(packageJson.scripts?.["kiwoom:quote:manual"]).toContain("scripts/kiwoom-manual-quote-test.ts");
-    expect(readFileSync(".env.example", "utf8")).toContain("MCP_SERVER_VERSION=0.25.0-alpha");
-    expect(readFileSync("src/utils/env.ts", "utf8")).toContain("0.25.0-alpha");
-    expect(readFileSync("src/server/create-server.ts", "utf8")).toContain("0.25.0-alpha");
+    expect(readFileSync(".env.example", "utf8")).toContain("MCP_SERVER_VERSION=0.26.0-alpha");
+    expect(readFileSync("src/utils/env.ts", "utf8")).toContain("0.26.0-alpha");
+    expect(readFileSync("src/server/create-server.ts", "utf8")).toContain("0.26.0-alpha");
+  });
+
+  it("documents v0.26 alpha final review and launch announcement without runtime expansion", () => {
+    const finalReviewDocs = [
+      "README.md",
+      "CHANGELOG.md",
+      "SECURITY.md",
+      "docs/providers/provider-status.md",
+      "docs/release/alpha-launch-announcement.md",
+      "docs/release/alpha-final-review.md",
+      "docs/release/v0.26.0-alpha-checklist.md",
+      "docs/release/distribution-readiness.md",
+      "examples/README.md"
+    ].map((path) => readFileSync(path, "utf8")).join("\n");
+
+    expect(finalReviewDocs).toContain("v0.26.0-alpha");
+    expect(finalReviewDocs).toContain("Alpha Release Final Review");
+    expect(finalReviewDocs).toContain("alpha-ready-with-limitations");
+    expect(finalReviewDocs).toContain("alpha launch announcement");
+    expect(finalReviewDocs).toContain("README final review");
+    expect(finalReviewDocs).toContain("SECURITY final review");
+    expect(finalReviewDocs).toContain("examples final review");
+    expect(finalReviewDocs).toContain("package metadata final review");
+    expect(finalReviewDocs).toContain("npm publish was not performed");
+    expect(finalReviewDocs).toContain("No hosted proxy was added");
+    expect(finalReviewDocs).toContain("Real Kiwoom quote lookup remains disabled by default.");
+    expect(finalReviewDocs).toContain("Mock provider is the recommended first setup path.");
+    expect(finalReviewDocs).toContain("Kiwoom real local verification is explicit opt-in only.");
+    expect(finalReviewDocs).toContain("get_kiwoom_stock_quote public tool scope unchanged");
+    expect(finalReviewDocs).toContain("get_kiwoom_stock_quote is the only Kiwoom public quote tool");
+    expect(finalReviewDocs).toContain("No account access.");
+    expect(finalReviewDocs).toContain("No orders.");
+    expect(finalReviewDocs).toContain("No balance lookup.");
+    expect(finalReviewDocs).toContain("No holdings lookup.");
+    expect(finalReviewDocs).toContain("No trading.");
+    expect(finalReviewDocs).toContain("No auto-trading.");
+    expect(finalReviewDocs).toContain("No investment recommendations.");
+    expect(finalReviewDocs).toContain("No centralized data redistribution proxy.");
   });
 
   it("keeps MCP client examples aligned with the built package entrypoint", () => {
