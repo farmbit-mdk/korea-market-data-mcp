@@ -84,9 +84,12 @@ docs/getting-started/quickstart.md
 docs/getting-started/mcp-client-setup.md
 examples/claude-desktop.mock.json
 examples/cursor.mock.json
+examples/README.md
 ```
 
 Never paste real app keys, secret keys, access tokens, `.env.local` contents, screenshots containing credentials, or raw provider responses into GitHub issues or pull requests.
+
+For the alpha launch candidate, Kiwoom real local verification requires user-owned credentials and explicit local opt-in only. Real Kiwoom quote lookup remains disabled by default, no centralized credential or market data proxy is provided, and account, order, balance, holdings, trading, auto-trading, and investment recommendation features remain out of scope.
 
 ---
 
