@@ -91,6 +91,18 @@ Never paste real app keys, secret keys, access tokens, `.env.local` contents, sc
 
 For the alpha launch candidate, Kiwoom real local verification requires user-owned credentials and explicit local opt-in only. Real Kiwoom quote lookup remains disabled by default, no centralized credential or market data proxy is provided, and account, order, balance, holdings, trading, auto-trading, and investment recommendation features remain out of scope.
 
+For package and distribution readiness:
+
+```text
+install from the official repository or maintainer-provided release artifacts only
+do not use unofficial hosted MCP proxies
+do not paste credentials into install logs, issues, pull requests, or screenshots
+do not commit .env.local or other local credential files
+use mock provider first
+real Kiwoom verification requires user-owned credentials
+no account/order/trading scope is supported
+```
+
 ---
 
 ## 5. Environment files

@@ -32,7 +32,10 @@ const requiredDocs = [
   "docs/release/v0.22.0-alpha-checklist.md",
   "docs/release/v0.23.0-alpha-checklist.md",
   "docs/release/v0.24.0-alpha-checklist.md",
+  "docs/release/v0.25.0-alpha-checklist.md",
   "docs/release/alpha-known-limitations.md",
+  "docs/release/distribution-readiness.md",
+  "docs/release/alpha-install-smoke-test.md",
   "examples/README.md"
 ];
 
@@ -261,6 +264,118 @@ describe("provider compliance and security review docs", () => {
     expect(launchCandidateDocs).toContain("no auto-trading");
     expect(launchCandidateDocs).toContain("no investment recommendations");
     expect(launchCandidateDocs).toContain("no centralized data redistribution proxy");
+  });
+
+  it("documents v0.25 package and distribution readiness without publishing or hosted proxy scope", () => {
+    const distributionDocs = [
+      "README.md",
+      "CHANGELOG.md",
+      "SECURITY.md",
+      "docs/providers/provider-status.md",
+      "docs/getting-started/quickstart.md",
+      "docs/getting-started/mcp-client-setup.md",
+      "docs/release/distribution-readiness.md",
+      "docs/release/alpha-install-smoke-test.md",
+      "docs/release/v0.25.0-alpha-checklist.md",
+      "examples/README.md"
+    ].map((path) => readFileSync(path, "utf8")).join("\n");
+
+    expect(distributionDocs).toContain("v0.25.0-alpha");
+    expect(distributionDocs).toContain("Package and Distribution Readiness");
+    expect(distributionDocs).toContain("npm publish");
+    expect(distributionDocs).toContain("not performed");
+    expect(distributionDocs).toContain("hosted proxy");
+    expect(distributionDocs).toContain("not added");
+    expect(distributionDocs).toContain("mock provider");
+    expect(distributionDocs).toContain("recommended first");
+    expect(distributionDocs).toContain("Kiwoom real local verification remains explicit opt-in only");
+    expect(distributionDocs).toContain("real Kiwoom quote lookup remains disabled by default");
+    expect(distributionDocs).toContain("get_kiwoom_stock_quote public tool scope");
+    expect(distributionDocs).toContain("command: node");
+    expect(distributionDocs).toContain("dist/index.js");
+    expect(distributionDocs).toContain("npm run build");
+    expect(distributionDocs).toContain("npm start");
+    expect(distributionDocs).toContain("no account access");
+    expect(distributionDocs).toContain("no orders");
+    expect(distributionDocs).toContain("no balance lookup");
+    expect(distributionDocs).toContain("no holdings lookup");
+    expect(distributionDocs).toContain("no trading");
+    expect(distributionDocs).toContain("no auto-trading");
+    expect(distributionDocs).toContain("no investment recommendations");
+    expect(distributionDocs).toContain("no centralized data redistribution proxy");
+  });
+
+  it("keeps package metadata aligned with documented local distribution commands", () => {
+    const packageJson = JSON.parse(readFileSync("package.json", "utf8")) as {
+      name: string;
+      version: string;
+      description: string;
+      type: string;
+      main?: string;
+      bin?: Record<string, string>;
+      files?: string[];
+      scripts?: Record<string, string>;
+      license: string;
+    };
+    const packageLock = JSON.parse(readFileSync("package-lock.json", "utf8")) as {
+      name: string;
+      version: string;
+      packages: Record<string, { version?: string }>;
+    };
+
+    expect(packageJson.name).toBe("korea-market-data-mcp");
+    expect(packageJson.version).toBe("0.25.0-alpha");
+    expect(packageLock.version).toBe(packageJson.version);
+    expect(packageLock.packages[""].version).toBe(packageJson.version);
+    expect(packageJson.description).toContain("Read-only MCP server");
+    expect(packageJson.license).toBe("MIT");
+    expect(packageJson.type).toBe("module");
+    expect(packageJson.main).toBe("dist/index.js");
+    expect(packageJson.bin?.["korea-market-data-mcp"]).toBe("dist/index.js");
+    expect(packageJson.files).toEqual(expect.arrayContaining([
+      "dist",
+      "docs",
+      "examples",
+      ".env.example",
+      "CHANGELOG.md",
+      "README.md",
+      "SECURITY.md",
+      "LICENSE"
+    ]));
+    expect(packageJson.scripts?.build).toBe("tsc -p tsconfig.json");
+    expect(packageJson.scripts?.start).toBe("node dist/index.js");
+    expect(packageJson.scripts?.test).toBe("vitest run");
+    expect(packageJson.scripts?.["kiwoom:token:manual"]).toContain("scripts/kiwoom-manual-token-test.ts");
+    expect(packageJson.scripts?.["kiwoom:quote:manual"]).toContain("scripts/kiwoom-manual-quote-test.ts");
+    expect(readFileSync(".env.example", "utf8")).toContain("MCP_SERVER_VERSION=0.25.0-alpha");
+    expect(readFileSync("src/utils/env.ts", "utf8")).toContain("0.25.0-alpha");
+    expect(readFileSync("src/server/create-server.ts", "utf8")).toContain("0.25.0-alpha");
+  });
+
+  it("keeps MCP client examples aligned with the built package entrypoint", () => {
+    const mcpJsonExamplePaths = [
+      "examples/claude-desktop.mock.json",
+      "examples/claude-desktop.kiwoom-local.example.json",
+      "examples/cursor.mock.json",
+      "examples/cursor.kiwoom-local.example.json"
+    ];
+
+    for (const path of mcpJsonExamplePaths) {
+      const parsed = JSON.parse(readFileSync(path, "utf8")) as {
+        mcpServers: Record<string, { command: string; args: string[]; env: Record<string, string> }>;
+      };
+      const server = parsed.mcpServers["korea-market-data"];
+
+      expect(server.command).toBe("node");
+      expect(server.args).toHaveLength(1);
+      expect(server.args[0]).toContain("dist/index.js");
+      expect(server.env.KIWOOM_ENABLE_REAL_API_CALLS).toBe("false");
+      expect(server.env.KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH).toBe("false");
+      expect(server.env).not.toHaveProperty("KIWOOM_ACCOUNT_NO");
+      expect(server.env).not.toHaveProperty("ENABLE_TRADING_TOOLS");
+      expect(server.env).not.toHaveProperty("ENABLE_ACCOUNT_TOOLS");
+      expect(server.env).not.toHaveProperty("ENABLE_ORDER_TOOLS");
+    }
   });
 
   it("documents local verification matrices and blocked reasons", () => {

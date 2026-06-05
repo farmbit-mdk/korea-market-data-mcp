@@ -54,6 +54,14 @@ npm run build
 npm test
 ```
 
+The current alpha package is not published to npm. Use the GitHub clone path unless a future release explicitly documents npm publishing.
+
+Run the built server locally:
+
+```powershell
+npm start
+```
+
 ## Start With Mock Provider
 
 Use mock provider first. It requires no credentials and does not make real network calls.
@@ -73,6 +81,19 @@ Use the MCP client examples in:
 examples/claude-desktop.mock.json
 examples/cursor.mock.json
 examples/env.mock.example
+```
+
+MCP clients should use:
+
+```text
+command: node
+args: absolute path to dist/index.js
+```
+
+Windows JSON path example:
+
+```json
+"C:\\absolute\\path\\to\\korea-market-data-mcp\\dist\\index.js"
 ```
 
 ## Verify The Server

@@ -1,14 +1,20 @@
 {
   "name": "korea-market-data-mcp",
-  "version": "0.1.0",
+  "version": "0.25.0-alpha",
   "description": "Read-only MCP server for Korean financial market data.",
   "type": "module",
+  "main": "dist/index.js",
   "bin": {
     "korea-market-data-mcp": "dist/index.js"
   },
   "files": [
     "dist",
+    "docs",
+    "examples",
+    ".env.example",
+    "CHANGELOG.md",
     "README.md",
+    "SECURITY.md",
     "LICENSE"
   ],
   "scripts": {
@@ -16,6 +22,7 @@
     "dev": "tsx src/index.ts",
     "kiwoom:quote:manual": "tsx scripts/kiwoom-manual-quote-test.ts",
     "kiwoom:token:manual": "tsx scripts/kiwoom-manual-token-test.ts",
+    "start": "node dist/index.js",
     "test": "vitest run",
     "test:watch": "vitest"
   },

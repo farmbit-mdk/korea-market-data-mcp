@@ -15,7 +15,7 @@ export class MockMarketDataProvider implements MarketDataProvider {
   readonly metadata = {
     id: "mock",
     name: "Mock Market Data Provider",
-    version: "0.1.0",
+    version: "0.25.0-alpha",
     supportsRealtime: false,
     supportsHistoricalChart: true,
     supportsEtfData: true,
