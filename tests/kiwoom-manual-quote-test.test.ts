@@ -109,9 +109,9 @@ describe("Kiwoom manual quote verification workflow", () => {
     expect(quoteTransport.requestQuote).not.toHaveBeenCalled();
   });
 
-  it("blocks when symbol is missing", async () => {
-    const tokenTransport = createMockTokenTransport();
-    const quoteTransport = createMockQuoteTransport();
+  it("falls back to Samsung Electronics symbol when CLI and env symbols are missing", async () => {
+    const tokenTransport = createMockTokenTransport(successfulKiwoomTokenResponse);
+    const quoteTransport = createMockQuoteTransport(successfulKiwoomQuoteLikeResponse);
     const summary = await runManualKiwoomQuoteVerification(
       {
         KIWOOM_ENABLE_REAL_API_CALLS: "true",
@@ -122,13 +122,12 @@ describe("Kiwoom manual quote verification workflow", () => {
     );
 
     expect(summary).toMatchObject({
-      status: "blocked",
-      quote_present: false,
-      reason_code: "INVALID_SYMBOL",
-      reason: expect.stringContaining("symbol")
+      status: "ok",
+      symbol: "005930",
+      quote_present: true
     });
-    expect(tokenTransport.requestToken).not.toHaveBeenCalled();
-    expect(quoteTransport.requestQuote).not.toHaveBeenCalled();
+    expect(tokenTransport.requestToken).toHaveBeenCalledOnce();
+    expect(quoteTransport.requestQuote).toHaveBeenCalledOnce();
   });
 
   it("blocks when quote endpoint mapping is disabled", async () => {

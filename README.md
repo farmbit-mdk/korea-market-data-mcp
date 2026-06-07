@@ -562,6 +562,24 @@ Examples:
 
 `get_korean_market_data_context` returns structured quote, daily chart, and related index payloads for analysis by the client model. It does not return buy/sell judgments, target prices, return forecasts, portfolio decisions, or investment recommendations.
 
+`v0.32.0-alpha` improves real Kiwoom context UX. For Kiwoom provider context, failed or blocked real quote lookups are returned as explicit `blocked` or `provider_error` payloads and are not replaced with mock data. Real chart and index context return `unavailable` until those real endpoints are implemented.
+
+Check local Kiwoom readiness:
+
+```bash
+npm run kiwoom:setup:check
+```
+
+Claude Desktop example prompts:
+
+```text
+korea-market-data MCP로 삼성전자 실제 데이터를 가져와줘
+삼전 현재 시세 데이터를 가져와줘
+KODEX 200 ETF 데이터를 가져와줘
+```
+
+The MCP server returns data payloads only. Claude/GPT performs any analysis from that data.
+
 ### Kiwoom auth skeleton
 
 The repository includes a Kiwoom provider auth skeleton for future adapter work. It can load Kiwoom-related environment variables and return normalized credential errors, but it does not request tokens or call the Kiwoom REST API by default.

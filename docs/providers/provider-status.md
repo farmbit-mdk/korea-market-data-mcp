@@ -236,6 +236,8 @@ official npm alpha publish result documentation
 v0.30.0-alpha release checklist
 Korean market data query resolution tools
 structured market data context payloads
+real market data context UX improvements
+Kiwoom setup check script
 normalized auth errors
 no-network safety tests
 read-only provider skeleton
@@ -320,6 +322,7 @@ Real Kiwoom API calls must remain disabled by default.
 | Official npm publish decision | Documented defer-publish decision, package name availability check, access policy, versioning policy, and v0.29 checklist; npm publish not performed |
 | Official npm alpha publish | Publishes v0.30.0-alpha with alpha dist-tag; latest currently points to alpha, documented install remains @alpha, no hosted proxy, and no runtime scope expansion |
 | Korean market data query resolution | Adds resolve_korean_market_query and get_korean_market_data_context for natural-language stock, ETF, and index data lookup |
+| Real market data context UX | Adds Kiwoom setup check, investment environment diagnostics, guarded real quote context, unavailable chart/index states, and no mock fallback for failed real context |
 | Public real Kiwoom quote lookup   | Not enabled by default |
 | Mock/test quote response          | Available for response validation only |
 | Mocked quote response                 | Can be normalized safely          |
@@ -1367,6 +1370,36 @@ Korean Market Data Query Resolution
 ```
 
 This release adds natural-language target resolution and structured market data context payloads for Korean stocks, ETFs, and indices. It must not be described as an answer engine, recommendation engine, hosted MCP service, or live Kiwoom quote support. Responses provide data payloads only and do not include buy/sell judgments, target prices, return forecasts, portfolio decisions, or investment recommendations.
+
+---
+
+## v0.32.0-alpha
+
+Provider status:
+
+```text
+mock provider implemented
+Kiwoom setup check script added
+KIWOOM_INVESTMENT_ENV documented in env example
+manual quote symbol fallback uses 005930 when CLI and env symbols are absent
+get_korean_market_data_context resolves natural-language queries for Kiwoom provider
+Kiwoom context quote path uses existing guarded real quote flow
+failed or blocked real context lookup does not fall back to mock data
+real daily chart context returns unavailable
+real index context returns unavailable
+get_kiwoom_stock_quote public tool scope unchanged
+real Kiwoom quote lookup disabled by default
+account/order/trading explicitly out of scope
+centralized data redistribution proxy out of scope
+```
+
+Recommended release description:
+
+```text
+Real Market Data Context UX
+```
+
+This release improves real Kiwoom readiness diagnostics and context payload behavior. It must not be described as enabling real quote lookup by default, adding real chart/index support, or adding recommendation/account/order/trading behavior. Failed real context lookups must return explicit blocked/provider_error/unavailable states instead of mock fallback data.
 
 ---
 

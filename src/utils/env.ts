@@ -17,7 +17,7 @@ export function loadRuntimeConfig(env: NodeJS.ProcessEnv = process.env): Runtime
   return {
     provider,
     serverName: env.MCP_SERVER_NAME ?? "korea-market-data-mcp",
-    serverVersion: env.MCP_SERVER_VERSION ?? "0.31.0-alpha",
+    serverVersion: env.MCP_SERVER_VERSION ?? "0.32.0-alpha",
     logLevel: env.LOG_LEVEL ?? "info"
   };
 }

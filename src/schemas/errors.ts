@@ -5,6 +5,7 @@ export const providerErrorCodes = [
   "PROVIDER_UNAVAILABLE",
   "PROVIDER_BAD_RESPONSE",
   "KIWOOM_TOKEN_REQUEST_FAILED",
+  "KIWOOM_INVESTMENT_ENV_MISMATCH",
   "KIWOOM_QUOTE_NOT_IMPLEMENTED",
   "KIWOOM_QUOTE_BAD_RESPONSE",
   "KIWOOM_QUOTE_REQUEST_FAILED",
@@ -24,5 +25,6 @@ export interface ToolErrorResponse {
     retryable: boolean;
     return_code?: string;
     return_msg?: string;
+    hint?: string;
   };
 }

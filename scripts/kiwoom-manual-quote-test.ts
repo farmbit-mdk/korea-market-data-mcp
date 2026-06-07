@@ -69,7 +69,7 @@ export async function runManualKiwoomQuoteVerification(
   dependencies: ManualKiwoomQuoteDependencies = {}
 ): Promise<ManualKiwoomQuoteSummary> {
   const environment = parseManualEnvironment(env.KIWOOM_ENV);
-  const symbol = normalizeEnvValue(env.KIWOOM_QUOTE_SYMBOL) ?? normalizeEnvValue(dependencies.argv?.[0]);
+  const symbol = normalizeEnvValue(dependencies.argv?.[0]) ?? normalizeEnvValue(env.KIWOOM_QUOTE_SYMBOL) ?? "005930";
   const rawAppKey = env.KIWOOM_APP_KEY;
   const rawSecretKey = env.KIWOOM_SECRET_KEY ?? env.KIWOOM_APP_SECRET;
   const appKey = normalizeEnvValue(env.KIWOOM_APP_KEY);
@@ -91,10 +91,6 @@ export async function runManualKiwoomQuoteVerification(
 
   if (appKey === undefined || secretKey === undefined) {
     return blocked(environment, symbol, "CREDENTIALS_MISSING", "KIWOOM_APP_KEY and KIWOOM_SECRET_KEY are required for manual quote verification.");
-  }
-
-  if (symbol === undefined) {
-    return blocked(environment, symbol, "INVALID_SYMBOL", "KIWOOM_QUOTE_SYMBOL or a CLI symbol argument is required for manual quote verification.");
   }
 
   if (!quoteEndpointMapping.enabled || !quoteEndpointMapping.manualOnly || !quoteEndpointMapping.readOnly) {

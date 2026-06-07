@@ -2,6 +2,20 @@
 
 All notable alpha release documentation and safety-scope changes are tracked here.
 
+## v0.32.0-alpha - Real Market Data Context UX
+
+Real Kiwoom setup and context UX improvements.
+
+- Updated package metadata and server defaults to `0.32.0-alpha`.
+- Added `npm run kiwoom:setup:check` for local Kiwoom readiness diagnostics.
+- Added `KIWOOM_INVESTMENT_ENV=real | mock` setup visibility while keeping provider mock and Kiwoom mock investment environment separate.
+- Normalized Kiwoom investment environment mismatch token errors as `KIWOOM_INVESTMENT_ENV_MISMATCH`.
+- Updated manual quote verification to fall back to Samsung Electronics symbol `005930` when no CLI symbol or `KIWOOM_QUOTE_SYMBOL` is provided.
+- Updated `get_korean_market_data_context` so Kiwoom provider context uses guarded real quote flow and does not fall back to mock quote/chart/index data.
+- Added explicit `blocked`, `provider_error`, and `unavailable` context payload states.
+
+This release keeps the MCP server as a data provider. It does not add buy/sell judgments, target prices, return forecasts, portfolio decisions, investment recommendations, account access, orders, balance lookup, holdings lookup, trading, auto-trading, hosted proxy, or centralized data redistribution.
+
 ## v0.31.0-alpha - Korean Market Data Query Resolution
 
 Natural-language Korean market data target resolution and context payloads.

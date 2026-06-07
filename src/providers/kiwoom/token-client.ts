@@ -116,6 +116,18 @@ export function normalizeKiwoomTokenResponse(response: KiwoomRawTokenResponse): 
   const returnMessage = response.return_msg;
 
   if (returnCode !== undefined && returnCode !== "0") {
+    if (isInvestmentEnvironmentMismatch(returnCode, returnMessage)) {
+      throw new MarketDataProviderError(
+        "KIWOOM_INVESTMENT_ENV_MISMATCH",
+        "Kiwoom App Key does not match the configured investment environment.",
+        "kiwoom",
+        false,
+        returnCode,
+        returnMessage === undefined ? undefined : redactSecrets(returnMessage),
+        "Check whether the App Key is for real trading or mock trading, then set KIWOOM_INVESTMENT_ENV accordingly."
+      );
+    }
+
     throw new MarketDataProviderError(
       "KIWOOM_TOKEN_REQUEST_FAILED",
       "Kiwoom token request failed.",
@@ -140,6 +152,16 @@ export function normalizeKiwoomTokenResponse(response: KiwoomRawTokenResponse): 
     returnCode,
     returnMessage
   };
+}
+
+function isInvestmentEnvironmentMismatch(returnCode: string, returnMessage: string | undefined): boolean {
+  const message = returnMessage ?? "";
+  return returnCode === "2" && (
+    message.includes("8030") ||
+    message.toLocaleLowerCase().includes("appkey") ||
+    message.includes("실전") ||
+    message.includes("모의")
+  );
 }
 
 export function normalizeKiwoomTokenError(error: unknown): MarketDataProviderError {
