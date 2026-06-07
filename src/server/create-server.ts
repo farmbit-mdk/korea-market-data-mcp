@@ -11,7 +11,7 @@ export interface CreateServerOptions {
 export function createServer(options: CreateServerOptions = {}): McpServer {
   const server = new McpServer({
     name: options.name ?? "korea-market-data-mcp",
-    version: options.version ?? "0.31.0-alpha"
+    version: options.version ?? "0.32.0-alpha"
   });
   const provider = createProvider(options.providerId ?? "mock");
 

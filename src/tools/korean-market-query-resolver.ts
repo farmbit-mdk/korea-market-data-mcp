@@ -32,14 +32,14 @@ export interface KoreanMarketDataContext {
   query: string;
   resolved_assets: ResolvedKoreanMarketAsset[];
   data: {
-    quotes: NormalizedQuote[];
-    daily_charts: NormalizedDailyChart[];
-    related_indices: NormalizedIndex[];
+    quotes: Array<NormalizedQuote | Record<string, unknown>>;
+    daily_charts: Array<NormalizedDailyChart | Record<string, unknown>>;
+    related_indices: Array<NormalizedIndex | Record<string, unknown>>;
   };
   provider: string;
   environment: string;
   fetched_at: string;
-  data_status: "ok" | "partial" | "unresolved";
+  data_status: "ok" | "partial" | "unresolved" | "blocked" | "provider_error" | "unavailable";
 }
 
 export interface ResolveKoreanMarketQueryOptions {
@@ -70,6 +70,59 @@ const knownTerms: Array<{ term: string; canonicalQuery: string; assetType: Resol
   { term: "코스피", canonicalQuery: "코스피", assetType: "index", confidence: 0.96 }
 ];
 
+const builtInAssets: Array<SymbolSearchResult & { aliases: string[] }> = [
+  {
+    symbol: "005930",
+    name: "Samsung Electronics",
+    market: "KOSPI",
+    assetType: "stock",
+    currency: "KRW",
+    provider: "resolver",
+    sourceSymbol: "005930",
+    aliases: ["삼성전자", "삼전", "Samsung", "Samsung Electronics", "005930"]
+  },
+  {
+    symbol: "069500",
+    name: "KODEX 200",
+    market: "KOSPI",
+    assetType: "etf",
+    currency: "KRW",
+    provider: "resolver",
+    sourceSymbol: "069500",
+    aliases: ["KODEX 200", "KODEX200", "코덱스 200", "코덱스200", "069500"]
+  },
+  {
+    symbol: "KOSPI",
+    name: "KOSPI",
+    market: "KRX",
+    assetType: "index",
+    currency: "KRW",
+    provider: "resolver",
+    sourceSymbol: "KOSPI",
+    aliases: ["KOSPI", "코스피"]
+  },
+  {
+    symbol: "KOSDAQ",
+    name: "KOSDAQ",
+    market: "KRX",
+    assetType: "index",
+    currency: "KRW",
+    provider: "resolver",
+    sourceSymbol: "KOSDAQ",
+    aliases: ["KOSDAQ", "코스닥"]
+  },
+  {
+    symbol: "KOSPI200",
+    name: "KOSPI 200",
+    market: "KRX",
+    assetType: "index",
+    currency: "KRW",
+    provider: "resolver",
+    sourceSymbol: "KOSPI200",
+    aliases: ["KOSPI200", "KOSPI 200", "코스피200", "코스피 200"]
+  }
+];
+
 export async function resolveKoreanMarketQuery(
   options: ResolveKoreanMarketQueryOptions
 ): Promise<KoreanMarketQueryResolution> {
@@ -82,11 +135,7 @@ export async function resolveKoreanMarketQuery(
   const resolved = new Map<string, ResolvedKoreanMarketAsset>();
 
   for (const match of searchQueries) {
-    const results = await options.provider.searchSymbol({
-      query: match.canonicalQuery,
-      assetType: match.assetType,
-      limit: maxResults
-    });
+    const results = await searchSymbols(options.provider, match, maxResults);
 
     for (const result of results) {
       if (!isResolvableAssetType(result.assetType) || !preferred.has(result.assetType)) {
@@ -118,6 +167,45 @@ export async function resolveKoreanMarketQuery(
     provider: options.provider.metadata.id,
     environment: options.provider.metadata.id === "mock" ? "mock" : "local"
   };
+}
+
+async function searchSymbols(
+  provider: MarketDataProvider,
+  match: { canonicalQuery: string; assetType: ResolvableAssetType },
+  maxResults: number
+): Promise<SymbolSearchResult[]> {
+  try {
+    const results = await provider.searchSymbol({
+      query: match.canonicalQuery,
+      assetType: match.assetType,
+      limit: maxResults
+    });
+
+    if (results.length > 0) {
+      return results;
+    }
+  } catch {
+    // Kiwoom does not provide symbol search yet. Fall back to a tiny built-in
+    // resolver catalog so natural-language queries can still reach guarded
+    // real quote flow without mock market data fallback.
+  }
+
+  const normalizedQuery = normalizeSearchText(match.canonicalQuery);
+  const compactQuery = compactText(normalizedQuery);
+
+  return builtInAssets
+    .filter((asset) => asset.assetType === match.assetType)
+    .filter((asset) => {
+      const values = [asset.symbol, asset.name, asset.sourceSymbol, ...asset.aliases].filter((value): value is string => value !== undefined);
+      return values.some((value) => {
+        const normalizedValue = normalizeSearchText(value);
+        return normalizedValue.includes(normalizedQuery) ||
+          compactText(normalizedValue).includes(compactQuery) ||
+          normalizedQuery.includes(normalizedValue) ||
+          compactQuery.includes(compactText(normalizedValue));
+      });
+    })
+    .slice(0, maxResults);
 }
 
 function findMatchedTerms(query: string): typeof knownTerms {

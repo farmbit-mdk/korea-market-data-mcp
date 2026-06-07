@@ -38,6 +38,7 @@ const requiredDocs = [
   "docs/release/v0.28.0-alpha-checklist.md",
   "docs/release/v0.29.0-alpha-checklist.md",
   "docs/release/v0.30.0-alpha-checklist.md",
+  "docs/release/v0.32.0-alpha-checklist.md",
   "docs/release/alpha-known-limitations.md",
   "docs/release/distribution-readiness.md",
   "docs/release/alpha-install-smoke-test.md",
@@ -343,7 +344,7 @@ describe("provider compliance and security review docs", () => {
     };
 
     expect(packageJson.name).toBe("korea-market-data-mcp");
-    expect(packageJson.version).toBe("0.31.0-alpha");
+    expect(packageJson.version).toBe("0.32.0-alpha");
     expect(packageLock.version).toBe(packageJson.version);
     expect(packageLock.packages[""].version).toBe(packageJson.version);
     expect(packageJson.description).toContain("Read-only MCP server");
@@ -375,11 +376,12 @@ describe("provider compliance and security review docs", () => {
     expect(packageJson.scripts?.build).toBe("tsc -p tsconfig.json");
     expect(packageJson.scripts?.start).toBe("node dist/index.js");
     expect(packageJson.scripts?.test).toBe("vitest run");
+    expect(packageJson.scripts?.["kiwoom:setup:check"]).toContain("scripts/kiwoom-setup-check.ts");
     expect(packageJson.scripts?.["kiwoom:token:manual"]).toContain("scripts/kiwoom-manual-token-test.ts");
     expect(packageJson.scripts?.["kiwoom:quote:manual"]).toContain("scripts/kiwoom-manual-quote-test.ts");
-    expect(readFileSync(".env.example", "utf8")).toContain("MCP_SERVER_VERSION=0.31.0-alpha");
-    expect(readFileSync("src/utils/env.ts", "utf8")).toContain("0.31.0-alpha");
-    expect(readFileSync("src/server/create-server.ts", "utf8")).toContain("0.31.0-alpha");
+    expect(readFileSync(".env.example", "utf8")).toContain("MCP_SERVER_VERSION=0.32.0-alpha");
+    expect(readFileSync("src/utils/env.ts", "utf8")).toContain("0.32.0-alpha");
+    expect(readFileSync("src/server/create-server.ts", "utf8")).toContain("0.32.0-alpha");
   });
 
   it("documents v0.30 official npm alpha publish without runtime scope expansion", () => {
