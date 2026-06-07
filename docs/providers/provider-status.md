@@ -1461,6 +1461,34 @@ This release documents live Claude Desktop usage result capture for the existing
 
 ---
 
+## v0.35.0-alpha
+
+Provider status:
+
+```text
+query resolution available
+symbol search fixtures retained
+market data context is real-provider-only
+mock quote/chart/index payloads removed from context flow
+mock provider no longer returns stock quote, ETF quote, market index, or daily chart market values
+Kiwoom setup required for real quote data
+failed or blocked real context lookup does not fall back to mock data
+get_kiwoom_stock_quote public tool scope unchanged
+real Kiwoom quote lookup disabled by default
+account/order/trading explicitly out of scope
+centralized data redistribution proxy out of scope
+```
+
+Recommended release description:
+
+```text
+Remove Mock Market Data
+```
+
+This release removes market-price-like mock payloads from context and low-level mock market data flows. Resolver fixtures remain available for Korean asset names and symbols, but quote, chart, and index values require real provider data. If Kiwoom real provider data is not configured, context requests must return blocked/provider_error/unavailable status instead of data_status ok with mock data.
+
+---
+
 ## 11. Future provider candidates
 
 Potential future providers may include:

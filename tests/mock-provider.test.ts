@@ -5,66 +5,36 @@ import { createMockProvider } from "../src/providers/mock/index.js";
 describe("mock provider", () => {
   const provider = createMockProvider();
 
-  it("returns Samsung Electronics stock quote", async () => {
-    const quote = await provider.getStockQuote({ symbol: "005930" });
-
-    expect(quote).toMatchObject({
-      symbol: "005930",
-      name: "Samsung Electronics",
-      market: "KOSPI",
-      assetType: "stock",
-      currency: "KRW",
-      price: 70000,
+  it("does not return mock stock quote market data", async () => {
+    await expect(provider.getStockQuote({ symbol: "005930" })).rejects.toMatchObject({
+      code: "UNSUPPORTED_PROVIDER_CAPABILITY",
       provider: "mock",
-      sourceSymbol: "005930",
-      providerTimestamp: null,
-      isDelayed: false
-    });
-    expect(Date.parse(quote.requestTimestamp)).not.toBeNaN();
-  });
-
-  it("returns KODEX 200 ETF quote", async () => {
-    const quote = await provider.getEtfQuote({ symbol: "069500" });
-
-    expect(quote).toMatchObject({
-      symbol: "069500",
-      name: "KODEX 200",
-      market: "ETF",
-      assetType: "etf",
-      provider: "mock",
-      sourceSymbol: "069500",
-      isDelayed: false
+      retryable: false
     });
   });
 
-  it("returns supported market indices", async () => {
-    await expect(provider.getMarketIndex({ indexCode: "KOSPI" })).resolves.toMatchObject({
-      indexCode: "KOSPI",
-      provider: "mock"
-    });
-    await expect(provider.getMarketIndex({ indexCode: "KOSDAQ" })).resolves.toMatchObject({
-      indexCode: "KOSDAQ",
-      provider: "mock"
-    });
-    await expect(provider.getMarketIndex({ indexCode: "KOSPI200" })).resolves.toMatchObject({
-      indexCode: "KOSPI200",
-      provider: "mock"
+  it("does not return mock ETF quote market data", async () => {
+    await expect(provider.getEtfQuote({ symbol: "069500" })).rejects.toMatchObject({
+      code: "UNSUPPORTED_PROVIDER_CAPABILITY",
+      provider: "mock",
+      retryable: false
     });
   });
 
-  it("returns daily chart candles", async () => {
-    const chart = await provider.getDailyChart({ symbol: "005930", limit: 2 });
-
-    expect(chart).toMatchObject({
-      symbol: "005930",
+  it("does not return mock market index values", async () => {
+    await expect(provider.getMarketIndex({ indexCode: "KOSPI" })).rejects.toMatchObject({
+      code: "UNSUPPORTED_PROVIDER_CAPABILITY",
       provider: "mock",
-      sourceSymbol: "005930",
-      isDelayed: false
+      retryable: false
     });
-    expect(chart.candles).toHaveLength(2);
-    expect(chart.candles[0]).toHaveProperty("date");
-    expect(chart.candles[0]).toHaveProperty("open");
-    expect(chart.candles[0]).toHaveProperty("close");
+  });
+
+  it("does not return mock daily chart candles", async () => {
+    await expect(provider.getDailyChart({ symbol: "005930", limit: 2 })).rejects.toMatchObject({
+      code: "UNSUPPORTED_PROVIDER_CAPABILITY",
+      provider: "mock",
+      retryable: false
+    });
   });
 
   it("searches symbols using stable fixtures", async () => {
@@ -107,10 +77,10 @@ describe("mock provider", () => {
     });
   });
 
-  it("throws normalized symbol not found errors", async () => {
+  it("throws normalized unsupported capability errors for market data payloads", async () => {
     await expect(provider.getStockQuote({ symbol: "000000" })).rejects.toBeInstanceOf(MarketDataProviderError);
     await expect(provider.getStockQuote({ symbol: "000000" })).rejects.toMatchObject({
-      code: "SYMBOL_NOT_FOUND",
+      code: "UNSUPPORTED_PROVIDER_CAPABILITY",
       provider: "mock",
       retryable: false
     });

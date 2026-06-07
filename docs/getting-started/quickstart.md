@@ -98,19 +98,19 @@ Windows JSON path example:
 
 ## Verify The Server
 
-After configuring your MCP client, ask for fixed mock data:
+After configuring your MCP client, ask for symbol resolution first:
 
 ```text
-Use korea-market-data MCP to get the stock quote for 005930.
+Use korea-market-data MCP to search for Samsung Electronics.
 ```
 
 Expected behavior:
 
 ```text
 the MCP client discovers the server
-the mock provider returns sample Samsung Electronics data
-the response is clearly mock data
-the response is not live market data
+resolver/search fixtures can return Samsung Electronics -> 005930
+market data context does not return mock quote/chart/index values
+real quote/chart/index values require a configured real provider
 ```
 
 ## Kiwoom Local Verification

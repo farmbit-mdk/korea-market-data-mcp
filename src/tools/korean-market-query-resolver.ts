@@ -40,6 +40,10 @@ export interface KoreanMarketDataContext {
   environment: string;
   fetched_at: string;
   data_status: "ok" | "partial" | "unresolved" | "blocked" | "provider_error" | "unavailable";
+  provider_error?: {
+    code: string;
+    message: string;
+  };
 }
 
 export interface ResolveKoreanMarketQueryOptions {

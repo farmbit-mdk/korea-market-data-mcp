@@ -86,19 +86,17 @@ describe("real market data context UX", () => {
       symbol: "005930",
       assetType: "stock"
     });
-    expect(result.data.quotes[0]).toMatchObject({
-      status: "blocked",
-      provider: "kiwoom",
-      symbol: "005930",
-      reason_code: "PUBLIC_TOOL_EXPOSURE_DISABLED"
+    expect(result.data.quotes).toEqual([]);
+    expect(result.provider_error).toMatchObject({
+      code: "PUBLIC_TOOL_EXPOSURE_DISABLED"
     });
     expect(result.data.daily_charts[0]).toMatchObject({
       status: "unavailable",
-      reason: "Real Kiwoom daily chart context is not implemented yet."
+      reason: "Real daily chart provider is not implemented."
     });
     expect(result.data.related_indices[0]).toMatchObject({
       status: "unavailable",
-      reason: "Real index context is not implemented yet."
+      reason: "Real index provider is not implemented."
     });
     expect(JSON.stringify(result)).not.toContain("Samsung Electronics mock");
   });

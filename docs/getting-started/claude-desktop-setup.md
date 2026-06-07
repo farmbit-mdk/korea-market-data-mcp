@@ -102,8 +102,9 @@ Expected:
 
 ```text
 search_korean_symbol can run
-mock provider returns fixed sample data
-responses are read-only market data
+resolver/search fixtures can return known symbols
+market data context does not return mock quote/chart/index values
+real provider data requires Kiwoom setup and explicit opt-in
 ```
 
 ## Kiwoom Local Verification

@@ -65,7 +65,7 @@ The initial scope is strictly limited to **read-only market data access**.
 
 ## Alpha launch candidate status
 
-`v0.34.0-alpha` documents Claude Desktop live usage result capture for the read-only Korean market data MCP alpha.
+`v0.35.0-alpha` removes mock market data payloads from the read-only Korean market data MCP alpha.
 
 This project is:
 
@@ -150,6 +150,7 @@ docs/verification/claude-desktop-real-data-verification.md
 docs/release/v0.33.0-alpha-checklist.md
 docs/verification/claude-desktop-live-usage-result.md
 docs/release/v0.34.0-alpha-checklist.md
+docs/release/v0.35.0-alpha-checklist.md
 ```
 
 Review safety and limitations:
@@ -598,6 +599,8 @@ npm run kiwoom:setup:check
 
 `v0.34.0-alpha` adds Claude Desktop live usage result capture docs. The live verification flow records actual prompts, selected MCP tools, result status, resolved assets, provider/environment, UX notes, and follow-up actions. Natural-language query examples are tested through `resolve_korean_market_query` and `get_korean_market_data_context`. Context payloads continue to return blocked/provider_error/unavailable status instead of mock fallback when real data is unavailable.
 
+`v0.35.0-alpha` removes mock market data payloads from the market data context flow. Market data context no longer returns mock quote, chart, or index values. If Kiwoom real provider data is not configured, context requests return blocked/provider_error/unavailable status. Resolver examples may still use known Korean asset names and symbols, but quote/chart/index values require real provider data.
+
 Claude Desktop example prompts:
 
 ```text
@@ -745,7 +748,7 @@ Default blocked output shape:
 }
 ```
 
-Mock/test-only success output shape:
+Real-provider success output shape, when local Kiwoom setup is explicitly enabled and succeeds:
 
 ```json
 {
@@ -759,10 +762,10 @@ Mock/test-only success output shape:
     "name": "Samsung Electronics",
     "market": "KOSPI",
     "currency": "KRW",
-    "price": 70000,
-    "change": 500,
-    "change_rate": 0.72,
-    "volume": 12000000,
+    "price": null,
+    "change": null,
+    "change_rate": null,
+    "volume": null,
     "as_of": "..."
   }
 }
@@ -1048,32 +1051,17 @@ The MCP server has been verified with Claude Desktop using the mock provider.
 Test prompt:
 
 ```text
-Use korea-market-data MCP to get the stock quote for 005930.
+Use korea-market-data MCP to search for Samsung Electronics.
 ```
 
 Expected behavior:
 
 - Claude Desktop detects the `korea-market-data` MCP server.
-- The `get_stock_quote` tool is called.
-- The mock provider returns Samsung Electronics sample data.
-- The response includes `provider: "mock"`.
-- The response must not be treated as live market data.
+- Resolver and symbol search tools can map known Korean asset names to symbols.
+- Market data context does not return mock quote, chart, or index values.
+- If Kiwoom real provider data is not configured, context requests return blocked/provider_error/unavailable status.
 
-Example mock data:
+The symbol resolver still supports known asset lookup such as `Samsung Electronics` -> `005930` and `KODEX 200` -> `069500`. Quote, chart, and index values require real provider data.
 
-| Field | Value |
-|---|---|
-| Symbol | 005930 |
-| Name | Samsung Electronics |
-| Market | KOSPI |
-| Price | 70,000 KRW |
-| Previous close | 69,500 KRW |
-| Change | +500 KRW |
-| Change rate | +0.72% |
-| Provider | mock |
-
-Note: mock provider data is fixed sample data for local MCP testing only. It is not live market data and must not be used for investment decisions.
-
-The mock provider also supports Korean alias search such as `삼성전자` → `005930` and `코덱스200` → `069500`.
 
 The Kiwoom provider is currently an authentication skeleton only. It validates local credential configuration but does not make real Kiwoom API calls by default.

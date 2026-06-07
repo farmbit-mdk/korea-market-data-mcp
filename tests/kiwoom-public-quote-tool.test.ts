@@ -1,5 +1,4 @@
 import { describe, expect, it, vi } from "vitest";
-import { MockMarketDataProvider } from "../src/providers/mock/client.js";
 import type { KiwoomQuoteEndpointMapping, NormalizedKiwoomQuote } from "../src/providers/kiwoom/index.js";
 import {
   getKiwoomStockQuoteTool,
@@ -558,11 +557,30 @@ describe("Kiwoom public quote guarded skeleton", () => {
     expect(quoteClient.getQuote).toHaveBeenCalledWith({ symbol: "005930", market: "KOSPI" });
   });
 
-  it("can build a mocked ok response from the existing mock provider quote flow", async () => {
-    const mockProvider = new MockMarketDataProvider();
-    const mockQuote = await mockProvider.getStockQuote({ symbol: "005930", market: "KOSPI" });
+  it("can build an ok response from an explicit test quote fixture", async () => {
+    const testQuote = {
+      symbol: "005930",
+      name: "Samsung Electronics",
+      market: "KOSPI",
+      assetType: "stock" as const,
+      currency: "KRW",
+      price: 70000,
+      previousClose: 69500,
+      open: 69800,
+      high: 70500,
+      low: 69200,
+      change: 500,
+      changeRate: 0.72,
+      volume: 12000000,
+      value: 840000000000,
+      provider: "test",
+      sourceSymbol: "005930",
+      requestTimestamp: "2026-06-03T09:00:00.000Z",
+      providerTimestamp: null,
+      isDelayed: false
+    };
     const tokenClient = createMockTokenClient();
-    const quoteClient = createMockQuoteClient(normalizeMockQuoteForKiwoomPublicTool(mockQuote));
+    const quoteClient = createMockQuoteClient(normalizeMockQuoteForKiwoomPublicTool(testQuote));
 
     const response = await runGuardedKiwoomPublicQuote(
       { symbol: "005930", market: "KOSPI", provider: "kiwoom" },

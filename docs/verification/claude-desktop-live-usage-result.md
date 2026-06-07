@@ -203,9 +203,9 @@ Expected:
 
 ```text
 get_korean_market_data_context is called.
-Mock provider may return mock quote/chart/index payloads.
 Kiwoom provider without valid setup returns blocked or provider_error.
 Real-provider context must not fall back to mock data.
+Market data context must not return mock quote/chart/index payloads.
 ```
 
 Capture:

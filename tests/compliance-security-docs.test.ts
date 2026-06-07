@@ -41,6 +41,7 @@ const requiredDocs = [
   "docs/release/v0.32.0-alpha-checklist.md",
   "docs/release/v0.33.0-alpha-checklist.md",
   "docs/release/v0.34.0-alpha-checklist.md",
+  "docs/release/v0.35.0-alpha-checklist.md",
   "docs/verification/claude-desktop-real-data-verification.md",
   "docs/verification/claude-desktop-live-usage-result.md",
   "docs/release/alpha-known-limitations.md",
@@ -350,7 +351,7 @@ describe("provider compliance and security review docs", () => {
     };
 
     expect(packageJson.name).toBe("korea-market-data-mcp");
-    expect(packageJson.version).toBe("0.34.0-alpha");
+    expect(packageJson.version).toBe("0.35.0-alpha");
     expect(packageLock.version).toBe(packageJson.version);
     expect(packageLock.packages[""].version).toBe(packageJson.version);
     expect(packageJson.description).toContain("Read-only MCP server");
@@ -385,9 +386,9 @@ describe("provider compliance and security review docs", () => {
     expect(packageJson.scripts?.["kiwoom:setup:check"]).toContain("scripts/kiwoom-setup-check.ts");
     expect(packageJson.scripts?.["kiwoom:token:manual"]).toContain("scripts/kiwoom-manual-token-test.ts");
     expect(packageJson.scripts?.["kiwoom:quote:manual"]).toContain("scripts/kiwoom-manual-quote-test.ts");
-    expect(readFileSync(".env.example", "utf8")).toContain("MCP_SERVER_VERSION=0.34.0-alpha");
-    expect(readFileSync("src/utils/env.ts", "utf8")).toContain("0.34.0-alpha");
-    expect(readFileSync("src/server/create-server.ts", "utf8")).toContain("0.34.0-alpha");
+    expect(readFileSync(".env.example", "utf8")).toContain("MCP_SERVER_VERSION=0.35.0-alpha");
+    expect(readFileSync("src/utils/env.ts", "utf8")).toContain("0.35.0-alpha");
+    expect(readFileSync("src/server/create-server.ts", "utf8")).toContain("0.35.0-alpha");
   });
 
   it("documents v0.30 official npm alpha publish without runtime scope expansion", () => {
@@ -750,6 +751,48 @@ describe("provider compliance and security review docs", () => {
     expect(docs).not.toMatch(/access_token\s*[:=]\s*[A-Za-z0-9._~+/=-]{8,}/i);
     expect(docs).not.toMatch(/KIWOOM_APP_KEY[ \t]*[:=][ \t]*(?!YOUR_KIWOOM_APP_KEY|your-app-key)[A-Za-z0-9._~-]{8,}/);
     expect(docs).not.toMatch(/KIWOOM_SECRET_KEY[ \t]*[:=][ \t]*(?!YOUR_KIWOOM_SECRET_KEY|your-secret-key)[A-Za-z0-9._~-]{8,}/);
+  });
+
+  it("documents v0.35 mock market data removal without removing resolver fixtures", () => {
+    const docs = [
+      "README.md",
+      "CHANGELOG.md",
+      "docs/providers/provider-status.md",
+      "docs/verification/claude-desktop-real-data-verification.md",
+      "docs/verification/claude-desktop-live-usage-result.md",
+      "docs/release/v0.35.0-alpha-checklist.md"
+    ].map((path) => readFileSync(path, "utf8")).join("\n");
+    const mockDataSource = readFileSync("src/providers/mock/data.ts", "utf8");
+    const contextSource = readFileSync("src/tools/get-korean-market-data-context.ts", "utf8");
+
+    expect(docs).toContain("v0.35.0-alpha");
+    expect(docs).toContain("Remove Mock Market Data");
+    expect(docs).toContain("Market data context no longer returns mock quote, chart, or index values");
+    expect(docs).toContain("mock quote/chart/index payloads removed from context flow");
+    expect(docs).toContain("market data context is real-provider-only");
+    expect(docs).toContain("resolver Samsung Electronics -> 005930 retained");
+    expect(docs).toContain("resolver KODEX 200 -> 069500 retained");
+    expect(docs).toContain("blocked/provider_error/unavailable");
+    expect(docs).toContain("No account access.");
+    expect(docs).toContain("No orders.");
+    expect(docs).toContain("No balance lookup.");
+    expect(docs).toContain("No holdings lookup.");
+    expect(docs).toContain("No trading.");
+    expect(docs).toContain("No auto-trading.");
+    expect(docs).toContain("No investment recommendations.");
+    expect(docs).toContain("No centralized data redistribution proxy.");
+
+    expect(mockDataSource).toContain("Samsung Electronics");
+    expect(mockDataSource).toContain("005930");
+    expect(mockDataSource).toContain("KODEX 200");
+    expect(mockDataSource).toContain("069500");
+    expect(mockDataSource).not.toContain("price: 70000");
+    expect(mockDataSource).not.toContain("volume: 12000000");
+    expect(mockDataSource).not.toContain("2026-05-25");
+    expect(mockDataSource).not.toContain("2026-05-26");
+    expect(mockDataSource).not.toContain("2026-05-27");
+    expect(contextSource).toContain("KIWOOM_REAL_PROVIDER_NOT_READY");
+    expect(contextSource).not.toContain("environment: context.provider.metadata.id === \"mock\" ? \"mock\" : \"local\"");
   });
 
   it("documents local verification matrices and blocked reasons", () => {
