@@ -2,6 +2,19 @@
 
 All notable alpha release documentation and safety-scope changes are tracked here.
 
+## v0.33.0-alpha - Claude Desktop Real Data Verification
+
+Claude Desktop verification docs and config examples for the official npm alpha package.
+
+- Updated package metadata and server defaults to `0.33.0-alpha`.
+- Added Claude Desktop npm alpha config example using `npx -y korea-market-data-mcp@alpha`.
+- Added Claude Desktop local development config example with placeholder-only Kiwoom credentials.
+- Expanded Claude Desktop setup docs with natural-language query test prompts, setup check interpretation, and real-provider-oriented context checks.
+- Added real data verification capture documentation for Claude Desktop.
+- Added tests for npm alpha config examples, safe placeholder-only configs, registry-aligned tool names, setup check documentation, and no mock fallback guidance.
+
+This release documents the verification workflow only. It does not add account access, orders, balance lookup, holdings lookup, trading, auto-trading, investment recommendations, hosted proxy behavior, centralized data redistribution, or mock fallback for failed real-provider context payloads.
+
 ## v0.32.0-alpha - Real Market Data Context UX
 
 Real Kiwoom setup and context UX improvements.

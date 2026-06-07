@@ -1,0 +1,20 @@
+{
+  "mcpServers": {
+    "korea-market-data": {
+      "command": "node",
+      "args": [
+        "/absolute/path/to/korea-market-data-mcp/dist/index.js"
+      ],
+      "env": {
+        "MARKET_DATA_PROVIDER": "kiwoom",
+        "KIWOOM_ENV": "mock",
+        "KIWOOM_INVESTMENT_ENV": "mock",
+        "KIWOOM_APP_KEY": "YOUR_KIWOOM_APP_KEY",
+        "KIWOOM_SECRET_KEY": "YOUR_KIWOOM_SECRET_KEY",
+        "KIWOOM_ENABLE_REAL_API_CALLS": "false",
+        "KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH": "false",
+        "LOG_LEVEL": "info"
+      }
+    }
+  }
+}

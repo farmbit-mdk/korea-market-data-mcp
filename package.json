@@ -1,6 +1,6 @@
 {
   "name": "korea-market-data-mcp",
-  "version": "0.32.0-alpha",
+  "version": "0.33.0-alpha",
   "description": "Read-only MCP server for Korean financial market data.",
   "keywords": [
     "mcp",

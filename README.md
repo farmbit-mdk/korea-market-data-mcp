@@ -65,7 +65,7 @@ The initial scope is strictly limited to **read-only market data access**.
 
 ## Alpha launch candidate status
 
-`v0.31.0-alpha` adds Korean market data query resolution for the read-only Kiwoom quote MCP alpha.
+`v0.33.0-alpha` documents Claude Desktop real data verification for the read-only Korean market data MCP alpha.
 
 This project is:
 
@@ -102,6 +102,8 @@ clean install smoke test documentation
 official npm publish decision documentation
 official npm alpha publish result documentation
 Korean market data query resolution tools
+Claude Desktop npm alpha package verification docs
+Claude Desktop real-provider-oriented context verification docs
 ```
 
 Real Kiwoom quote lookup remains disabled by default:
@@ -143,6 +145,8 @@ docs/release/versioning-policy.md
 docs/release/v0.29.0-alpha-checklist.md
 docs/release/npm-alpha-publish-result.md
 docs/release/v0.30.0-alpha-checklist.md
+docs/verification/claude-desktop-real-data-verification.md
+docs/release/v0.33.0-alpha-checklist.md
 ```
 
 Review safety and limitations:
@@ -457,6 +461,23 @@ npm install korea-market-data-mcp@alpha
 
 GitHub clone/local setup remains supported and is the safe fallback. Mock provider remains the recommended first setup path. Real Kiwoom quote lookup remains disabled by default, and Kiwoom local verification remains explicit opt-in only.
 
+Claude Desktop can use the npm alpha package directly:
+
+```json
+{
+  "command": "npx",
+  "args": [
+    "-y",
+    "korea-market-data-mcp@alpha"
+  ],
+  "env": {
+    "MARKET_DATA_PROVIDER": "mock",
+    "KIWOOM_ENABLE_REAL_API_CALLS": "false",
+    "KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH": "false"
+  }
+}
+```
+
 See:
 
 ```text
@@ -569,6 +590,8 @@ Check local Kiwoom readiness:
 ```bash
 npm run kiwoom:setup:check
 ```
+
+`v0.33.0-alpha` adds Claude Desktop verification docs and examples for this flow. Claude Desktop can connect with the official npm alpha package, use natural-language query resolution, and request real-provider-oriented context payloads. Real data context requires local Kiwoom credentials and explicit opt-in settings. If real data is blocked or unavailable, the MCP server returns structured status instead of mock replacement data.
 
 Claude Desktop example prompts:
 

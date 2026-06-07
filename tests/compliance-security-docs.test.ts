@@ -39,6 +39,8 @@ const requiredDocs = [
   "docs/release/v0.29.0-alpha-checklist.md",
   "docs/release/v0.30.0-alpha-checklist.md",
   "docs/release/v0.32.0-alpha-checklist.md",
+  "docs/release/v0.33.0-alpha-checklist.md",
+  "docs/verification/claude-desktop-real-data-verification.md",
   "docs/release/alpha-known-limitations.md",
   "docs/release/distribution-readiness.md",
   "docs/release/alpha-install-smoke-test.md",
@@ -67,6 +69,8 @@ const mcpClientSetupExamplePaths = [
   "examples/cursor.mock.json",
   "examples/cursor.kiwoom-local.example.json",
   "examples/claude-desktop.package.example.json",
+  "examples/claude-desktop.npm-alpha.config.json",
+  "examples/claude-desktop.local-dev.config.json",
   "examples/cursor.package.example.json",
   "examples/env.mock.example",
   "examples/env.kiwoom-local.example"
@@ -344,7 +348,7 @@ describe("provider compliance and security review docs", () => {
     };
 
     expect(packageJson.name).toBe("korea-market-data-mcp");
-    expect(packageJson.version).toBe("0.32.0-alpha");
+    expect(packageJson.version).toBe("0.33.0-alpha");
     expect(packageLock.version).toBe(packageJson.version);
     expect(packageLock.packages[""].version).toBe(packageJson.version);
     expect(packageJson.description).toContain("Read-only MCP server");
@@ -379,9 +383,9 @@ describe("provider compliance and security review docs", () => {
     expect(packageJson.scripts?.["kiwoom:setup:check"]).toContain("scripts/kiwoom-setup-check.ts");
     expect(packageJson.scripts?.["kiwoom:token:manual"]).toContain("scripts/kiwoom-manual-token-test.ts");
     expect(packageJson.scripts?.["kiwoom:quote:manual"]).toContain("scripts/kiwoom-manual-quote-test.ts");
-    expect(readFileSync(".env.example", "utf8")).toContain("MCP_SERVER_VERSION=0.32.0-alpha");
-    expect(readFileSync("src/utils/env.ts", "utf8")).toContain("0.32.0-alpha");
-    expect(readFileSync("src/server/create-server.ts", "utf8")).toContain("0.32.0-alpha");
+    expect(readFileSync(".env.example", "utf8")).toContain("MCP_SERVER_VERSION=0.33.0-alpha");
+    expect(readFileSync("src/utils/env.ts", "utf8")).toContain("0.33.0-alpha");
+    expect(readFileSync("src/server/create-server.ts", "utf8")).toContain("0.33.0-alpha");
   });
 
   it("documents v0.30 official npm alpha publish without runtime scope expansion", () => {
@@ -634,9 +638,70 @@ describe("provider compliance and security review docs", () => {
     }
 
     const examplesReadme = readFileSync("examples/README.md", "utf8");
-    expect(examplesReadme).toContain("local tarball or future official npm package validation only");
-    expect(examplesReadme).toContain("official npm package is not published yet");
-    expect(examplesReadme).toContain("Use GitHub clone setup for the current alpha unless you are testing package installation");
+    expect(examplesReadme).toContain("official npm alpha package validation");
+    expect(examplesReadme).toContain("npm install korea-market-data-mcp@alpha");
+    expect(examplesReadme).toContain("npx -y korea-market-data-mcp@alpha");
+  });
+
+  it("documents v0.33 Claude Desktop real data verification without runtime expansion", () => {
+    const docs = [
+      "README.md",
+      "CHANGELOG.md",
+      "docs/getting-started/claude-desktop-setup.md",
+      "docs/providers/provider-status.md",
+      "docs/verification/claude-desktop-real-data-verification.md",
+      "docs/release/v0.33.0-alpha-checklist.md",
+      "examples/README.md"
+    ].map((path) => readFileSync(path, "utf8")).join("\n");
+
+    const npmAlphaConfig = JSON.parse(readFileSync("examples/claude-desktop.npm-alpha.config.json", "utf8")) as {
+      mcpServers: Record<string, { command: string; args: string[]; env: Record<string, string> }>;
+    };
+    const localDevConfig = JSON.parse(readFileSync("examples/claude-desktop.local-dev.config.json", "utf8")) as {
+      mcpServers: Record<string, { command: string; args: string[]; env: Record<string, string> }>;
+    };
+    const npmServer = npmAlphaConfig.mcpServers["korea-market-data"];
+    const localServer = localDevConfig.mcpServers["korea-market-data"];
+
+    expect(docs).toContain("v0.33.0-alpha");
+    expect(docs).toContain("Claude Desktop Real Data Verification");
+    expect(docs).toContain("korea-market-data-mcp@alpha");
+    expect(docs).toContain("resolve_korean_market_query");
+    expect(docs).toContain("get_korean_market_data_context");
+    expect(docs).toContain("search_korean_symbol");
+    expect(docs).toContain("get_stock_quote");
+    expect(docs).toContain("get_etf_quote");
+    expect(docs).toContain("get_market_index");
+    expect(docs).toContain("get_daily_chart");
+    expect(docs).toContain("get_kiwoom_stock_quote");
+    expect(docs).toContain("npm run kiwoom:setup:check");
+    expect(docs).toContain("failed or blocked Kiwoom context lookup does not fall back to mock data");
+    expect(docs).toContain("failed real-provider context does not fall back to mock data");
+    expect(docs).toContain("blocked/provider_error");
+    expect(docs).toContain("No account access.");
+    expect(docs).toContain("No orders.");
+    expect(docs).toContain("No balance lookup.");
+    expect(docs).toContain("No holdings lookup.");
+    expect(docs).toContain("No trading.");
+    expect(docs).toContain("No auto-trading.");
+    expect(docs).toContain("No investment recommendations.");
+    expect(docs).toContain("No centralized data redistribution proxy.");
+
+    expect(npmServer.command).toBe("npx");
+    expect(npmServer.args).toEqual(["-y", "korea-market-data-mcp@alpha"]);
+    expect(npmServer.env.KIWOOM_ENABLE_REAL_API_CALLS).toBe("false");
+    expect(npmServer.env.KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH).toBe("false");
+
+    expect(localServer.env.KIWOOM_APP_KEY).toBe("YOUR_KIWOOM_APP_KEY");
+    expect(localServer.env.KIWOOM_SECRET_KEY).toBe("YOUR_KIWOOM_SECRET_KEY");
+    expect(localServer.env.KIWOOM_ENABLE_REAL_API_CALLS).toBe("false");
+    expect(localServer.env.KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH).toBe("false");
+    expect(JSON.stringify(localDevConfig)).not.toMatch(/Bearer\s+[A-Za-z0-9._~+/=-]{12,}/);
+    expect(JSON.stringify(localDevConfig)).not.toMatch(/access_token/i);
+    expect(localServer.env).not.toHaveProperty("KIWOOM_ACCOUNT_NO");
+    expect(localServer.env).not.toHaveProperty("ENABLE_TRADING_TOOLS");
+    expect(localServer.env).not.toHaveProperty("ENABLE_ACCOUNT_TOOLS");
+    expect(localServer.env).not.toHaveProperty("ENABLE_ORDER_TOOLS");
   });
 
   it("documents local verification matrices and blocked reasons", () => {

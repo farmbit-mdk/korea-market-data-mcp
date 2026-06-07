@@ -1403,6 +1403,35 @@ This release improves real Kiwoom readiness diagnostics and context payload beha
 
 ---
 
+## v0.33.0-alpha
+
+Provider status:
+
+```text
+official npm alpha package remains the documented package path
+Claude Desktop npm alpha config example added
+Claude Desktop local development config example added
+Claude Desktop natural-language query verification prompts documented
+Claude Desktop real-provider-oriented context verification documented
+Kiwoom setup check interpretation documented
+verification result capture document added
+get_korean_market_data_context no mock fallback behavior documented
+get_kiwoom_stock_quote public tool scope unchanged
+real Kiwoom quote lookup disabled by default
+account/order/trading explicitly out of scope
+centralized data redistribution proxy out of scope
+```
+
+Recommended release description:
+
+```text
+Claude Desktop Real Data Verification
+```
+
+This release documents how to verify the npm alpha package in Claude Desktop and how to capture real-provider-oriented context payload results safely. It must not be described as enabling real quote lookup by default, adding live chart/index support, adding hosted proxy behavior, or adding recommendation/account/order/trading behavior. Failed real context lookups must remain explicit blocked/provider_error/unavailable payloads and must not be replaced with mock data.
+
+---
+
 ## 11. Future provider candidates
 
 Potential future providers may include:
