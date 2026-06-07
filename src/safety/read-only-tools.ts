@@ -1,6 +1,7 @@
 export const allowedToolNames = [
   "resolve_korean_market_query",
   "get_korean_market_data_context",
+  "get_kiwoom_setup_status",
   "search_korean_symbol",
   "get_stock_quote",
   "get_kiwoom_stock_quote",

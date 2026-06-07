@@ -118,10 +118,7 @@ export interface KiwoomQuoteTransportRequest {
   url: string;
   method: "POST";
   headers: Record<string, string>;
-  body: {
-    symbol: string;
-    market?: KiwoomQuoteMarket;
-  };
+  body: Record<string, string | undefined>;
 }
 
 export interface KiwoomQuoteTransport {

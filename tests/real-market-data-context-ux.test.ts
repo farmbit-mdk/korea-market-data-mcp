@@ -3,7 +3,9 @@ import { checkKiwoomSetup } from "../src/providers/kiwoom/setup-check.js";
 import { normalizeKiwoomTokenResponse } from "../src/providers/kiwoom/token-client.js";
 import type { MarketDataProvider } from "../src/providers/types.js";
 import { getKoreanMarketDataContextTool } from "../src/tools/get-korean-market-data-context.js";
+import { getKiwoomSetupStatusTool } from "../src/tools/get-kiwoom-setup-status.js";
 import type { KoreanMarketDataContext } from "../src/tools/korean-market-query-resolver.js";
+import { getRegisteredToolNames } from "../src/tools/index.js";
 
 describe("real market data context UX", () => {
   it("reports Kiwoom setup blocked when real API opt-in is false", () => {
@@ -52,6 +54,64 @@ describe("real market data context UX", () => {
     expect(result.status).toBe("blocked");
     expect(result.placeholder_credentials).toBe(true);
     expect(result.blocked_reasons).toContain("Placeholder credentials cannot be used.");
+  });
+
+  it("reports Kiwoom setup ready when local quote verification opt-in is complete", () => {
+    const result = checkKiwoomSetup({
+      KIWOOM_ENABLE_REAL_API_CALLS: "true",
+      KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH: "true",
+      KIWOOM_APP_KEY: "dummy_app_key",
+      KIWOOM_SECRET_KEY: "dummy_secret_key",
+      KIWOOM_ENV: "prod",
+      KIWOOM_INVESTMENT_ENV: "real"
+    });
+
+    expect(result).toMatchObject({
+      status: "ready",
+      real_api_enabled: true,
+      public_quote_real_path_enabled: true,
+      credentials_present: true,
+      placeholder_credentials: false,
+      kiwoom_investment_environment: "real",
+      quote_real_path_ready: true,
+      blocked_reasons: [],
+      next_step: "Run npm run kiwoom:token:manual, then npm run kiwoom:quote:manual."
+    });
+  });
+
+  it("returns environment setup guidance when setup env is incomplete", () => {
+    const result = checkKiwoomSetup({
+      KIWOOM_ENABLE_REAL_API_CALLS: "true",
+      KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH: "true",
+      KIWOOM_APP_KEY: "dummy_app_key",
+      KIWOOM_SECRET_KEY: "dummy_secret_key"
+    });
+
+    expect(result.status).toBe("blocked");
+    expect(result.blocked_reasons).toContain("Kiwoom quote endpoint mapping is not enabled for local/manual verification.");
+    expect(result.next_step).toContain("Set required Kiwoom environment variables");
+  });
+
+  it("registers get_kiwoom_setup_status and returns setup payload without quote lookup", async () => {
+    const originalEnv = { ...process.env };
+    process.env = {
+      ...originalEnv,
+      KIWOOM_ENABLE_REAL_API_CALLS: "false",
+      KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH: "false"
+    };
+
+    try {
+      const result = await getKiwoomSetupStatusTool.handler({ provider: "kiwoom" }, { provider: createKiwoomLikeProvider() });
+
+      expect(getRegisteredToolNames()).toContain("get_kiwoom_setup_status");
+      expect(result).toMatchObject({
+        status: "blocked",
+        provider: "kiwoom",
+        quote_real_path_ready: false
+      });
+    } finally {
+      process.env = originalEnv;
+    }
   });
 
   it("normalizes Kiwoom investment environment mismatch token errors", () => {

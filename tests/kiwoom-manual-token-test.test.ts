@@ -111,6 +111,27 @@ describe("Kiwoom manual token verification workflow", () => {
     expect(transport.requestToken).toHaveBeenCalledOnce();
   });
 
+  it("treats KIWOOM_ENV=real as production for manual token verification", async () => {
+    const transport = createMockTransport(successfulKiwoomTokenResponse);
+
+    const summary = await runManualKiwoomTokenVerification(
+      {
+        KIWOOM_ENABLE_REAL_API_CALLS: "true",
+        KIWOOM_APP_KEY: "dummy_app_key",
+        KIWOOM_SECRET_KEY: "dummy_secret_key",
+        KIWOOM_ENV: "real"
+      },
+      transport
+    );
+
+    expect(summary).toMatchObject({
+      status: "ok",
+      environment: "production",
+      token_present: true
+    });
+    expect(transport.requestToken).toHaveBeenCalledOnce();
+  });
+
   it("returns safe error output for Kiwoom token error responses", async () => {
     const transport = createMockTransport(kiwoomErrorTokenResponse);
     const summary = await runManualKiwoomTokenVerification(

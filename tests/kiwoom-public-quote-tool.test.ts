@@ -40,6 +40,34 @@ describe("Kiwoom public quote guarded skeleton", () => {
     expect(quoteClient.getQuote).not.toHaveBeenCalled();
   });
 
+  it("passes the public exposure gate when local Kiwoom quote verification env is valid", async () => {
+    const tokenClient = createMockTokenClient();
+    const quoteClient = createMockQuoteClient();
+    const response = await runGuardedKiwoomPublicQuote(
+      { symbol: "005930", market: "KOSPI", provider: "kiwoom" },
+      {
+        env: {
+          KIWOOM_ENABLE_REAL_API_CALLS: "true",
+          KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH: "true",
+          KIWOOM_APP_KEY: "dummy_app_key",
+          KIWOOM_SECRET_KEY: "dummy_secret_key",
+          KIWOOM_ENV: "production",
+          KIWOOM_INVESTMENT_ENV: "real"
+        },
+        tokenClient,
+        quoteClient
+      }
+    );
+
+    expect(response).toMatchObject({
+      status: "ok",
+      quote_present: true,
+      symbol: "005930"
+    });
+    expect(tokenClient.getAccessToken).toHaveBeenCalledOnce();
+    expect(quoteClient.getQuote).toHaveBeenCalledWith({ symbol: "005930", market: "KOSPI" });
+  });
+
   it("requires symbol without calling clients", async () => {
     const tokenClient = createMockTokenClient();
     const quoteClient = createMockQuoteClient();
@@ -617,7 +645,8 @@ describe("Kiwoom public quote guarded skeleton", () => {
     KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH: "true",
     KIWOOM_APP_KEY: "dummy_app_key",
     KIWOOM_SECRET_KEY: "dummy_secret_key",
-    KIWOOM_ENV: "mock"
+    KIWOOM_ENV: "mock",
+    KIWOOM_INVESTMENT_ENV: "mock"
   };
 
   const enabledPublicMapping: KiwoomQuoteEndpointMapping = {

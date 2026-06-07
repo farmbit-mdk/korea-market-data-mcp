@@ -1,5 +1,6 @@
 import { fileURLToPath } from "node:url";
 import { createKiwoomTokenClient } from "../src/providers/kiwoom/token-client.js";
+import { parseKiwoomManualEnvironment } from "../src/providers/kiwoom/env.js";
 import type { KiwoomAuthConfig, KiwoomTokenTransport } from "../src/providers/kiwoom/types.js";
 import { toToolErrorResponse } from "../src/providers/errors.js";
 import { redactSecrets } from "../src/safety/redact-secret.js";
@@ -44,7 +45,7 @@ export async function runManualKiwoomTokenVerification(
   env: ManualKiwoomEnv = process.env,
   transport?: KiwoomTokenTransport
 ): Promise<ManualKiwoomTokenSummary> {
-  const environment = parseManualEnvironment(env.KIWOOM_ENV);
+  const environment = parseKiwoomManualEnvironment(env.KIWOOM_ENV);
   const rawAppKey = env.KIWOOM_APP_KEY;
   const rawSecretKey = env.KIWOOM_SECRET_KEY ?? env.KIWOOM_APP_SECRET;
   const appKey = normalizeEnvValue(env.KIWOOM_APP_KEY);
@@ -113,18 +114,6 @@ export async function runManualKiwoomTokenVerification(
       error: redactSecrets(toolError)
     };
   }
-}
-
-function parseManualEnvironment(value: string | undefined): "mock" | "production" {
-  if (value === undefined || value === "" || value === "mock") {
-    return "mock";
-  }
-
-  if (value === "production" || value === "prod") {
-    return "production";
-  }
-
-  return "mock";
 }
 
 function normalizeEnvValue(value: string | undefined): string | undefined {

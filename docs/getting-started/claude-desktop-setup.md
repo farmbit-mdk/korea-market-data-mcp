@@ -102,6 +102,7 @@ Expected:
 
 ```text
 search_korean_symbol can run
+get_kiwoom_setup_status can report readiness without quote requests
 resolver/search fixtures can return known symbols
 market data context does not return mock quote/chart/index values
 real provider data requires Kiwoom setup and explicit opt-in
@@ -133,6 +134,8 @@ Real Kiwoom credential environment example:
 ```
 
 Do not use placeholder values for a real request. Replace placeholders only in your local Claude Desktop config or local shell environment, never in Git.
+
+`KIWOOM_ENV=real`, `KIWOOM_ENV=production`, and `KIWOOM_ENV=prod` all select production. Use `KIWOOM_ENV=mock` with `KIWOOM_INVESTMENT_ENV=mock` for Kiwoom mock investment credentials. Production credentials should use `KIWOOM_INVESTMENT_ENV=real`.
 
 ## Claude Desktop Prompt Checklist
 
@@ -185,6 +188,14 @@ Run locally before expecting real Kiwoom data:
 npm run kiwoom:setup:check
 ```
 
+Claude Desktop can call:
+
+```text
+get_kiwoom_setup_status
+```
+
+This returns the setup payload only. It does not request a token or quote.
+
 Expected safe default:
 
 ```text
@@ -204,6 +215,15 @@ placeholder credentials: YOUR_KIWOOM_APP_KEY and YOUR_KIWOOM_SECRET_KEY cannot b
 investment environment mismatch: check KIWOOM_INVESTMENT_ENV=real or mock against the issued app key.
 provider error: keep the structured error payload; do not replace it with mock data.
 ```
+
+When setup is ready, use this order:
+
+```powershell
+npm run kiwoom:token:manual
+npm run kiwoom:quote:manual
+```
+
+Then ask Claude Desktop for `get_korean_market_data_context`. If token or quote verification is blocked or fails, context should remain blocked/provider_error/unavailable rather than returning mock market values.
 
 `get_korean_market_data_context` must not recommend mock fallback for failed real-provider context. It should return `blocked`, `provider_error`, or `unavailable` payload state so Claude can explain what data is missing.
 

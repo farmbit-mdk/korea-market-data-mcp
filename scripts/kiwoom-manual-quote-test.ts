@@ -1,7 +1,8 @@
 import { fileURLToPath } from "node:url";
 import { toToolErrorResponse } from "../src/providers/errors.js";
+import { parseKiwoomManualEnvironment } from "../src/providers/kiwoom/env.js";
 import { createKiwoomQuoteClient } from "../src/providers/kiwoom/quote-client.js";
-import { kiwoomQuoteEndpointMappings } from "../src/providers/kiwoom/quote-endpoints.js";
+import { getEffectiveKiwoomQuoteEndpointMapping } from "../src/providers/kiwoom/quote-endpoints.js";
 import { createKiwoomTokenClient } from "../src/providers/kiwoom/token-client.js";
 import type {
   KiwoomAuthConfig,
@@ -68,13 +69,13 @@ export async function runManualKiwoomQuoteVerification(
   env: ManualKiwoomQuoteEnv = process.env,
   dependencies: ManualKiwoomQuoteDependencies = {}
 ): Promise<ManualKiwoomQuoteSummary> {
-  const environment = parseManualEnvironment(env.KIWOOM_ENV);
+  const environment = parseKiwoomManualEnvironment(env.KIWOOM_ENV);
   const symbol = normalizeEnvValue(dependencies.argv?.[0]) ?? normalizeEnvValue(env.KIWOOM_QUOTE_SYMBOL) ?? "005930";
   const rawAppKey = env.KIWOOM_APP_KEY;
   const rawSecretKey = env.KIWOOM_SECRET_KEY ?? env.KIWOOM_APP_SECRET;
   const appKey = normalizeEnvValue(env.KIWOOM_APP_KEY);
   const secretKey = normalizeEnvValue(env.KIWOOM_SECRET_KEY) ?? normalizeEnvValue(env.KIWOOM_APP_SECRET);
-  const quoteEndpointMapping = dependencies.quoteEndpointMapping ?? kiwoomQuoteEndpointMappings.quote;
+  const quoteEndpointMapping = dependencies.quoteEndpointMapping ?? getEffectiveKiwoomQuoteEndpointMapping(env as NodeJS.ProcessEnv);
 
   if (env.KIWOOM_ENABLE_REAL_API_CALLS !== "true") {
     return blocked(
@@ -120,6 +121,8 @@ export async function runManualKiwoomQuoteVerification(
     const quote = await createKiwoomQuoteClient({
       baseUrl,
       quoteEndpointPath: quoteEndpointMapping.path,
+      accessToken: token.accessToken,
+      apiId: quoteEndpointMapping.apiId,
       transport: dependencies.quoteTransport
     }).getQuote({ symbol });
 
@@ -161,18 +164,6 @@ function blocked(
     reason_code: reasonCode,
     reason
   };
-}
-
-function parseManualEnvironment(value: string | undefined): "mock" | "production" {
-  if (value === undefined || value === "" || value === "mock") {
-    return "mock";
-  }
-
-  if (value === "production" || value === "prod") {
-    return "production";
-  }
-
-  return "mock";
 }
 
 function normalizeEnvValue(value: string | undefined): string | undefined {

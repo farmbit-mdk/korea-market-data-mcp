@@ -1,4 +1,5 @@
-import { kiwoomQuoteEndpointMappings } from "./quote-endpoints.js";
+import { parseKiwoomEnvironment, parseKiwoomInvestmentEnvironment } from "./env.js";
+import { getEffectiveKiwoomQuoteEndpointMapping, isKiwoomEnvironmentPairAllowed } from "./quote-endpoints.js";
 
 export interface KiwoomSetupCheckResult {
   status: "ready" | "blocked" | "error";
@@ -35,8 +36,8 @@ export function checkKiwoomSetup(env: NodeJS.ProcessEnv = process.env): KiwoomSe
   const secretKey = normalizeEnvValue(rawSecretKey);
   const credentialsPresent = appKey !== undefined && secretKey !== undefined;
   const placeholderCredentials = isPlaceholderCredential(rawAppKey) || isPlaceholderCredential(rawSecretKey);
-  const investmentEnvironment = parseInvestmentEnvironment(env.KIWOOM_INVESTMENT_ENV ?? env.KIWOOM_ENV);
-  const mapping = kiwoomQuoteEndpointMappings.quote;
+  const investmentEnvironment = parseKiwoomInvestmentEnvironment(env.KIWOOM_INVESTMENT_ENV);
+  const mapping = getEffectiveKiwoomQuoteEndpointMapping(env);
   const blockedReasons: string[] = [];
 
   if (!realApiEnabled) {
@@ -59,6 +60,15 @@ export function checkKiwoomSetup(env: NodeJS.ProcessEnv = process.env): KiwoomSe
     blockedReasons.push("KIWOOM_INVESTMENT_ENV should be real or mock.");
   }
 
+  try {
+    parseKiwoomEnvironment(env.KIWOOM_ENV);
+    if (investmentEnvironment !== "unknown" && !isKiwoomEnvironmentPairAllowed(env)) {
+      blockedReasons.push("KIWOOM_ENV and KIWOOM_INVESTMENT_ENV must both target production/real or both target mock.");
+    }
+  } catch {
+    blockedReasons.push("KIWOOM_ENV should be production, prod, real, or mock.");
+  }
+
   if (!mapping.enabled || !mapping.readOnly || !mapping.manualOnly) {
     blockedReasons.push("Kiwoom quote endpoint mapping is not enabled for local/manual verification.");
   }
@@ -77,20 +87,8 @@ export function checkKiwoomSetup(env: NodeJS.ProcessEnv = process.env): KiwoomSe
     investment_environment: investmentEnvironment,
     quote_real_path_ready: quoteRealPathReady,
     blocked_reasons: blockedReasons,
-    next_step: quoteRealPathReady ? "Run npm run kiwoom:token:manual" : "Set required Kiwoom environment variables, then run npm run kiwoom:setup:check again."
+    next_step: getSetupNextStep(quoteRealPathReady, blockedReasons)
   };
-}
-
-function parseInvestmentEnvironment(value: string | undefined): "real" | "mock" | "unknown" {
-  if (value === "real" || value === "production" || value === "prod") {
-    return "real";
-  }
-
-  if (value === "mock") {
-    return "mock";
-  }
-
-  return "unknown";
 }
 
 function normalizeEnvValue(value: string | undefined): string | undefined {
@@ -99,4 +97,25 @@ function normalizeEnvValue(value: string | undefined): string | undefined {
 
 function isPlaceholderCredential(value: string | undefined): boolean {
   return value !== undefined && placeholderCredentialValues.has(value.trim().toUpperCase());
+}
+
+function getSetupNextStep(quoteRealPathReady: boolean, blockedReasons: string[]): string {
+  if (quoteRealPathReady) {
+    return "Run npm run kiwoom:token:manual, then npm run kiwoom:quote:manual.";
+  }
+
+  const hasEnvironmentSetupBlocker = blockedReasons.some((reason) =>
+    reason.includes("KIWOOM_ENABLE_REAL_API_CALLS") ||
+    reason.includes("KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH") ||
+    reason.includes("KIWOOM_APP_KEY") ||
+    reason.includes("Placeholder credentials") ||
+    reason.includes("KIWOOM_INVESTMENT_ENV") ||
+    reason.includes("KIWOOM_ENV")
+  );
+
+  if (!hasEnvironmentSetupBlocker && blockedReasons.some((reason) => reason.includes("endpoint mapping"))) {
+    return "Enable local Kiwoom quote endpoint mapping or run a v0.36.0-alpha or newer build, then run npm run kiwoom:setup:check again.";
+  }
+
+  return "Set required Kiwoom environment variables, then run npm run kiwoom:setup:check again.";
 }

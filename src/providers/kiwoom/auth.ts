@@ -1,6 +1,7 @@
 import { MarketDataProviderError } from "../errors.js";
 import { createKiwoomTokenClient, type KiwoomTokenClient } from "./token-client.js";
-import type { KiwoomAccessToken, KiwoomAuthConfig, KiwoomEnvironment } from "./types.js";
+import { parseKiwoomEnvironment } from "./env.js";
+import type { KiwoomAccessToken, KiwoomAuthConfig } from "./types.js";
 
 const defaultApiBaseUrl = "https://api.kiwoom.com";
 const defaultMockApiBaseUrl = "https://mockapi.kiwoom.com";
@@ -48,18 +49,6 @@ export class KiwoomAuthClient {
 
 export function createKiwoomAuthClient(config: KiwoomAuthConfig = loadKiwoomAuthConfig()): KiwoomAuthClient {
   return new KiwoomAuthClient(config);
-}
-
-function parseKiwoomEnvironment(value: string | undefined): KiwoomEnvironment {
-  if (value === undefined || value === "" || value === "prod" || value === "production") {
-    return "prod";
-  }
-
-  if (value === "mock") {
-    return "mock";
-  }
-
-  throw new MarketDataProviderError("INVALID_INPUT", "KIWOOM_ENV must be production, prod, or mock.", "kiwoom", false);
 }
 
 function emptyToUndefined(value: string | undefined): string | undefined {

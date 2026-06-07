@@ -42,6 +42,7 @@ const requiredDocs = [
   "docs/release/v0.33.0-alpha-checklist.md",
   "docs/release/v0.34.0-alpha-checklist.md",
   "docs/release/v0.35.0-alpha-checklist.md",
+  "docs/release/v0.36.0-alpha-checklist.md",
   "docs/verification/claude-desktop-real-data-verification.md",
   "docs/verification/claude-desktop-live-usage-result.md",
   "docs/release/alpha-known-limitations.md",
@@ -351,7 +352,7 @@ describe("provider compliance and security review docs", () => {
     };
 
     expect(packageJson.name).toBe("korea-market-data-mcp");
-    expect(packageJson.version).toBe("0.35.0-alpha");
+    expect(packageJson.version).toBe("0.36.0-alpha");
     expect(packageLock.version).toBe(packageJson.version);
     expect(packageLock.packages[""].version).toBe(packageJson.version);
     expect(packageJson.description).toContain("Read-only MCP server");
@@ -386,9 +387,9 @@ describe("provider compliance and security review docs", () => {
     expect(packageJson.scripts?.["kiwoom:setup:check"]).toContain("scripts/kiwoom-setup-check.ts");
     expect(packageJson.scripts?.["kiwoom:token:manual"]).toContain("scripts/kiwoom-manual-token-test.ts");
     expect(packageJson.scripts?.["kiwoom:quote:manual"]).toContain("scripts/kiwoom-manual-quote-test.ts");
-    expect(readFileSync(".env.example", "utf8")).toContain("MCP_SERVER_VERSION=0.35.0-alpha");
-    expect(readFileSync("src/utils/env.ts", "utf8")).toContain("0.35.0-alpha");
-    expect(readFileSync("src/server/create-server.ts", "utf8")).toContain("0.35.0-alpha");
+    expect(readFileSync(".env.example", "utf8")).toContain("MCP_SERVER_VERSION=0.36.0-alpha");
+    expect(readFileSync("src/utils/env.ts", "utf8")).toContain("0.36.0-alpha");
+    expect(readFileSync("src/server/create-server.ts", "utf8")).toContain("0.36.0-alpha");
   });
 
   it("documents v0.30 official npm alpha publish without runtime scope expansion", () => {
@@ -994,6 +995,7 @@ describe("provider compliance and security review docs", () => {
     expect(getRegisteredToolNames()).toEqual([
       "resolve_korean_market_query",
       "get_korean_market_data_context",
+      "get_kiwoom_setup_status",
       "search_korean_symbol",
       "get_stock_quote",
       "get_kiwoom_stock_quote",

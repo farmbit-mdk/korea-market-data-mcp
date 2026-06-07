@@ -1,4 +1,5 @@
 import type { KiwoomQuoteEndpointMapping } from "./types.js";
+import { parseKiwoomEnvironment, parseKiwoomInvestmentEnvironment } from "./env.js";
 
 export const kiwoomQuoteEndpointMappings = {
   quote: {
@@ -17,3 +18,75 @@ export const kiwoomQuoteEndpointMappings = {
 } as const satisfies Record<string, KiwoomQuoteEndpointMapping>;
 
 export type KiwoomQuoteEndpointKey = keyof typeof kiwoomQuoteEndpointMappings;
+
+export const localKiwoomQuoteEndpointPath = "/api/dostk/stkinfo";
+
+const placeholderCredentialValues = new Set([
+  "YOUR_APP_KEY",
+  "YOUR_SECRET_KEY",
+  "YOUR_KIWOOM_APP_KEY",
+  "YOUR_KIWOOM_APP_SECRET",
+  "YOUR_KIWOOM_SECRET_KEY",
+  "CHANGE_ME",
+  "REPLACE_ME",
+  ""
+]);
+
+export function getEffectiveKiwoomQuoteEndpointMapping(
+  env: NodeJS.ProcessEnv = process.env,
+  mapping: KiwoomQuoteEndpointMapping = kiwoomQuoteEndpointMappings.quote
+): KiwoomQuoteEndpointMapping {
+  if (!isLocalKiwoomQuoteVerificationEnabled(env)) {
+    return mapping;
+  }
+
+  return {
+    ...mapping,
+    enabled: true,
+    exposesPublicTool: true,
+    manualOnly: true,
+    readOnly: true,
+    path: localKiwoomQuoteEndpointPath,
+    description: "Stock basic information request enabled only for explicit local Kiwoom quote verification.",
+    verified: true
+  };
+}
+
+export function isLocalKiwoomQuoteVerificationEnabled(env: NodeJS.ProcessEnv = process.env): boolean {
+  const appKey = normalizeEnvValue(env.KIWOOM_APP_KEY);
+  const secretKey = normalizeEnvValue(env.KIWOOM_SECRET_KEY) ?? normalizeEnvValue(env.KIWOOM_APP_SECRET);
+
+  return (
+    env.KIWOOM_ENABLE_REAL_API_CALLS === "true" &&
+    env.KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH === "true" &&
+    appKey !== undefined &&
+    secretKey !== undefined &&
+    !isPlaceholderCredential(env.KIWOOM_APP_KEY) &&
+    !isPlaceholderCredential(env.KIWOOM_SECRET_KEY ?? env.KIWOOM_APP_SECRET) &&
+    isKiwoomEnvironmentPairAllowed(env)
+  );
+}
+
+export function isKiwoomEnvironmentPairAllowed(env: NodeJS.ProcessEnv = process.env): boolean {
+  let providerEnvironment: ReturnType<typeof parseKiwoomEnvironment>;
+  try {
+    providerEnvironment = parseKiwoomEnvironment(env.KIWOOM_ENV);
+  } catch {
+    return false;
+  }
+
+  const investmentEnvironment = parseKiwoomInvestmentEnvironment(env.KIWOOM_INVESTMENT_ENV);
+
+  return (
+    (providerEnvironment === "prod" && investmentEnvironment === "real") ||
+    (providerEnvironment === "mock" && investmentEnvironment === "mock")
+  );
+}
+
+function normalizeEnvValue(value: string | undefined): string | undefined {
+  return value === undefined || value.trim() === "" ? undefined : value;
+}
+
+function isPlaceholderCredential(value: string | undefined): boolean {
+  return value !== undefined && placeholderCredentialValues.has(value.trim().toUpperCase());
+}
