@@ -221,6 +221,8 @@ describe("Kiwoom read-only quote adapter skeleton", () => {
 
   it("keeps public MCP tool registry limited to read-only tools", () => {
     expect(getRegisteredToolNames()).toEqual([
+      "resolve_korean_market_query",
+      "get_korean_market_data_context",
       "search_korean_symbol",
       "get_stock_quote",
       "get_kiwoom_stock_quote",

@@ -63,6 +63,8 @@ It returns fixed sample data and does not call external services.
 The mock provider currently supports:
 
 ```text
+resolve_korean_market_query
+get_korean_market_data_context
 search_korean_symbol
 get_stock_quote
 get_etf_quote
@@ -232,6 +234,8 @@ versioning policy documentation
 v0.29.0-alpha release checklist
 official npm alpha publish result documentation
 v0.30.0-alpha release checklist
+Korean market data query resolution tools
+structured market data context payloads
 normalized auth errors
 no-network safety tests
 read-only provider skeleton
@@ -315,6 +319,7 @@ Real Kiwoom API calls must remain disabled by default.
 | Clean install smoke test | Prepared tarball install smoke docs, package-based MCP examples, and v0.28 checklist; npm publish not performed |
 | Official npm publish decision | Documented defer-publish decision, package name availability check, access policy, versioning policy, and v0.29 checklist; npm publish not performed |
 | Official npm alpha publish | Publishes v0.30.0-alpha with alpha dist-tag; latest currently points to alpha, documented install remains @alpha, no hosted proxy, and no runtime scope expansion |
+| Korean market data query resolution | Adds resolve_korean_market_query and get_korean_market_data_context for natural-language stock, ETF, and index data lookup |
 | Public real Kiwoom quote lookup   | Not enabled by default |
 | Mock/test quote response          | Available for response validation only |
 | Mocked quote response                 | Can be normalized safely          |
@@ -405,6 +410,8 @@ automation for execution
 Current allowed MCP tools:
 
 ```text
+resolve_korean_market_query
+get_korean_market_data_context
 search_korean_symbol
 get_stock_quote
 get_kiwoom_stock_quote
@@ -1331,6 +1338,35 @@ Official npm Alpha Publish
 ```
 
 This release publishes the official npm alpha package using the `alpha` dist-tag. The npm registry currently also has `latest` pointing to `0.30.0-alpha`, but this is not a stable/latest release and the required documented install path remains `npm install korea-market-data-mcp@alpha`. It must not be described as a hosted MCP service or as live Kiwoom quote support. Public real Kiwoom quote lookup, endpoint enabled defaults, public exposure defaults, account access, orders, balance lookup, holdings lookup, trading, auto-trading, investment recommendations, centralized credential storage, and centralized data redistribution proxy behavior remain disabled by default or forbidden.
+
+---
+
+## v0.31.0-alpha
+
+Provider status:
+
+```text
+mock provider implemented
+natural-language Korean market query resolution implemented
+resolve_korean_market_query registered
+get_korean_market_data_context registered
+Samsung Electronics, KODEX 200, KOSPI, KOSDAQ, and KOSPI 200 aliases supported
+structured quote, daily chart, and related index context returned for mock provider
+public tool list expanded with read-only data resolution tools
+get_kiwoom_stock_quote public tool scope unchanged
+real Kiwoom quote lookup disabled by default
+Kiwoom real local verification remains explicit opt-in only
+account/order/trading explicitly out of scope
+centralized data redistribution proxy out of scope
+```
+
+Recommended release description:
+
+```text
+Korean Market Data Query Resolution
+```
+
+This release adds natural-language target resolution and structured market data context payloads for Korean stocks, ETFs, and indices. It must not be described as an answer engine, recommendation engine, hosted MCP service, or live Kiwoom quote support. Responses provide data payloads only and do not include buy/sell judgments, target prices, return forecasts, portfolio decisions, or investment recommendations.
 
 ---
 

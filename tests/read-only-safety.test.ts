@@ -16,6 +16,8 @@ describe("read-only safety", () => {
     expect(() => validateRegisteredTools(["search_korean_symbol"])).toThrow(/Missing allowed/);
     expect(() =>
       validateRegisteredTools([
+        "resolve_korean_market_query",
+        "get_korean_market_data_context",
         "search_korean_symbol",
         "get_stock_quote",
         "get_kiwoom_stock_quote",
