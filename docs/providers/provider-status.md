@@ -15,7 +15,7 @@ This document is especially important because different providers may have diffe
 | Provider | Status        | Real API calls |     Credentials required | Default | Notes                                                   |
 | -------- | ------------- | -------------: | -----------------------: | ------: | ------------------------------------------------------- |
 | `mock`   | Implemented   |             No |                       No |     Yes | Fixed sample data for local MCP testing                 |
-| `kiwoom` | Clean install smoke test readiness prepared |  No by default | Yes, for manual token/quote verification and local-only smoke tests |      No | Guarded public quote tool; real lookup disabled by default |
+| `kiwoom` | Official npm publish decision documented |  No by default | Yes, for manual token/quote verification and local-only smoke tests |      No | Guarded public quote tool; real lookup disabled by default |
 
 ---
 
@@ -226,6 +226,10 @@ package metadata review for npm readiness
 clean install smoke test documentation
 package-based MCP config examples for local tarball validation
 v0.28.0-alpha release checklist
+official npm publish decision documentation
+npm access policy documentation
+versioning policy documentation
+v0.29.0-alpha release checklist
 normalized auth errors
 no-network safety tests
 read-only provider skeleton
@@ -307,6 +311,7 @@ Real Kiwoom API calls must remain disabled by default.
 | Alpha release final review | Prepared final review docs, launch announcement draft, and v0.26 checklist |
 | npm pack dry run and publish readiness | Prepared dry-run docs, package contents policy, and v0.27 checklist; npm publish not performed |
 | Clean install smoke test | Prepared tarball install smoke docs, package-based MCP examples, and v0.28 checklist; npm publish not performed |
+| Official npm publish decision | Documented defer-publish decision, package name availability check, access policy, versioning policy, and v0.29 checklist; npm publish not performed |
 | Public real Kiwoom quote lookup   | Not enabled by default |
 | Mock/test quote response          | Available for response validation only |
 | Mocked quote response                 | Can be normalized safely          |
@@ -538,6 +543,7 @@ package/distribution docs keep mock provider as recommended first path
 alpha final review confirms public tool scope and unsupported scope
 npm publish readiness docs confirm no hosted proxy and no npm publish performed
 clean install smoke docs confirm package setup remains alpha/testing only
+official npm publish decision docs confirm defer-publish status and access/versioning policy
 ```
 
 Kiwoom tests must not require real credentials.
@@ -1256,6 +1262,39 @@ Clean Install Smoke Test
 ```
 
 This release prepares and documents clean install smoke test readiness for the package tarball. It must not be described as an npm-published package or hosted MCP service. Public real Kiwoom quote lookup, endpoint enabled defaults, public exposure defaults, account access, orders, balance lookup, holdings lookup, trading, auto-trading, investment recommendations, centralized credential storage, and centralized data redistribution proxy behavior remain disabled by default or forbidden.
+
+---
+
+## v0.29.0-alpha
+
+Provider status:
+
+```text
+mock provider implemented
+official npm publish decision documented
+publish decision is defer publish
+package name availability checked with npm view and returned E404 Not Found on 2026-06-07
+npm access policy documented
+versioning policy documented
+npm publishing not performed
+hosted proxy not provided
+public tool list unchanged
+get_kiwoom_stock_quote public tool scope unchanged
+endpoint enabled default remains false
+endpoint exposesPublicTool default remains false
+public real Kiwoom quote lookup disabled by default
+Kiwoom real local verification remains explicit opt-in only
+account/order/trading explicitly out of scope
+centralized data redistribution proxy out of scope
+```
+
+Recommended release description:
+
+```text
+Official npm Publish Decision
+```
+
+This release records the decision to defer actual npm publish until a separate final publish release. It must not be described as an npm-published package or hosted MCP service. Public real Kiwoom quote lookup, endpoint enabled defaults, public exposure defaults, account access, orders, balance lookup, holdings lookup, trading, auto-trading, investment recommendations, centralized credential storage, and centralized data redistribution proxy behavior remain disabled by default or forbidden.
 
 ---
 

@@ -18,7 +18,7 @@ Package metadata is aligned for a future npm package:
 
 ```text
 name: korea-market-data-mcp
-version: 0.28.0-alpha
+version: 0.29.0-alpha
 type: module
 main: dist/index.js
 bin: korea-market-data-mcp -> dist/index.js
@@ -90,19 +90,58 @@ account/order/balance/holdings/trading data
 
 ## Version And Tag Consistency
 
-For v0.28.0-alpha readiness:
+For v0.29.0-alpha readiness:
 
 ```text
-package.json version: 0.28.0-alpha
-package-lock.json root version: 0.28.0-alpha
-recommended release tag: v0.28.0-alpha
+package.json version: 0.29.0-alpha
+package-lock.json root version: 0.29.0-alpha
+recommended release tag: v0.29.0-alpha
 ```
 
 ## npm Publish Decision
 
-For v0.27.0-alpha, npm publish was not performed.
+For v0.29.0-alpha, npm publish was not performed.
 
 GitHub clone/local setup remains the primary distribution path.
+
+The official npm publish decision is documented in:
+
+```text
+docs/release/npm-publish-decision.md
+docs/release/npm-access-policy.md
+docs/release/versioning-policy.md
+```
+
+Current decision:
+
+```text
+defer publish
+```
+
+Recommended decision:
+
+```text
+defer actual npm publish until a separate final publish release
+```
+
+Package name availability status:
+
+```text
+npm view korea-market-data-mcp name version --json returned E404 Not Found on 2026-06-07
+not reserved
+must be rechecked immediately before future publish
+```
+
+Publish blockers:
+
+```text
+npm package ownership not finally approved
+npm account owner and access policy require final approval
+npm 2FA must be confirmed before publish
+provenance policy requires final approval
+dist-tag policy requires final approval
+final decision owner must approve actual publish
+```
 
 Official distribution channels for this alpha:
 
@@ -112,6 +151,8 @@ GitHub release artifacts if explicitly published by the maintainer
 ```
 
 Do not trust unofficial npm packages or hosted MCP proxies claiming to be this project.
+
+Do not provide Kiwoom credentials to third-party packages or hosted proxies.
 
 ## Clean Install Smoke Test Status
 

@@ -65,7 +65,7 @@ The initial scope is strictly limited to **read-only market data access**.
 
 ## Alpha launch candidate status
 
-`v0.28.0-alpha` is a clean install smoke test readiness review for the read-only Kiwoom quote MCP alpha.
+`v0.29.0-alpha` documents the official npm publish decision for the read-only Kiwoom quote MCP alpha.
 
 This project is:
 
@@ -98,6 +98,7 @@ package metadata and local install/run documentation
 alpha launch announcement and final review documentation
 npm pack dry run and publish readiness documentation
 clean install smoke test documentation
+official npm publish decision documentation
 ```
 
 Real Kiwoom quote lookup remains disabled by default:
@@ -133,6 +134,10 @@ docs/release/npm-pack-dry-run.md
 docs/release/v0.27.0-alpha-checklist.md
 docs/release/clean-install-smoke-test.md
 docs/release/v0.28.0-alpha-checklist.md
+docs/release/npm-publish-decision.md
+docs/release/npm-access-policy.md
+docs/release/versioning-policy.md
+docs/release/v0.29.0-alpha-checklist.md
 ```
 
 Review safety and limitations:
@@ -407,7 +412,7 @@ Current package command shape:
 
 ```text
 package name: korea-market-data-mcp
-package version: 0.28.0-alpha
+package version: 0.29.0-alpha
 main: dist/index.js
 bin: korea-market-data-mcp -> dist/index.js
 start: node dist/index.js
@@ -415,9 +420,26 @@ start: node dist/index.js
 
 Until a package is actually published, use the GitHub clone path above.
 
+`v0.29.0-alpha` records the official npm publish decision:
+
+```text
+current decision: defer publish
+recommended decision: defer actual npm publish until a separate final publish release
+official npm package is not published yet
+npm publish decision is being tracked
+GitHub clone/local setup remains primary
+package-based setup remains alpha/testing-only until official npm release
+do not trust unofficial packages or hosted MCP proxies
+```
+
+Before any future npm publish, the maintainer must confirm package ownership, npm account access, 2FA, provenance, dist-tag, and versioning policy. If an alpha package is published in a future release, the recommended command is `npm publish --tag alpha`; alpha releases must not use the `latest` dist-tag.
+
 See:
 
 ```text
+docs/release/npm-publish-decision.md
+docs/release/npm-access-policy.md
+docs/release/versioning-policy.md
 docs/release/clean-install-smoke-test.md
 docs/release/npm-pack-dry-run.md
 docs/release/distribution-readiness.md

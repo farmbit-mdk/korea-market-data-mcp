@@ -139,6 +139,21 @@ no hosted proxy is provided by this project
 package-based setup remains alpha/testing only until official npm publication
 ```
 
+Official npm publish decision security:
+
+```text
+npm publish was not performed for v0.29.0-alpha
+official npm publication is deferred until a separate final publish release
+package name availability must be rechecked immediately before publish
+maintainer package ownership must be confirmed before publish
+npm account 2FA is required before publish
+provenance and dist-tag policy must be approved before publish
+do not install similarly named unofficial packages
+verify the GitHub repository and release tags before trusting artifacts
+never provide Kiwoom credentials to a third-party package or hosted proxy
+report package impersonation through the repository security reporting path
+```
+
 ---
 
 ## 5. Environment files
