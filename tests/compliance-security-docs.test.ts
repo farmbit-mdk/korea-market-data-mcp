@@ -37,6 +37,7 @@ const requiredDocs = [
   "docs/release/v0.27.0-alpha-checklist.md",
   "docs/release/v0.28.0-alpha-checklist.md",
   "docs/release/v0.29.0-alpha-checklist.md",
+  "docs/release/v0.30.0-alpha-checklist.md",
   "docs/release/alpha-known-limitations.md",
   "docs/release/distribution-readiness.md",
   "docs/release/alpha-install-smoke-test.md",
@@ -45,6 +46,7 @@ const requiredDocs = [
   "docs/release/npm-publish-decision.md",
   "docs/release/npm-access-policy.md",
   "docs/release/versioning-policy.md",
+  "docs/release/npm-alpha-publish-result.md",
   "docs/release/alpha-launch-announcement.md",
   "docs/release/alpha-final-review.md",
   "examples/README.md"
@@ -341,7 +343,7 @@ describe("provider compliance and security review docs", () => {
     };
 
     expect(packageJson.name).toBe("korea-market-data-mcp");
-    expect(packageJson.version).toBe("0.29.0-alpha");
+    expect(packageJson.version).toBe("0.30.0-alpha");
     expect(packageLock.version).toBe(packageJson.version);
     expect(packageLock.packages[""].version).toBe(packageJson.version);
     expect(packageJson.description).toContain("Read-only MCP server");
@@ -375,9 +377,47 @@ describe("provider compliance and security review docs", () => {
     expect(packageJson.scripts?.test).toBe("vitest run");
     expect(packageJson.scripts?.["kiwoom:token:manual"]).toContain("scripts/kiwoom-manual-token-test.ts");
     expect(packageJson.scripts?.["kiwoom:quote:manual"]).toContain("scripts/kiwoom-manual-quote-test.ts");
-    expect(readFileSync(".env.example", "utf8")).toContain("MCP_SERVER_VERSION=0.29.0-alpha");
-    expect(readFileSync("src/utils/env.ts", "utf8")).toContain("0.29.0-alpha");
-    expect(readFileSync("src/server/create-server.ts", "utf8")).toContain("0.29.0-alpha");
+    expect(readFileSync(".env.example", "utf8")).toContain("MCP_SERVER_VERSION=0.30.0-alpha");
+    expect(readFileSync("src/utils/env.ts", "utf8")).toContain("0.30.0-alpha");
+    expect(readFileSync("src/server/create-server.ts", "utf8")).toContain("0.30.0-alpha");
+  });
+
+  it("documents v0.30 official npm alpha publish without runtime scope expansion", () => {
+    const alphaPublishDocs = [
+      "README.md",
+      "CHANGELOG.md",
+      "SECURITY.md",
+      "docs/providers/provider-status.md",
+      "docs/release/distribution-readiness.md",
+      "docs/release/npm-alpha-publish-result.md",
+      "docs/release/v0.30.0-alpha-checklist.md",
+      "examples/README.md"
+    ].map((path) => readFileSync(path, "utf8")).join("\n");
+
+    expect(alphaPublishDocs).toContain("v0.30.0-alpha");
+    expect(alphaPublishDocs).toContain("Official npm Alpha Publish");
+    expect(alphaPublishDocs).toContain("npm install korea-market-data-mcp@alpha");
+    expect(alphaPublishDocs).toContain("npm publish --tag alpha");
+    expect(alphaPublishDocs).toContain("npm package was published with alpha dist-tag");
+    expect(alphaPublishDocs).toContain("latest currently points to alpha, but alpha install is still the required documented path");
+    expect(alphaPublishDocs).toContain("v0.30.0-alpha is not a stable/latest release");
+    expect(alphaPublishDocs).toContain("npm dist-tag rm korea-market-data-mcp latest attempted and failed with E400 Bad Request");
+    expect(alphaPublishDocs).toContain("audit: 0 vulnerabilities");
+    expect(alphaPublishDocs).toContain("Do not run plain `npm publish`");
+    expect(alphaPublishDocs).toContain("GitHub clone/local setup remains supported");
+    expect(alphaPublishDocs).toContain("No hosted proxy was added");
+    expect(alphaPublishDocs).toContain("Real Kiwoom quote lookup remains disabled by default");
+    expect(alphaPublishDocs).toContain("Mock provider is the recommended first setup path");
+    expect(alphaPublishDocs).toContain("Kiwoom real local verification is explicit opt-in only");
+    expect(alphaPublishDocs).toContain("get_kiwoom_stock_quote public tool scope is unchanged");
+    expect(alphaPublishDocs).toContain("No account access.");
+    expect(alphaPublishDocs).toContain("No orders.");
+    expect(alphaPublishDocs).toContain("No balance lookup.");
+    expect(alphaPublishDocs).toContain("No holdings lookup.");
+    expect(alphaPublishDocs).toContain("No trading.");
+    expect(alphaPublishDocs).toContain("No auto-trading.");
+    expect(alphaPublishDocs).toContain("No investment recommendations.");
+    expect(alphaPublishDocs).toContain("No centralized data redistribution proxy.");
   });
 
   it("documents v0.29 official npm publish decision without publishing", () => {

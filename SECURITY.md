@@ -154,6 +154,22 @@ never provide Kiwoom credentials to a third-party package or hosted proxy
 report package impersonation through the repository security reporting path
 ```
 
+npm alpha package security:
+
+```text
+install only the official package name: korea-market-data-mcp
+use the alpha tag during the alpha phase
+install with npm install korea-market-data-mcp@alpha
+latest currently points to alpha, but alpha install is still the required documented path
+do not treat v0.30.0-alpha as a stable/latest release
+verify the package name before installing
+verify release notes and GitHub tags before trusting artifacts
+never provide Kiwoom credentials to a hosted proxy
+this project does not provide a hosted proxy
+credentials remain local to your machine
+real Kiwoom quote lookup remains disabled by default
+```
+
 ---
 
 ## 5. Environment files

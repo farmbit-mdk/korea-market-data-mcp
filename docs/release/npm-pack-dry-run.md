@@ -2,7 +2,7 @@
 
 ## Current npm Status
 
-`korea-market-data-mcp` is not published to npm for v0.29.0-alpha.
+`korea-market-data-mcp` is published to npm alpha when v0.30.0-alpha publish succeeds.
 
 GitHub clone/local setup remains the primary distribution path.
 
@@ -53,6 +53,18 @@ npm publish: not performed
 ```
 
 The dry run includes the v0.29 publish decision, npm access policy, versioning policy, and release checklist documentation.
+
+## v0.30.0-alpha Dry Run Result
+
+Status:
+
+```text
+npm pack --dry-run must complete before npm publish --tag alpha
+package: korea-market-data-mcp@0.30.0-alpha
+filename: korea-market-data-mcp-0.30.0-alpha.tgz
+npm publish command: npm publish --tag alpha
+install command after publish: npm install korea-market-data-mcp@alpha
+```
 
 Observed included content:
 
@@ -132,7 +144,7 @@ npm pack
 New-Item -ItemType Directory -Path ..\korea-market-data-mcp-pack-smoke
 Set-Location ..\korea-market-data-mcp-pack-smoke
 npm init -y
-npm install ..\korea-market-data-mcp\korea-market-data-mcp-0.29.0-alpha.tgz
+npm install ..\korea-market-data-mcp\korea-market-data-mcp-0.30.0-alpha.tgz
 npx korea-market-data-mcp
 ```
 
@@ -184,14 +196,14 @@ no hosted proxy confusion in docs
 
 ## Publish Decision
 
-For v0.29.0-alpha:
+For v0.30.0-alpha:
 
 ```text
-npm publish was not performed
+npm publish --tag alpha is the only approved publish command
 no hosted proxy was added
 GitHub clone/local setup remains primary
-npm package remains publish-decision only
-official publish is deferred until a separate final publish release
+npm alpha package is the official package channel after publish succeeds
+latest currently points to alpha, but alpha install is still the required documented path
 ```
 
 ## Safety

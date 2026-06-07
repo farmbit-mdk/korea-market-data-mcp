@@ -17,7 +17,7 @@ Alpha releases use pre-release versions:
 The current sequence is:
 
 ```text
-v0.1.0-alpha through v0.29.0-alpha
+v0.1.0-alpha through v0.30.0-alpha
 ```
 
 Each alpha release should document whether it changes runtime behavior, packaging, verification, or only release policy.
