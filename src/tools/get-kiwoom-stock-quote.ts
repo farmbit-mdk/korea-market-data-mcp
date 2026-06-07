@@ -2,7 +2,11 @@ import { z } from "zod";
 import { MarketDataProviderError, toToolErrorResponse } from "../providers/errors.js";
 import { createKiwoomAuthClient, loadKiwoomAuthConfig } from "../providers/kiwoom/auth.js";
 import { createKiwoomQuoteClient } from "../providers/kiwoom/quote-client.js";
-import { kiwoomQuoteEndpointMappings } from "../providers/kiwoom/quote-endpoints.js";
+import {
+  getEffectiveKiwoomQuoteEndpointMapping,
+  isLocalKiwoomQuoteVerificationEnabled,
+  kiwoomQuoteEndpointMappings
+} from "../providers/kiwoom/quote-endpoints.js";
 import type {
   KiwoomQuoteEndpointMapping,
   KiwoomQuoteMarket,
@@ -143,7 +147,8 @@ export async function runGuardedKiwoomPublicQuote(
 
   try {
     const normalizedInput = normalizeKiwoomPublicQuoteInput(input);
-    const mapping = dependencies.quoteEndpointMapping ?? kiwoomQuoteEndpointMappings.quote;
+    const env = dependencies.env ?? process.env;
+    const mapping = dependencies.quoteEndpointMapping ?? getEffectiveKiwoomQuoteEndpointMapping(env);
 
     if (!mapping.readOnly) {
       return blocked(normalizedInput.symbol, "QUOTE_ENDPOINT_NOT_READ_ONLY", "Kiwoom quote endpoint mapping is not marked read-only.");
@@ -157,13 +162,13 @@ export async function runGuardedKiwoomPublicQuote(
       return blocked(normalizedInput.symbol, "ENDPOINT_DISABLED", "Kiwoom quote endpoint is not enabled.");
     }
 
-    const config = loadKiwoomAuthConfig(dependencies.env);
+    const config = loadKiwoomAuthConfig(env);
 
     if (!config.enableRealApiCalls) {
       return blocked(normalizedInput.symbol, "REAL_API_CALLS_DISABLED", "KIWOOM_ENABLE_REAL_API_CALLS must be true.");
     }
 
-    if (!isPublicQuoteRealPathEnabled(dependencies.env)) {
+    if (!isPublicQuoteRealPathEnabled(env)) {
       return blocked(normalizedInput.symbol, "PUBLIC_QUOTE_REAL_PATH_DISABLED", "KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH must be true.");
     }
 
@@ -175,9 +180,11 @@ export async function runGuardedKiwoomPublicQuote(
       return blocked(normalizedInput.symbol, "CREDENTIALS_PLACEHOLDER", "Kiwoom credentials are missing or invalid.");
     }
 
-    const activationBlock = getActivationDecisionBlockReason(dependencies.activationDecisionRecord);
-    if (activationBlock !== undefined) {
-      return blocked(normalizedInput.symbol, activationBlock.reasonCode, activationBlock.reason);
+    if (dependencies.quoteEndpointMapping !== undefined || !isLocalKiwoomQuoteVerificationEnabled(env)) {
+      const activationBlock = getActivationDecisionBlockReason(dependencies.activationDecisionRecord);
+      if (activationBlock !== undefined) {
+        return blocked(normalizedInput.symbol, activationBlock.reasonCode, activationBlock.reason);
+      }
     }
 
     const tokenClient = dependencies.tokenClient ?? createKiwoomAuthClient(config);
@@ -189,7 +196,9 @@ export async function runGuardedKiwoomPublicQuote(
 
     const quoteClient = dependencies.quoteClient ?? createKiwoomQuoteClient({
       baseUrl: config.env === "mock" ? config.mockApiBaseUrl : config.apiBaseUrl,
-      quoteEndpointPath: mapping.path
+      quoteEndpointPath: mapping.path,
+      accessToken: token.accessToken,
+      apiId: mapping.apiId
     });
     const quote = await quoteClient.getQuote({
       symbol: normalizedInput.symbol,

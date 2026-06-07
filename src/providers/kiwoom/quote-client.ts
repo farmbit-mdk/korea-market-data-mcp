@@ -19,6 +19,8 @@ export interface KiwoomQuoteClientOptions {
   quoteEndpointPath?: string;
   baseUrl?: string;
   useMappedQuoteEndpoint?: boolean;
+  accessToken?: string;
+  apiId?: string;
 }
 
 export class DefaultKiwoomQuoteClient implements KiwoomQuoteClient {
@@ -46,12 +48,10 @@ export class DefaultKiwoomQuoteClient implements KiwoomQuoteClient {
       url: `${this.options.baseUrl}${quoteEndpointPath}`,
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        ...this.resolveKiwoomHeaders()
       },
-      body: {
-        symbol: request.symbol,
-        market: request.market
-      }
+      body: this.resolveQuoteRequestBody(request)
     };
 
     try {
@@ -76,6 +76,24 @@ export class DefaultKiwoomQuoteClient implements KiwoomQuoteClient {
     }
 
     return undefined;
+  }
+
+  private resolveKiwoomHeaders(): Record<string, string> {
+    return {
+      ...(this.options.accessToken === undefined ? {} : { Authorization: `Bearer ${this.options.accessToken}` }),
+      ...(this.options.apiId === undefined ? {} : { "api-id": this.options.apiId })
+    };
+  }
+
+  private resolveQuoteRequestBody(request: KiwoomQuoteRequest): Record<string, string | undefined> {
+    if (this.options.apiId === kiwoomQuoteEndpointMappings.quote.apiId) {
+      return { stk_cd: request.symbol };
+    }
+
+    return {
+      symbol: request.symbol,
+      market: request.market
+    };
   }
 }
 

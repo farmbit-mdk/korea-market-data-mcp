@@ -65,7 +65,7 @@ The initial scope is strictly limited to **read-only market data access**.
 
 ## Alpha launch candidate status
 
-`v0.35.0-alpha` removes mock market data payloads from the read-only Korean market data MCP alpha.
+`v0.36.0-alpha` enables a local Kiwoom quote verification path for explicitly opted-in users while keeping real API calls disabled by default.
 
 This project is:
 
@@ -92,6 +92,7 @@ Current alpha scope:
 mock provider tools for local MCP testing
 natural-language Korean market query resolution
 guarded get_kiwoom_stock_quote public tool skeleton
+get_kiwoom_setup_status readiness tool
 manual Kiwoom token and quote verification commands
 documentation for Claude Desktop and Cursor setup
 known limitations and release checklists
@@ -114,7 +115,25 @@ KIWOOM_ENABLE_REAL_API_CALLS=false
 KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH=false
 ```
 
-Kiwoom real local verification is explicit opt-in only. Endpoint `enabled` and `exposesPublicTool` defaults remain false.
+Kiwoom real local verification is explicit opt-in only. Static endpoint `enabled` and `exposesPublicTool` defaults remain false; v0.36 only enables an effective local quote mapping when all local opt-in guards and environment checks are valid.
+
+Supported Kiwoom environment parsing:
+
+```text
+KIWOOM_ENV=real | production | prod -> production
+KIWOOM_ENV=mock -> mock
+KIWOOM_INVESTMENT_ENV=real | mock must match the issued credentials
+```
+
+Local verification order:
+
+```powershell
+npm run kiwoom:setup:check
+npm run kiwoom:token:manual
+npm run kiwoom:quote:manual
+```
+
+Claude Desktop can call `get_kiwoom_setup_status` to inspect readiness without requesting a token or quote. `get_korean_market_data_context` may use real Kiwoom quote data only after setup is ready and quote verification succeeds; chart and related index data remain unavailable rather than mocked.
 
 Start with mock provider setup:
 
@@ -151,6 +170,7 @@ docs/release/v0.33.0-alpha-checklist.md
 docs/verification/claude-desktop-live-usage-result.md
 docs/release/v0.34.0-alpha-checklist.md
 docs/release/v0.35.0-alpha-checklist.md
+docs/release/v0.36.0-alpha-checklist.md
 ```
 
 Review safety and limitations:
@@ -388,6 +408,7 @@ The current implementation registers these read-only tools:
 ```text
 resolve_korean_market_query
 get_korean_market_data_context
+get_kiwoom_setup_status
 search_korean_symbol
 get_stock_quote
 get_kiwoom_stock_quote
@@ -403,6 +424,7 @@ Public MCP tool list:
 ```text
 resolve_korean_market_query
 get_korean_market_data_context
+get_kiwoom_setup_status
 search_korean_symbol
 get_stock_quote
 get_kiwoom_stock_quote
@@ -600,6 +622,8 @@ npm run kiwoom:setup:check
 `v0.34.0-alpha` adds Claude Desktop live usage result capture docs. The live verification flow records actual prompts, selected MCP tools, result status, resolved assets, provider/environment, UX notes, and follow-up actions. Natural-language query examples are tested through `resolve_korean_market_query` and `get_korean_market_data_context`. Context payloads continue to return blocked/provider_error/unavailable status instead of mock fallback when real data is unavailable.
 
 `v0.35.0-alpha` removes mock market data payloads from the market data context flow. Market data context no longer returns mock quote, chart, or index values. If Kiwoom real provider data is not configured, context requests return blocked/provider_error/unavailable status. Resolver examples may still use known Korean asset names and symbols, but quote/chart/index values require real provider data.
+
+`v0.36.0-alpha` adds the local Kiwoom quote verification path. `get_kiwoom_setup_status` returns the same readiness payload as `npm run kiwoom:setup:check` without requesting a token or quote. `KIWOOM_ENV=real`, `KIWOOM_ENV=production`, and `KIWOOM_ENV=prod` all select production; `KIWOOM_ENV=mock` selects mock. When setup is ready, run `npm run kiwoom:token:manual`, then `npm run kiwoom:quote:manual`, then use Claude/GPT market data context prompts. No mock market values are returned when real data is unavailable.
 
 Claude Desktop example prompts:
 
@@ -985,6 +1009,7 @@ examples/cursor.kiwoom-local.example.json
 ### v0.3 — Basic market data tools
 
 * `search_korean_symbol`
+* `get_kiwoom_setup_status`
 * `get_stock_quote`
 * `get_etf_quote`
 * `get_market_index`

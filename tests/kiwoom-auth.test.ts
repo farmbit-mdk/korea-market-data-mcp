@@ -34,6 +34,14 @@ describe("Kiwoom auth skeleton", () => {
     expect(config.appSecret).toBeUndefined();
   });
 
+  it.each(["real", "production", "prod"])("parses KIWOOM_ENV=%s as production", (kiwoomEnv) => {
+    const config = loadKiwoomAuthConfig({
+      KIWOOM_ENV: kiwoomEnv
+    });
+
+    expect(config.env).toBe("prod");
+  });
+
   it("returns a normalized auth error when credentials are missing", async () => {
     process.env.KIWOOM_APP_KEY = "";
     process.env.KIWOOM_APP_SECRET = "";

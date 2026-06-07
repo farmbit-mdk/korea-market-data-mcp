@@ -149,6 +149,42 @@ describe("Kiwoom manual quote verification workflow", () => {
     expect(quoteTransport.requestQuote).not.toHaveBeenCalled();
   });
 
+  it("uses the effective local quote mapping when all v0.36 opt-in guards are valid", async () => {
+    const tokenTransport = createMockTokenTransport(successfulKiwoomTokenResponse);
+    const quoteTransport = createMockQuoteTransport(successfulKiwoomQuoteLikeResponse);
+    const summary = await runManualKiwoomQuoteVerification(
+      {
+        KIWOOM_ENABLE_REAL_API_CALLS: "true",
+        KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH: "true",
+        KIWOOM_APP_KEY: "dummy_app_key",
+        KIWOOM_SECRET_KEY: "dummy_secret_key",
+        KIWOOM_ENV: "real",
+        KIWOOM_INVESTMENT_ENV: "real",
+        KIWOOM_QUOTE_SYMBOL: "005930"
+      },
+      { tokenTransport, quoteTransport }
+    );
+
+    expect(summary).toMatchObject({
+      status: "ok",
+      environment: "production",
+      symbol: "005930",
+      quote_present: true
+    });
+    expect(tokenTransport.requestToken).toHaveBeenCalledOnce();
+    expect(quoteTransport.requestQuote).toHaveBeenCalledWith(expect.objectContaining({
+      url: "https://api.kiwoom.com/api/dostk/stkinfo",
+      method: "POST",
+      headers: expect.objectContaining({
+        Authorization: expect.stringContaining("Bearer "),
+        "api-id": "ka10001"
+      }),
+      body: {
+        stk_cd: "005930"
+      }
+    }));
+  });
+
   it("does not request a quote when token request fails", async () => {
     const tokenTransport = createMockTokenTransport(kiwoomErrorTokenResponse);
     const quoteTransport = createMockQuoteTransport(successfulKiwoomQuoteLikeResponse);

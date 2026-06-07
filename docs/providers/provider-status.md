@@ -1,5 +1,17 @@
 # Provider Status
 
+## v0.36.0-alpha
+
+Kiwoom local quote verification is enabled only through explicit local opt-in.
+
+- `get_kiwoom_setup_status` is registered as a read-only MCP tool and returns setup readiness without requesting a token or quote.
+- `KIWOOM_ENV=real`, `KIWOOM_ENV=production`, and `KIWOOM_ENV=prod` resolve to production; `KIWOOM_ENV=mock` resolves to mock.
+- The effective Kiwoom quote endpoint mapping becomes ready only when real API calls, public quote path, credentials, placeholder checks, and provider/investment environment pairing are valid.
+- Recommended verification order is setup status -> manual token -> manual quote -> Claude/GPT market data context.
+- `get_korean_market_data_context` preserves no mock fallback behavior; quote/chart/index values are not replaced with mock market data.
+
+No account access. No orders. No balance lookup. No holdings lookup. No trading. No auto-trading. No investment recommendations. No centralized data redistribution proxy.
+
 ## 1. Purpose
 
 This document tracks the implementation status of market data providers in `korea-market-data-mcp`.
@@ -15,7 +27,7 @@ This document is especially important because different providers may have diffe
 | Provider | Status        | Real API calls |     Credentials required | Default | Notes                                                   |
 | -------- | ------------- | -------------: | -----------------------: | ------: | ------------------------------------------------------- |
 | `mock`   | Implemented   |             No |                       No |     Yes | Fixed sample data for local MCP testing                 |
-| `kiwoom` | Official npm alpha publish prepared |  No by default | Yes, for manual token/quote verification and local-only smoke tests |      No | Guarded public quote tool; real lookup disabled by default |
+| `kiwoom` | Local quote verification path available |  No by default | Yes, for manual token/quote verification and local-only smoke tests |      No | Guarded setup status and quote tools; real lookup disabled by default |
 
 ---
 
@@ -65,6 +77,7 @@ The mock provider currently supports:
 ```text
 resolve_korean_market_query
 get_korean_market_data_context
+get_kiwoom_setup_status
 search_korean_symbol
 get_stock_quote
 get_etf_quote
@@ -415,6 +428,7 @@ Current allowed MCP tools:
 ```text
 resolve_korean_market_query
 get_korean_market_data_context
+get_kiwoom_setup_status
 search_korean_symbol
 get_stock_quote
 get_kiwoom_stock_quote

@@ -2,6 +2,19 @@
 
 All notable alpha release documentation and safety-scope changes are tracked here.
 
+## v0.36.0-alpha - Enable Local Kiwoom Quote Verification
+
+Local Kiwoom quote verification path for explicitly opted-in users.
+
+- Updated package metadata and server defaults to `0.36.0-alpha`.
+- Enabled the effective local Kiwoom quote endpoint verification path only when real API calls, public quote path, non-placeholder credentials, and Kiwoom provider/investment environments are all valid.
+- Added `get_kiwoom_setup_status` as a read-only public MCP tool that reports setup readiness without requesting a token or quote.
+- Unified `KIWOOM_ENV` parsing so `real`, `production`, and `prod` resolve to production across setup, token, quote, and auth flows; `mock` remains mock.
+- Improved setup check `next_step` messages, including the token -> quote manual verification sequence when ready.
+- Preserved no mock market data behavior for `get_korean_market_data_context`; unavailable quote/chart/index data remains `blocked`, `provider_error`, or `unavailable`.
+
+No account access. No orders. No balance lookup. No holdings lookup. No trading. No auto-trading. No investment recommendations. No centralized data redistribution proxy.
+
 ## v0.35.0-alpha - Remove Mock Market Data
 
 Remove mock market data payloads from market data context flow.
