@@ -128,6 +128,17 @@ no hosted proxy is provided by this project
 npm publish was not performed for v0.27.0-alpha
 ```
 
+Package install security:
+
+```text
+official npm publication has not yet occurred
+do not install similarly named unofficial packages
+verify GitHub tags and the source repository
+never provide credentials to hosted proxies or third-party packages
+no hosted proxy is provided by this project
+package-based setup remains alpha/testing only until official npm publication
+```
+
 ---
 
 ## 5. Environment files

@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "korea-market-data": {
+      "command": "npx",
+      "args": [
+        "korea-market-data-mcp"
+      ],
+      "env": {
+        "MARKET_DATA_PROVIDER": "mock",
+        "KIWOOM_ENABLE_REAL_API_CALLS": "false",
+        "KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH": "false",
+        "LOG_LEVEL": "info"
+      }
+    }
+  }
+}

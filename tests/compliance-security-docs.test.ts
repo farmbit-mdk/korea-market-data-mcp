@@ -35,10 +35,12 @@ const requiredDocs = [
   "docs/release/v0.25.0-alpha-checklist.md",
   "docs/release/v0.26.0-alpha-checklist.md",
   "docs/release/v0.27.0-alpha-checklist.md",
+  "docs/release/v0.28.0-alpha-checklist.md",
   "docs/release/alpha-known-limitations.md",
   "docs/release/distribution-readiness.md",
   "docs/release/alpha-install-smoke-test.md",
   "docs/release/npm-pack-dry-run.md",
+  "docs/release/clean-install-smoke-test.md",
   "docs/release/alpha-launch-announcement.md",
   "docs/release/alpha-final-review.md",
   "examples/README.md"
@@ -57,6 +59,8 @@ const mcpClientSetupExamplePaths = [
   "examples/claude-desktop.kiwoom-local.example.json",
   "examples/cursor.mock.json",
   "examples/cursor.kiwoom-local.example.json",
+  "examples/claude-desktop.package.example.json",
+  "examples/cursor.package.example.json",
   "examples/env.mock.example",
   "examples/env.kiwoom-local.example"
 ];
@@ -333,7 +337,7 @@ describe("provider compliance and security review docs", () => {
     };
 
     expect(packageJson.name).toBe("korea-market-data-mcp");
-    expect(packageJson.version).toBe("0.27.0-alpha");
+    expect(packageJson.version).toBe("0.28.0-alpha");
     expect(packageLock.version).toBe(packageJson.version);
     expect(packageLock.packages[""].version).toBe(packageJson.version);
     expect(packageJson.description).toContain("Read-only MCP server");
@@ -367,9 +371,49 @@ describe("provider compliance and security review docs", () => {
     expect(packageJson.scripts?.test).toBe("vitest run");
     expect(packageJson.scripts?.["kiwoom:token:manual"]).toContain("scripts/kiwoom-manual-token-test.ts");
     expect(packageJson.scripts?.["kiwoom:quote:manual"]).toContain("scripts/kiwoom-manual-quote-test.ts");
-    expect(readFileSync(".env.example", "utf8")).toContain("MCP_SERVER_VERSION=0.27.0-alpha");
-    expect(readFileSync("src/utils/env.ts", "utf8")).toContain("0.27.0-alpha");
-    expect(readFileSync("src/server/create-server.ts", "utf8")).toContain("0.27.0-alpha");
+    expect(readFileSync(".env.example", "utf8")).toContain("MCP_SERVER_VERSION=0.28.0-alpha");
+    expect(readFileSync("src/utils/env.ts", "utf8")).toContain("0.28.0-alpha");
+    expect(readFileSync("src/server/create-server.ts", "utf8")).toContain("0.28.0-alpha");
+  });
+
+  it("documents v0.28 clean install smoke test readiness without npm publishing", () => {
+    const cleanInstallDocs = [
+      "README.md",
+      "CHANGELOG.md",
+      "SECURITY.md",
+      "docs/providers/provider-status.md",
+      "docs/release/distribution-readiness.md",
+      "docs/release/npm-pack-dry-run.md",
+      "docs/release/clean-install-smoke-test.md",
+      "docs/release/v0.28.0-alpha-checklist.md",
+      "examples/README.md"
+    ].map((path) => readFileSync(path, "utf8")).join("\n");
+
+    expect(cleanInstallDocs).toContain("v0.28.0-alpha");
+    expect(cleanInstallDocs).toContain("Clean Install Smoke Test");
+    expect(cleanInstallDocs).toContain("clean temp directory install");
+    expect(cleanInstallDocs).toContain("tarball install passed");
+    expect(cleanInstallDocs).toContain("package bin startup check passed");
+    expect(cleanInstallDocs).toContain("mock provider startup check passed");
+    expect(cleanInstallDocs).toContain("manual token default blocked");
+    expect(cleanInstallDocs).toContain("manual quote default blocked");
+    expect(cleanInstallDocs).toContain("package-based MCP client config");
+    expect(cleanInstallDocs).toContain("official npm package is not published yet");
+    expect(cleanInstallDocs).toContain("package-based setup remains alpha/testing only");
+    expect(cleanInstallDocs).toContain("npm publish was not performed");
+    expect(cleanInstallDocs).toContain("hosted proxy was not added");
+    expect(cleanInstallDocs).toContain("Real Kiwoom quote lookup remains disabled by default");
+    expect(cleanInstallDocs).toContain("Mock provider is the recommended first setup path");
+    expect(cleanInstallDocs).toContain("Kiwoom real local verification is explicit opt-in only");
+    expect(cleanInstallDocs).toContain("get_kiwoom_stock_quote public tool scope is unchanged");
+    expect(cleanInstallDocs).toContain("No account access.");
+    expect(cleanInstallDocs).toContain("No orders.");
+    expect(cleanInstallDocs).toContain("No balance lookup.");
+    expect(cleanInstallDocs).toContain("No holdings lookup.");
+    expect(cleanInstallDocs).toContain("No trading.");
+    expect(cleanInstallDocs).toContain("No auto-trading.");
+    expect(cleanInstallDocs).toContain("No investment recommendations.");
+    expect(cleanInstallDocs).toContain("No centralized data redistribution proxy.");
   });
 
   it("documents v0.27 npm pack dry run readiness without npm publishing", () => {
@@ -470,6 +514,38 @@ describe("provider compliance and security review docs", () => {
       expect(server.env).not.toHaveProperty("ENABLE_ACCOUNT_TOOLS");
       expect(server.env).not.toHaveProperty("ENABLE_ORDER_TOOLS");
     }
+  });
+
+  it("keeps package-based MCP examples scoped to local tarball or future npm validation", () => {
+    const packageExamplePaths = [
+      "examples/claude-desktop.package.example.json",
+      "examples/cursor.package.example.json"
+    ];
+
+    for (const path of packageExamplePaths) {
+      const serialized = readFileSync(path, "utf8");
+      const parsed = JSON.parse(serialized) as {
+        mcpServers: Record<string, { command: string; args: string[]; env: Record<string, string> }>;
+      };
+      const server = parsed.mcpServers["korea-market-data"];
+
+      expect(server.command).toBe("npx");
+      expect(server.args).toEqual(["korea-market-data-mcp"]);
+      expect(server.env.MARKET_DATA_PROVIDER).toBe("mock");
+      expect(server.env.KIWOOM_ENABLE_REAL_API_CALLS).toBe("false");
+      expect(server.env.KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH).toBe("false");
+      expect(serialized).not.toMatch(/Bearer\s+[A-Za-z0-9._~+/=-]{12,}/);
+      expect(serialized).not.toMatch(/access_token/i);
+      expect(server.env).not.toHaveProperty("KIWOOM_ACCOUNT_NO");
+      expect(server.env).not.toHaveProperty("ENABLE_TRADING_TOOLS");
+      expect(server.env).not.toHaveProperty("ENABLE_ACCOUNT_TOOLS");
+      expect(server.env).not.toHaveProperty("ENABLE_ORDER_TOOLS");
+    }
+
+    const examplesReadme = readFileSync("examples/README.md", "utf8");
+    expect(examplesReadme).toContain("local tarball or future official npm package validation only");
+    expect(examplesReadme).toContain("official npm package is not published yet");
+    expect(examplesReadme).toContain("Use GitHub clone setup for the current alpha unless you are testing package installation");
   });
 
   it("documents local verification matrices and blocked reasons", () => {

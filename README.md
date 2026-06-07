@@ -65,7 +65,7 @@ The initial scope is strictly limited to **read-only market data access**.
 
 ## Alpha launch candidate status
 
-`v0.27.0-alpha` is an npm pack dry run and publish readiness review for the read-only Kiwoom quote MCP alpha.
+`v0.28.0-alpha` is a clean install smoke test readiness review for the read-only Kiwoom quote MCP alpha.
 
 This project is:
 
@@ -97,6 +97,7 @@ known limitations and release checklists
 package metadata and local install/run documentation
 alpha launch announcement and final review documentation
 npm pack dry run and publish readiness documentation
+clean install smoke test documentation
 ```
 
 Real Kiwoom quote lookup remains disabled by default:
@@ -130,6 +131,8 @@ docs/release/alpha-final-review.md
 docs/release/v0.26.0-alpha-checklist.md
 docs/release/npm-pack-dry-run.md
 docs/release/v0.27.0-alpha-checklist.md
+docs/release/clean-install-smoke-test.md
+docs/release/v0.28.0-alpha-checklist.md
 ```
 
 Review safety and limitations:
@@ -398,11 +401,13 @@ GitHub clone/local setup remains the primary distribution path. The npm package 
 
 Do not install from unofficial npm packages claiming this project name. Use GitHub releases/source until an official npm package is published from this repository.
 
+Tarball-based clean install smoke testing has been reviewed for the alpha package. Package-based setup remains alpha/testing only unless an official npm package is published.
+
 Current package command shape:
 
 ```text
 package name: korea-market-data-mcp
-package version: 0.27.0-alpha
+package version: 0.28.0-alpha
 main: dist/index.js
 bin: korea-market-data-mcp -> dist/index.js
 start: node dist/index.js
@@ -413,6 +418,7 @@ Until a package is actually published, use the GitHub clone path above.
 See:
 
 ```text
+docs/release/clean-install-smoke-test.md
 docs/release/npm-pack-dry-run.md
 docs/release/distribution-readiness.md
 ```
