@@ -1432,6 +1432,35 @@ This release documents how to verify the npm alpha package in Claude Desktop and
 
 ---
 
+## v0.34.0-alpha
+
+Provider status:
+
+```text
+Claude Desktop live usage verification documented
+Claude Desktop prompt test cases documented
+verification capture template added
+natural language query tools available
+resolve_korean_market_query available
+get_korean_market_data_context available
+real provider context requires Kiwoom setup and opt-in
+failed or blocked real context lookup does not fall back to mock data
+get_kiwoom_stock_quote public tool scope unchanged
+real Kiwoom quote lookup disabled by default
+account/order/trading explicitly out of scope
+centralized data redistribution proxy out of scope
+```
+
+Recommended release description:
+
+```text
+Claude Desktop Live Usage Result Capture
+```
+
+This release documents live Claude Desktop usage result capture for the existing public tools. It must not be described as enabling real quote lookup by default, adding live chart/index support, adding hosted proxy behavior, or adding recommendation/account/order/trading behavior. Failed real context lookups must remain explicit blocked/provider_error/unavailable payloads and must not be replaced with mock data.
+
+---
+
 ## 11. Future provider candidates
 
 Potential future providers may include:

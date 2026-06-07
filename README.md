@@ -65,7 +65,7 @@ The initial scope is strictly limited to **read-only market data access**.
 
 ## Alpha launch candidate status
 
-`v0.33.0-alpha` documents Claude Desktop real data verification for the read-only Korean market data MCP alpha.
+`v0.34.0-alpha` documents Claude Desktop live usage result capture for the read-only Korean market data MCP alpha.
 
 This project is:
 
@@ -104,6 +104,7 @@ official npm alpha publish result documentation
 Korean market data query resolution tools
 Claude Desktop npm alpha package verification docs
 Claude Desktop real-provider-oriented context verification docs
+Claude Desktop live usage result capture docs
 ```
 
 Real Kiwoom quote lookup remains disabled by default:
@@ -147,6 +148,8 @@ docs/release/npm-alpha-publish-result.md
 docs/release/v0.30.0-alpha-checklist.md
 docs/verification/claude-desktop-real-data-verification.md
 docs/release/v0.33.0-alpha-checklist.md
+docs/verification/claude-desktop-live-usage-result.md
+docs/release/v0.34.0-alpha-checklist.md
 ```
 
 Review safety and limitations:
@@ -592,6 +595,8 @@ npm run kiwoom:setup:check
 ```
 
 `v0.33.0-alpha` adds Claude Desktop verification docs and examples for this flow. Claude Desktop can connect with the official npm alpha package, use natural-language query resolution, and request real-provider-oriented context payloads. Real data context requires local Kiwoom credentials and explicit opt-in settings. If real data is blocked or unavailable, the MCP server returns structured status instead of mock replacement data.
+
+`v0.34.0-alpha` adds Claude Desktop live usage result capture docs. The live verification flow records actual prompts, selected MCP tools, result status, resolved assets, provider/environment, UX notes, and follow-up actions. Natural-language query examples are tested through `resolve_korean_market_query` and `get_korean_market_data_context`. Context payloads continue to return blocked/provider_error/unavailable status instead of mock fallback when real data is unavailable.
 
 Claude Desktop example prompts:
 

@@ -2,6 +2,19 @@
 
 All notable alpha release documentation and safety-scope changes are tracked here.
 
+## v0.34.0-alpha - Claude Desktop Live Usage Result Capture
+
+Claude Desktop live usage result capture documentation.
+
+- Updated package metadata and server defaults to `0.34.0-alpha`.
+- Added Claude Desktop live usage result capture documentation.
+- Added real usage prompt examples for MCP tool visibility, natural-language query resolution, context payload lookup, setup status, and real quote checks.
+- Added a capture template for prompt, tool called, result status, resolved asset, data returned, provider, environment, notes, and follow-up action.
+- Added tool selection and context payload UX note sections for live verification findings.
+- Added a v0.34.0-alpha release checklist and documentation consistency tests.
+
+This release documents live usage capture only. It does not add account access, orders, balance lookup, holdings lookup, trading, auto-trading, investment recommendations, hosted proxy behavior, centralized data redistribution, or mock fallback for failed real-provider context payloads.
+
 ## v0.33.0-alpha - Claude Desktop Real Data Verification
 
 Claude Desktop verification docs and config examples for the official npm alpha package.
