@@ -343,7 +343,7 @@ describe("provider compliance and security review docs", () => {
     };
 
     expect(packageJson.name).toBe("korea-market-data-mcp");
-    expect(packageJson.version).toBe("0.30.0-alpha");
+    expect(packageJson.version).toBe("0.31.0-alpha");
     expect(packageLock.version).toBe(packageJson.version);
     expect(packageLock.packages[""].version).toBe(packageJson.version);
     expect(packageJson.description).toContain("Read-only MCP server");
@@ -377,9 +377,9 @@ describe("provider compliance and security review docs", () => {
     expect(packageJson.scripts?.test).toBe("vitest run");
     expect(packageJson.scripts?.["kiwoom:token:manual"]).toContain("scripts/kiwoom-manual-token-test.ts");
     expect(packageJson.scripts?.["kiwoom:quote:manual"]).toContain("scripts/kiwoom-manual-quote-test.ts");
-    expect(readFileSync(".env.example", "utf8")).toContain("MCP_SERVER_VERSION=0.30.0-alpha");
-    expect(readFileSync("src/utils/env.ts", "utf8")).toContain("0.30.0-alpha");
-    expect(readFileSync("src/server/create-server.ts", "utf8")).toContain("0.30.0-alpha");
+    expect(readFileSync(".env.example", "utf8")).toContain("MCP_SERVER_VERSION=0.31.0-alpha");
+    expect(readFileSync("src/utils/env.ts", "utf8")).toContain("0.31.0-alpha");
+    expect(readFileSync("src/server/create-server.ts", "utf8")).toContain("0.31.0-alpha");
   });
 
   it("documents v0.30 official npm alpha publish without runtime scope expansion", () => {
@@ -834,6 +834,8 @@ describe("provider compliance and security review docs", () => {
 
   it("keeps the MCP registry at allowed read-only tools with guarded Kiwoom quote only", () => {
     expect(getRegisteredToolNames()).toEqual([
+      "resolve_korean_market_query",
+      "get_korean_market_data_context",
       "search_korean_symbol",
       "get_stock_quote",
       "get_kiwoom_stock_quote",

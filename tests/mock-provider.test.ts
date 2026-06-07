@@ -80,6 +80,7 @@ describe("mock provider", () => {
 
   it("searches Samsung Electronics by Korean, English, and symbol aliases", async () => {
     await expectFirstSearchSymbol("삼성전자", "005930");
+    await expectFirstSearchSymbol("삼전", "005930");
     await expectFirstSearchSymbol("Samsung Electronics", "005930");
     await expectFirstSearchSymbol("Samsung", "005930");
     await expectFirstSearchSymbol("005930", "005930");
@@ -90,6 +91,13 @@ describe("mock provider", () => {
     await expectFirstSearchSymbol("코덱스 200", "069500");
     await expectFirstSearchSymbol("KODEX 200", "069500");
     await expectFirstSearchSymbol("069500", "069500");
+  });
+
+  it("searches Korean market indices by Korean and English aliases", async () => {
+    await expectFirstSearchSymbol("코스피", "KOSPI");
+    await expectFirstSearchSymbol("코스닥", "KOSDAQ");
+    await expectFirstSearchSymbol("코스피200", "KOSPI200");
+    await expectFirstSearchSymbol("KOSPI200", "KOSPI200");
   });
 
   it("throws normalized invalid input errors", async () => {

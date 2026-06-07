@@ -65,7 +65,7 @@ The initial scope is strictly limited to **read-only market data access**.
 
 ## Alpha launch candidate status
 
-`v0.30.0-alpha` publishes the official npm alpha package for the read-only Kiwoom quote MCP alpha.
+`v0.31.0-alpha` adds Korean market data query resolution for the read-only Kiwoom quote MCP alpha.
 
 This project is:
 
@@ -90,6 +90,7 @@ Current alpha scope:
 
 ```text
 mock provider tools for local MCP testing
+natural-language Korean market query resolution
 guarded get_kiwoom_stock_quote public tool skeleton
 manual Kiwoom token and quote verification commands
 documentation for Claude Desktop and Cursor setup
@@ -100,6 +101,7 @@ npm pack dry run and publish readiness documentation
 clean install smoke test documentation
 official npm publish decision documentation
 official npm alpha publish result documentation
+Korean market data query resolution tools
 ```
 
 Real Kiwoom quote lookup remains disabled by default:
@@ -376,6 +378,8 @@ npm test
 The current implementation registers these read-only tools:
 
 ```text
+resolve_korean_market_query
+get_korean_market_data_context
 search_korean_symbol
 get_stock_quote
 get_kiwoom_stock_quote
@@ -389,6 +393,8 @@ get_daily_chart
 Public MCP tool list:
 
 ```text
+resolve_korean_market_query
+get_korean_market_data_context
 search_korean_symbol
 get_stock_quote
 get_kiwoom_stock_quote
@@ -415,7 +421,7 @@ Current package command shape:
 
 ```text
 package name: korea-market-data-mcp
-package version: 0.30.0-alpha
+package version: 0.31.0-alpha
 main: dist/index.js
 bin: korea-market-data-mcp -> dist/index.js
 start: node dist/index.js
@@ -533,6 +539,28 @@ no auto-trading
 no investment recommendations
 no centralized data redistribution proxy
 ```
+
+### Korean market data query resolution
+
+`v0.31.0-alpha` adds two read-only data-resolution tools:
+
+```text
+resolve_korean_market_query
+get_korean_market_data_context
+```
+
+These tools help Claude, GPT, and other MCP clients find Korean stock, ETF, and index data targets from natural-language queries when the user does not know the code.
+
+Examples:
+
+```text
+삼성전자 요즘 어때? -> 005930 / stock / KOSPI
+삼전 흐름 알려줘 -> 005930 / stock / KOSPI
+코덱스200 조회해줘 -> 069500 / etf / KOSPI
+코스피 흐름 알려줘 -> KOSPI / index
+```
+
+`get_korean_market_data_context` returns structured quote, daily chart, and related index payloads for analysis by the client model. It does not return buy/sell judgments, target prices, return forecasts, portfolio decisions, or investment recommendations.
 
 ### Kiwoom auth skeleton
 

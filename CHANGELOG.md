@@ -2,6 +2,19 @@
 
 All notable alpha release documentation and safety-scope changes are tracked here.
 
+## v0.31.0-alpha - Korean Market Data Query Resolution
+
+Natural-language Korean market data target resolution and context payloads.
+
+- Updated package metadata and server defaults to `0.31.0-alpha`.
+- Added `resolve_korean_market_query` for resolving Korean stock, ETF, and index targets from natural-language queries.
+- Added `get_korean_market_data_context` for returning structured quote, daily chart, and related index payloads.
+- Expanded mock provider aliases for Samsung Electronics, KODEX 200, KOSPI, KOSDAQ, and KOSPI 200.
+- Added tests for Korean query resolution, context payloads, registry registration, and existing tool preservation.
+- Confirmed no investment recommendation, account, order, trading, or hosted proxy scope expansion.
+
+The MCP server remains a data provider, not an answer or recommendation engine. Responses provide structured market data payloads for Claude/GPT analysis and do not include buy/sell judgments, target prices, return forecasts, portfolio decisions, or investment recommendations.
+
 ## v0.30.0-alpha - Official npm Alpha Publish
 
 Official npm alpha package publish.

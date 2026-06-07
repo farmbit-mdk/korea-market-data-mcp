@@ -1,12 +1,16 @@
 import { getDailyChartTool } from "./get-daily-chart.js";
 import { getEtfQuoteTool } from "./get-etf-quote.js";
+import { getKoreanMarketDataContextTool } from "./get-korean-market-data-context.js";
 import { getKiwoomStockQuoteTool } from "./get-kiwoom-stock-quote.js";
 import { getMarketIndexTool } from "./get-market-index.js";
 import { getStockQuoteTool } from "./get-stock-quote.js";
+import { resolveKoreanMarketQueryTool } from "./resolve-korean-market-query.js";
 import { searchKoreanSymbolTool } from "./search-korean-symbol.js";
 import type { ToolDefinition } from "./types.js";
 
 export const toolDefinitions: ToolDefinition[] = [
+  resolveKoreanMarketQueryTool,
+  getKoreanMarketDataContextTool,
   searchKoreanSymbolTool,
   getStockQuoteTool,
   getKiwoomStockQuoteTool,
