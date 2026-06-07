@@ -2,6 +2,34 @@
 
 All notable alpha release documentation and safety-scope changes are tracked here.
 
+## v0.29.0-alpha - Official npm Publish Decision
+
+Official npm publish decision documentation without publishing to npm.
+
+- Updated package metadata and server defaults to `0.29.0-alpha`.
+- Added official npm publish decision record.
+- Added npm access policy documentation for ownership, 2FA, publish access, tokens, and handoff.
+- Added versioning policy documentation for alpha versions and npm dist-tags.
+- Documented package name availability check result and package impersonation risk.
+- Updated README, distribution readiness, SECURITY, provider status, and release checklist guidance.
+- Added tests for publish decision documentation, access policy, versioning policy, and package impersonation warnings.
+- Confirmed no runtime scope expansion in this release.
+
+`npm publish` was not performed. No hosted proxy was added. Real Kiwoom quote lookup remains disabled by default, mock provider remains the recommended first setup path, Kiwoom real local verification remains explicit opt-in only, and `get_kiwoom_stock_quote` public tool scope is unchanged.
+
+Explicitly excluded:
+
+```text
+account access
+orders
+balance lookup
+holdings lookup
+trading
+auto-trading
+investment recommendations
+centralized data redistribution proxy
+```
+
 ## v0.28.0-alpha - Clean Install Smoke Test
 
 Clean install smoke test readiness review for the package tarball.

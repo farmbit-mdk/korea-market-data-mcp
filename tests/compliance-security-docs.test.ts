@@ -36,11 +36,15 @@ const requiredDocs = [
   "docs/release/v0.26.0-alpha-checklist.md",
   "docs/release/v0.27.0-alpha-checklist.md",
   "docs/release/v0.28.0-alpha-checklist.md",
+  "docs/release/v0.29.0-alpha-checklist.md",
   "docs/release/alpha-known-limitations.md",
   "docs/release/distribution-readiness.md",
   "docs/release/alpha-install-smoke-test.md",
   "docs/release/npm-pack-dry-run.md",
   "docs/release/clean-install-smoke-test.md",
+  "docs/release/npm-publish-decision.md",
+  "docs/release/npm-access-policy.md",
+  "docs/release/versioning-policy.md",
   "docs/release/alpha-launch-announcement.md",
   "docs/release/alpha-final-review.md",
   "examples/README.md"
@@ -337,7 +341,7 @@ describe("provider compliance and security review docs", () => {
     };
 
     expect(packageJson.name).toBe("korea-market-data-mcp");
-    expect(packageJson.version).toBe("0.28.0-alpha");
+    expect(packageJson.version).toBe("0.29.0-alpha");
     expect(packageLock.version).toBe(packageJson.version);
     expect(packageLock.packages[""].version).toBe(packageJson.version);
     expect(packageJson.description).toContain("Read-only MCP server");
@@ -371,9 +375,54 @@ describe("provider compliance and security review docs", () => {
     expect(packageJson.scripts?.test).toBe("vitest run");
     expect(packageJson.scripts?.["kiwoom:token:manual"]).toContain("scripts/kiwoom-manual-token-test.ts");
     expect(packageJson.scripts?.["kiwoom:quote:manual"]).toContain("scripts/kiwoom-manual-quote-test.ts");
-    expect(readFileSync(".env.example", "utf8")).toContain("MCP_SERVER_VERSION=0.28.0-alpha");
-    expect(readFileSync("src/utils/env.ts", "utf8")).toContain("0.28.0-alpha");
-    expect(readFileSync("src/server/create-server.ts", "utf8")).toContain("0.28.0-alpha");
+    expect(readFileSync(".env.example", "utf8")).toContain("MCP_SERVER_VERSION=0.29.0-alpha");
+    expect(readFileSync("src/utils/env.ts", "utf8")).toContain("0.29.0-alpha");
+    expect(readFileSync("src/server/create-server.ts", "utf8")).toContain("0.29.0-alpha");
+  });
+
+  it("documents v0.29 official npm publish decision without publishing", () => {
+    const publishDecisionDocs = [
+      "README.md",
+      "CHANGELOG.md",
+      "SECURITY.md",
+      "docs/providers/provider-status.md",
+      "docs/release/distribution-readiness.md",
+      "docs/release/npm-publish-decision.md",
+      "docs/release/npm-access-policy.md",
+      "docs/release/versioning-policy.md",
+      "docs/release/v0.29.0-alpha-checklist.md",
+      "examples/README.md"
+    ].map((path) => readFileSync(path, "utf8")).join("\n");
+
+    expect(publishDecisionDocs).toContain("v0.29.0-alpha");
+    expect(publishDecisionDocs).toContain("Official npm Publish Decision");
+    expect(publishDecisionDocs).toContain("defer publish");
+    expect(publishDecisionDocs).toContain("defer actual npm publish until a separate final publish release");
+    expect(publishDecisionDocs).toContain("npm publish was not performed");
+    expect(publishDecisionDocs).toContain("official npm package is not published yet");
+    expect(publishDecisionDocs).toContain("GitHub clone/local setup remains primary");
+    expect(publishDecisionDocs).toContain("package name availability");
+    expect(publishDecisionDocs).toContain("E404 Not Found");
+    expect(publishDecisionDocs).toContain("not reserved");
+    expect(publishDecisionDocs).toContain("2FA");
+    expect(publishDecisionDocs).toContain("provenance");
+    expect(publishDecisionDocs).toContain("npm publish --tag alpha");
+    expect(publishDecisionDocs).toContain("latest dist-tag");
+    expect(publishDecisionDocs).toContain("package impersonation");
+    expect(publishDecisionDocs).toContain("do not install similarly named unofficial packages");
+    expect(publishDecisionDocs).toContain("No hosted proxy was added");
+    expect(publishDecisionDocs).toContain("Real Kiwoom quote lookup remains disabled by default");
+    expect(publishDecisionDocs).toContain("Mock provider is the recommended first setup path");
+    expect(publishDecisionDocs).toContain("Kiwoom real local verification is explicit opt-in only");
+    expect(publishDecisionDocs).toContain("get_kiwoom_stock_quote public tool scope is unchanged");
+    expect(publishDecisionDocs).toContain("No account access.");
+    expect(publishDecisionDocs).toContain("No orders.");
+    expect(publishDecisionDocs).toContain("No balance lookup.");
+    expect(publishDecisionDocs).toContain("No holdings lookup.");
+    expect(publishDecisionDocs).toContain("No trading.");
+    expect(publishDecisionDocs).toContain("No auto-trading.");
+    expect(publishDecisionDocs).toContain("No investment recommendations.");
+    expect(publishDecisionDocs).toContain("No centralized data redistribution proxy.");
   });
 
   it("documents v0.28 clean install smoke test readiness without npm publishing", () => {
