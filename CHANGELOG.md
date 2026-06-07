@@ -2,6 +2,33 @@
 
 All notable alpha release documentation and safety-scope changes are tracked here.
 
+## v0.28.0-alpha - Clean Install Smoke Test
+
+Clean install smoke test readiness review for the package tarball.
+
+- Updated package metadata and server defaults to `0.28.0-alpha`.
+- Added clean install smoke test documentation.
+- Added package-based Claude Desktop and Cursor MCP config examples for local tarball or future npm package validation.
+- Added v0.28.0-alpha release checklist.
+- Updated README, distribution readiness, SECURITY, and examples guidance for clean install smoke testing.
+- Added tests for package-based MCP examples and clean install smoke test documentation.
+- Confirmed no runtime scope expansion in this release.
+
+`npm publish` was not performed. No hosted proxy was added. Real Kiwoom quote lookup remains disabled by default, mock provider remains the recommended first setup path, Kiwoom real local verification remains explicit opt-in only, and `get_kiwoom_stock_quote` public tool scope is unchanged.
+
+Explicitly excluded:
+
+```text
+account access
+orders
+balance lookup
+holdings lookup
+trading
+auto-trading
+investment recommendations
+centralized data redistribution proxy
+```
+
 ## v0.27.0-alpha - npm Pack Dry Run and Publish Readiness
 
 npm package publish-readiness review without publishing to npm.

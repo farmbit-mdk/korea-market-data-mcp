@@ -2,7 +2,7 @@
 
 ## Current npm Status
 
-`korea-market-data-mcp` is not published to npm for v0.27.0-alpha.
+`korea-market-data-mcp` is not published to npm for v0.28.0-alpha.
 
 GitHub clone/local setup remains the primary distribution path.
 
@@ -28,14 +28,14 @@ npm pack --dry-run
 
 The dry run must not publish anything.
 
-## v0.27.0-alpha Dry Run Result
+## v0.28.0-alpha Dry Run Result
 
 Status:
 
 ```text
 npm pack --dry-run completed
-package: korea-market-data-mcp@0.27.0-alpha
-filename: korea-market-data-mcp-0.27.0-alpha.tgz
+package: korea-market-data-mcp@0.28.0-alpha
+filename: korea-market-data-mcp-0.28.0-alpha.tgz
 total files: 114
 npm publish: not performed
 ```
@@ -118,7 +118,7 @@ npm pack
 New-Item -ItemType Directory -Path ..\korea-market-data-mcp-pack-smoke
 Set-Location ..\korea-market-data-mcp-pack-smoke
 npm init -y
-npm install ..\korea-market-data-mcp\korea-market-data-mcp-0.27.0-alpha.tgz
+npm install ..\korea-market-data-mcp\korea-market-data-mcp-0.28.0-alpha.tgz
 npx korea-market-data-mcp
 ```
 
@@ -147,7 +147,7 @@ MCP client examples use node plus absolute path to dist/index.js
 
 ## MCP Client Config Impact
 
-No MCP client config changes are required for v0.27.0-alpha.
+Package-based MCP client examples were added for local tarball or future official npm package validation in v0.28.0-alpha.
 
 Mock provider remains the recommended first setup path.
 
@@ -170,7 +170,7 @@ no hosted proxy confusion in docs
 
 ## Publish Decision
 
-For v0.27.0-alpha:
+For v0.28.0-alpha:
 
 ```text
 npm publish was not performed

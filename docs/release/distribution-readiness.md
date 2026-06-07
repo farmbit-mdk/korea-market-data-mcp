@@ -18,7 +18,7 @@ Package metadata is aligned for a future npm package:
 
 ```text
 name: korea-market-data-mcp
-version: 0.27.0-alpha
+version: 0.28.0-alpha
 type: module
 main: dist/index.js
 bin: korea-market-data-mcp -> dist/index.js
@@ -90,12 +90,12 @@ account/order/balance/holdings/trading data
 
 ## Version And Tag Consistency
 
-For v0.27.0-alpha readiness:
+For v0.28.0-alpha readiness:
 
 ```text
-package.json version: 0.27.0-alpha
-package-lock.json root version: 0.27.0-alpha
-recommended release tag: v0.27.0-alpha
+package.json version: 0.28.0-alpha
+package-lock.json root version: 0.28.0-alpha
+recommended release tag: v0.28.0-alpha
 ```
 
 ## npm Publish Decision
@@ -112,6 +112,26 @@ GitHub release artifacts if explicitly published by the maintainer
 ```
 
 Do not trust unofficial npm packages or hosted MCP proxies claiming to be this project.
+
+## Clean Install Smoke Test Status
+
+For v0.28.0-alpha, tarball-based clean install smoke testing has been reviewed and documented in:
+
+```text
+docs/release/clean-install-smoke-test.md
+```
+
+Status:
+
+```text
+package install readiness reviewed
+package-based MCP config reviewed
+mock provider startup remains default
+npm publish still not performed
+hosted proxy still not provided
+```
+
+Package-based setup remains alpha/testing only. GitHub clone/local setup remains the primary distribution path.
 
 ## npm Pack Dry Run Status
 

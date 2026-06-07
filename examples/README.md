@@ -16,6 +16,15 @@ examples/cursor.kiwoom-local.example.json
 examples/env.kiwoom-local.example
 ```
 
+Package-based examples are for local tarball or future official npm package validation only:
+
+```text
+examples/claude-desktop.package.example.json
+examples/cursor.package.example.json
+```
+
+The official npm package is not published yet. Use GitHub clone setup for the current alpha unless you are testing package installation.
+
 These files contain placeholders only. Do not use `YOUR_KIWOOM_APP_KEY`, `YOUR_KIWOOM_SECRET_KEY`, `CHANGE_ME`, `REPLACE_ME`, or empty strings for a real request.
 
 Copy an example into your local MCP client configuration path, adjust paths for your machine, and restart the MCP client after changing configuration.
