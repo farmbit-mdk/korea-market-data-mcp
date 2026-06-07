@@ -2,6 +2,32 @@
 
 All notable alpha release documentation and safety-scope changes are tracked here.
 
+## v0.30.0-alpha - Official npm Alpha Publish
+
+Official npm alpha package publish.
+
+- Updated package metadata and server defaults to `0.30.0-alpha`.
+- Published the package with the `alpha` dist-tag when publish verification succeeded.
+- Added npm alpha publish result documentation.
+- Added v0.30.0-alpha release checklist.
+- Updated README, distribution readiness, SECURITY, provider status, and tests for npm alpha distribution.
+- Confirmed no runtime scope expansion in this release.
+
+The alpha package uses `npm install korea-market-data-mcp@alpha`. The npm registry currently has `latest` pointing to `0.30.0-alpha` because this was the first published version, but this is not a stable/latest release. The required documented install path remains `npm install korea-market-data-mcp@alpha`. No hosted proxy was added. Real Kiwoom quote lookup remains disabled by default, mock provider remains the recommended first setup path, Kiwoom real local verification remains explicit opt-in only, and `get_kiwoom_stock_quote` public tool scope is unchanged.
+
+Explicitly excluded:
+
+```text
+account access
+orders
+balance lookup
+holdings lookup
+trading
+auto-trading
+investment recommendations
+centralized data redistribution proxy
+```
+
 ## v0.29.0-alpha - Official npm Publish Decision
 
 Official npm publish decision documentation without publishing to npm.

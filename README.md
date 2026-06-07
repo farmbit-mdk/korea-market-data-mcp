@@ -65,7 +65,7 @@ The initial scope is strictly limited to **read-only market data access**.
 
 ## Alpha launch candidate status
 
-`v0.29.0-alpha` documents the official npm publish decision for the read-only Kiwoom quote MCP alpha.
+`v0.30.0-alpha` publishes the official npm alpha package for the read-only Kiwoom quote MCP alpha.
 
 This project is:
 
@@ -99,6 +99,7 @@ alpha launch announcement and final review documentation
 npm pack dry run and publish readiness documentation
 clean install smoke test documentation
 official npm publish decision documentation
+official npm alpha publish result documentation
 ```
 
 Real Kiwoom quote lookup remains disabled by default:
@@ -138,6 +139,8 @@ docs/release/npm-publish-decision.md
 docs/release/npm-access-policy.md
 docs/release/versioning-policy.md
 docs/release/v0.29.0-alpha-checklist.md
+docs/release/npm-alpha-publish-result.md
+docs/release/v0.30.0-alpha-checklist.md
 ```
 
 Review safety and limitations:
@@ -412,7 +415,7 @@ Current package command shape:
 
 ```text
 package name: korea-market-data-mcp
-package version: 0.29.0-alpha
+package version: 0.30.0-alpha
 main: dist/index.js
 bin: korea-market-data-mcp -> dist/index.js
 start: node dist/index.js
@@ -434,12 +437,27 @@ do not trust unofficial packages or hosted MCP proxies
 
 Before any future npm publish, the maintainer must confirm package ownership, npm account access, 2FA, provenance, dist-tag, and versioning policy. If an alpha package is published in a future release, the recommended command is `npm publish --tag alpha`; alpha releases must not use the `latest` dist-tag.
 
+`v0.30.0-alpha` publishes the official npm alpha package when the publish step succeeds:
+
+```powershell
+npm install korea-market-data-mcp@alpha
+```
+
+Use the `alpha` tag during the alpha phase. The npm registry currently has `latest` pointing to `0.30.0-alpha` because this was the first published version, but this is not a stable/latest release. The required documented install path remains:
+
+```powershell
+npm install korea-market-data-mcp@alpha
+```
+
+GitHub clone/local setup remains supported and is the safe fallback. Mock provider remains the recommended first setup path. Real Kiwoom quote lookup remains disabled by default, and Kiwoom local verification remains explicit opt-in only.
+
 See:
 
 ```text
 docs/release/npm-publish-decision.md
 docs/release/npm-access-policy.md
 docs/release/versioning-policy.md
+docs/release/npm-alpha-publish-result.md
 docs/release/clean-install-smoke-test.md
 docs/release/npm-pack-dry-run.md
 docs/release/distribution-readiness.md

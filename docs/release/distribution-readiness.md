@@ -2,9 +2,9 @@
 
 ## Current Distribution Status
 
-`korea-market-data-mcp` is prepared for package and distribution readiness review, but this release does not publish the package to npm.
+`korea-market-data-mcp` is prepared for package and distribution readiness review, and v0.30.0-alpha publishes the official npm alpha package when the publish command succeeds.
 
-Current supported setup path:
+Current supported setup paths:
 
 ```text
 GitHub clone
@@ -12,13 +12,14 @@ npm install
 npm run build
 npm test
 local MCP client command using node dist/index.js
+npm install korea-market-data-mcp@alpha
 ```
 
 Package metadata is aligned for a future npm package:
 
 ```text
 name: korea-market-data-mcp
-version: 0.29.0-alpha
+version: 0.30.0-alpha
 type: module
 main: dist/index.js
 bin: korea-market-data-mcp -> dist/index.js
@@ -62,7 +63,15 @@ Use mock provider first. It requires no credentials and does not make Kiwoom pro
 
 ## npm Package Readiness Status
 
-This project is npm-ready in package metadata only. `npm publish` has not been performed for this release.
+This project is published to npm only on the alpha channel when v0.30.0-alpha publish succeeds.
+
+Install command:
+
+```powershell
+npm install korea-market-data-mcp@alpha
+```
+
+Do not use `latest` for alpha releases.
 
 When npm publishing is considered, verify:
 
@@ -90,12 +99,12 @@ account/order/balance/holdings/trading data
 
 ## Version And Tag Consistency
 
-For v0.29.0-alpha readiness:
+For v0.30.0-alpha readiness:
 
 ```text
-package.json version: 0.29.0-alpha
-package-lock.json root version: 0.29.0-alpha
-recommended release tag: v0.29.0-alpha
+package.json version: 0.30.0-alpha
+package-lock.json root version: 0.30.0-alpha
+recommended release tag: v0.30.0-alpha
 ```
 
 ## npm Publish Decision
@@ -153,6 +162,37 @@ GitHub release artifacts if explicitly published by the maintainer
 Do not trust unofficial npm packages or hosted MCP proxies claiming to be this project.
 
 Do not provide Kiwoom credentials to third-party packages or hosted proxies.
+
+## npm Alpha Publish Status
+
+For v0.30.0-alpha:
+
+```text
+package name: korea-market-data-mcp
+version: 0.30.0-alpha
+dist-tag: alpha
+publish command: npm publish --tag alpha
+dist-tag result: alpha: 0.30.0-alpha, latest: 0.30.0-alpha
+latest currently points to alpha, but alpha install is still the required documented path
+stable/latest release status: not stable; do not treat as latest release
+hosted proxy: not added
+```
+
+Publish result and post-publish verification are tracked in:
+
+```text
+docs/release/npm-alpha-publish-result.md
+docs/release/v0.30.0-alpha-checklist.md
+```
+
+Official distribution channels after successful alpha publish:
+
+```text
+GitHub source repository
+npm alpha package
+```
+
+GitHub clone/local setup remains supported and is the safe fallback.
 
 ## Clean Install Smoke Test Status
 

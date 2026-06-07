@@ -15,7 +15,7 @@ This document is especially important because different providers may have diffe
 | Provider | Status        | Real API calls |     Credentials required | Default | Notes                                                   |
 | -------- | ------------- | -------------: | -----------------------: | ------: | ------------------------------------------------------- |
 | `mock`   | Implemented   |             No |                       No |     Yes | Fixed sample data for local MCP testing                 |
-| `kiwoom` | Official npm publish decision documented |  No by default | Yes, for manual token/quote verification and local-only smoke tests |      No | Guarded public quote tool; real lookup disabled by default |
+| `kiwoom` | Official npm alpha publish prepared |  No by default | Yes, for manual token/quote verification and local-only smoke tests |      No | Guarded public quote tool; real lookup disabled by default |
 
 ---
 
@@ -230,6 +230,8 @@ official npm publish decision documentation
 npm access policy documentation
 versioning policy documentation
 v0.29.0-alpha release checklist
+official npm alpha publish result documentation
+v0.30.0-alpha release checklist
 normalized auth errors
 no-network safety tests
 read-only provider skeleton
@@ -312,6 +314,7 @@ Real Kiwoom API calls must remain disabled by default.
 | npm pack dry run and publish readiness | Prepared dry-run docs, package contents policy, and v0.27 checklist; npm publish not performed |
 | Clean install smoke test | Prepared tarball install smoke docs, package-based MCP examples, and v0.28 checklist; npm publish not performed |
 | Official npm publish decision | Documented defer-publish decision, package name availability check, access policy, versioning policy, and v0.29 checklist; npm publish not performed |
+| Official npm alpha publish | Publishes v0.30.0-alpha with alpha dist-tag; latest currently points to alpha, documented install remains @alpha, no hosted proxy, and no runtime scope expansion |
 | Public real Kiwoom quote lookup   | Not enabled by default |
 | Mock/test quote response          | Available for response validation only |
 | Mocked quote response                 | Can be normalized safely          |
@@ -544,6 +547,7 @@ alpha final review confirms public tool scope and unsupported scope
 npm publish readiness docs confirm no hosted proxy and no npm publish performed
 clean install smoke docs confirm package setup remains alpha/testing only
 official npm publish decision docs confirm defer-publish status and access/versioning policy
+npm alpha publish docs confirm latest currently points to alpha, but alpha install is still the required documented path
 ```
 
 Kiwoom tests must not require real credentials.
@@ -1295,6 +1299,38 @@ Official npm Publish Decision
 ```
 
 This release records the decision to defer actual npm publish until a separate final publish release. It must not be described as an npm-published package or hosted MCP service. Public real Kiwoom quote lookup, endpoint enabled defaults, public exposure defaults, account access, orders, balance lookup, holdings lookup, trading, auto-trading, investment recommendations, centralized credential storage, and centralized data redistribution proxy behavior remain disabled by default or forbidden.
+
+---
+
+## v0.30.0-alpha
+
+Provider status:
+
+```text
+mock provider implemented
+official npm alpha package published when publish succeeds
+distribution channels are GitHub source repository and npm alpha package
+npm alpha dist-tag used
+latest currently points to alpha, but alpha install is still the required documented path
+v0.30.0-alpha is not a stable/latest release
+hosted proxy not provided
+public tool list unchanged
+get_kiwoom_stock_quote public tool scope unchanged
+endpoint enabled default remains false
+endpoint exposesPublicTool default remains false
+public real Kiwoom quote lookup disabled by default
+Kiwoom real local verification remains explicit opt-in only
+account/order/trading explicitly out of scope
+centralized data redistribution proxy out of scope
+```
+
+Recommended release description:
+
+```text
+Official npm Alpha Publish
+```
+
+This release publishes the official npm alpha package using the `alpha` dist-tag. The npm registry currently also has `latest` pointing to `0.30.0-alpha`, but this is not a stable/latest release and the required documented install path remains `npm install korea-market-data-mcp@alpha`. It must not be described as a hosted MCP service or as live Kiwoom quote support. Public real Kiwoom quote lookup, endpoint enabled defaults, public exposure defaults, account access, orders, balance lookup, holdings lookup, trading, auto-trading, investment recommendations, centralized credential storage, and centralized data redistribution proxy behavior remain disabled by default or forbidden.
 
 ---
 
