@@ -141,7 +141,7 @@ Use korea-market-data MCP to fetch KOSPI index data.
 Expected behavior:
 
 ```text
-mock provider can return mock quote/chart/index payloads
+market data context no longer returns mock quote/chart/index payloads
 Kiwoom provider attempts only guarded real quote context for resolved stock/ETF targets
 Kiwoom chart context is unavailable until implemented
 Kiwoom index context is unavailable until implemented

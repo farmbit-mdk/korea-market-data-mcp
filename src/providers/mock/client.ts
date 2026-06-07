@@ -7,29 +7,27 @@ import type {
   SymbolSearchInput
 } from "../types.js";
 import type { NormalizedDailyChart, NormalizedIndex, NormalizedQuote, SymbolSearchResult } from "../../schemas/index.js";
-import { nowIso } from "../../utils/time.js";
 import { mockSymbols } from "./data.js";
-import { mapMockDailyChart, mapMockEtfQuote, mapMockIndex, mapMockStockQuote } from "./mapper.js";
 
 export class MockMarketDataProvider implements MarketDataProvider {
   readonly metadata = {
     id: "mock",
     name: "Mock Market Data Provider",
-    version: "0.34.0-alpha",
+    version: "0.35.0-alpha",
     supportsRealtime: false,
-    supportsHistoricalChart: true,
-    supportsEtfData: true,
-    supportsIndexData: true,
+    supportsHistoricalChart: false,
+    supportsEtfData: false,
+    supportsIndexData: false,
     supportsSymbolSearch: true,
     isReadOnly: true
   } as const;
 
   readonly capabilities = {
     symbolSearch: true,
-    stockQuote: true,
-    etfQuote: true,
-    marketIndex: true,
-    dailyChart: true,
+    stockQuote: false,
+    etfQuote: false,
+    marketIndex: false,
+    dailyChart: false,
     minuteChart: false,
     realtimeQuote: false
   };
@@ -57,47 +55,32 @@ export class MockMarketDataProvider implements MarketDataProvider {
 
   async getStockQuote(input: QuoteInput): Promise<NormalizedQuote> {
     assertNonEmpty(input.symbol, "symbol");
-    const quote = mapMockStockQuote(input.symbol, nowIso());
-
-    if (quote === undefined) {
-      throw new MarketDataProviderError("SYMBOL_NOT_FOUND", "Symbol was not found.", "mock", false);
-    }
-
-    return quote;
+    throw realProviderRequired("stock quote");
   }
 
   async getEtfQuote(input: QuoteInput): Promise<NormalizedQuote> {
     assertNonEmpty(input.symbol, "symbol");
-    const quote = mapMockEtfQuote(input.symbol, nowIso());
-
-    if (quote === undefined) {
-      throw new MarketDataProviderError("SYMBOL_NOT_FOUND", "Symbol was not found.", "mock", false);
-    }
-
-    return quote;
+    throw realProviderRequired("ETF quote");
   }
 
   async getMarketIndex(input: MarketIndexInput): Promise<NormalizedIndex> {
     assertNonEmpty(input.indexCode, "indexCode");
-    const index = mapMockIndex(input.indexCode, nowIso());
-
-    if (index === undefined) {
-      throw new MarketDataProviderError("SYMBOL_NOT_FOUND", "Index code was not found.", "mock", false);
-    }
-
-    return index;
+    throw realProviderRequired("market index");
   }
 
   async getDailyChart(input: DailyChartInput): Promise<NormalizedDailyChart> {
     assertNonEmpty(input.symbol, "symbol");
-    const chart = mapMockDailyChart(input, nowIso());
-
-    if (chart === undefined) {
-      throw new MarketDataProviderError("SYMBOL_NOT_FOUND", "Symbol was not found.", "mock", false);
-    }
-
-    return chart;
+    throw realProviderRequired("daily chart");
   }
+}
+
+function realProviderRequired(capability: string): MarketDataProviderError {
+  return new MarketDataProviderError(
+    "UNSUPPORTED_PROVIDER_CAPABILITY",
+    `Mock provider no longer returns ${capability} market data. Configure a real provider to request market values.`,
+    "mock",
+    false
+  );
 }
 
 function assertNonEmpty(value: string | undefined, fieldName: string): void {

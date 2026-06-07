@@ -1,7 +1,6 @@
 import { z } from "zod";
 import { toToolErrorResponse } from "../providers/errors.js";
 import { nowIso } from "../utils/time.js";
-import type { NormalizedDailyChart, NormalizedIndex, NormalizedQuote } from "../schemas/index.js";
 import type { ToolDefinition } from "./types.js";
 import type { KoreanMarketDataContext, ResolvedKoreanMarketAsset } from "./korean-market-query-resolver.js";
 import { resolveKoreanMarketQuery } from "./korean-market-query-resolver.js";
@@ -9,7 +8,7 @@ import { runGuardedKiwoomPublicQuote } from "./get-kiwoom-stock-quote.js";
 
 export const getKoreanMarketDataContextTool: ToolDefinition = {
   name: "get_korean_market_data_context",
-  description: "Resolve a natural-language Korean market query and return structured quote, chart, and index context.",
+  description: "Resolve a natural-language Korean market query and return structured market data context from real providers when configured. Does not return mock market prices; if real provider data is unavailable, returns blocked/provider_error/unavailable status.",
   inputSchema: {
     query: z.string().trim().min(1),
     includeQuote: z.boolean().default(true),
@@ -40,72 +39,17 @@ export const getKoreanMarketDataContextTool: ToolDefinition = {
         });
       }
 
-      const quotes: NormalizedQuote[] = [];
-      const dailyCharts: NormalizedDailyChart[] = [];
-      const relatedIndices = new Map<string, NormalizedIndex>();
-      let failedFetches = 0;
-
-      for (const asset of resolution.resolved_assets.slice(0, maxAssets)) {
-        try {
-          if (asset.assetType === "index") {
-            relatedIndices.set(asset.symbol, await context.provider.getMarketIndex({ indexCode: asset.symbol }));
-            continue;
-          }
-
-          if (includeQuote) {
-            quotes.push(await getQuoteForAsset(context.provider, asset));
-          }
-
-          if (includeChart) {
-            dailyCharts.push(await context.provider.getDailyChart({
-              symbol: asset.symbol,
-              market: asset.market as never,
-              assetType: asset.assetType,
-              limit: 30
-            }));
-          }
-
-          if (includeRelatedIndices) {
-            for (const indexCode of getRelatedIndexCodes(asset)) {
-              relatedIndices.set(indexCode, await context.provider.getMarketIndex({ indexCode }));
-            }
-          }
-        } catch {
-          failedFetches += 1;
-        }
-      }
-
-      const response: KoreanMarketDataContext = {
+      return getRealProviderNotReadyContext({
         query,
-        resolved_assets: resolution.resolved_assets,
-        data: {
-          quotes,
-          daily_charts: dailyCharts,
-          related_indices: [...relatedIndices.values()]
-        },
-        provider: context.provider.metadata.id,
-        environment: context.provider.metadata.id === "mock" ? "mock" : "local",
-        fetched_at: nowIso(),
-        data_status: getDataStatus(resolution.resolved_assets, failedFetches)
-      };
-
-      return response;
+        resolvedAssets: resolution.resolved_assets.slice(0, maxAssets),
+        includeChart,
+        includeRelatedIndices
+      });
     } catch (error) {
       return toToolErrorResponse(error, context.provider.metadata.id);
     }
   }
 };
-
-async function getQuoteForAsset(
-  provider: Parameters<ToolDefinition["handler"]>[1]["provider"],
-  asset: ResolvedKoreanMarketAsset
-): Promise<NormalizedQuote> {
-  if (asset.assetType === "etf") {
-    return provider.getEtfQuote({ symbol: asset.symbol, market: asset.market as never });
-  }
-
-  return provider.getStockQuote({ symbol: asset.symbol, market: asset.market as never });
-}
 
 async function getKiwoomMarketDataContext(options: {
   query: string;
@@ -120,6 +64,7 @@ async function getKiwoomMarketDataContext(options: {
   let blockedCount = 0;
   let errorCount = 0;
   let unavailableCount = 0;
+  let providerError: KoreanMarketDataContext["provider_error"];
 
   for (const asset of options.resolvedAssets) {
     if (asset.assetType === "index") {
@@ -144,38 +89,36 @@ async function getKiwoomMarketDataContext(options: {
         });
       } else if (quoteResult.status === "blocked") {
         blockedCount += 1;
-        quotes.push({
-          status: "blocked",
-          provider: "kiwoom",
-          symbol: asset.symbol,
-          reason_code: quoteResult.reason_code,
-          reason: quoteResult.reason
-        });
+        providerError = {
+          code: quoteResult.reason_code,
+          message: quoteResult.reason
+        };
       } else {
         errorCount += 1;
-        quotes.push({
-          status: "provider_error",
-          provider: "kiwoom",
-          symbol: asset.symbol,
-          error: quoteResult.error
-        });
+        providerError = {
+          code: quoteResult.error.code,
+          message: quoteResult.error.message
+        };
       }
     }
 
     if (options.includeChart) {
-      dailyCharts.push(unavailable("Real Kiwoom daily chart context is not implemented yet.", asset.symbol));
+      dailyCharts.push(unavailable("Real daily chart provider is not implemented.", asset.symbol));
       unavailableCount += 1;
     }
 
     if (options.includeRelatedIndices) {
-      relatedIndices.push(unavailable("Real index context is not implemented yet.", asset.symbol));
+      relatedIndices.push(unavailable("Real index provider is not implemented.", asset.symbol));
       unavailableCount += 1;
     }
   }
 
   return {
     query: options.query,
-    resolved_assets: options.resolvedAssets,
+    resolved_assets: options.resolvedAssets.map((asset) => ({
+      ...asset,
+      provider: asset.provider === "mock" ? "resolver" : asset.provider
+    })),
     data: {
       quotes,
       daily_charts: dailyCharts,
@@ -184,7 +127,51 @@ async function getKiwoomMarketDataContext(options: {
     provider: "kiwoom",
     environment: "local",
     fetched_at: nowIso(),
-    data_status: getKiwoomDataStatus(options.resolvedAssets.length, blockedCount, errorCount, unavailableCount)
+    data_status: getKiwoomDataStatus(options.resolvedAssets.length, blockedCount, errorCount, unavailableCount),
+    provider_error: providerError
+  };
+}
+
+function getRealProviderNotReadyContext(options: {
+  query: string;
+  resolvedAssets: ResolvedKoreanMarketAsset[];
+  includeChart: boolean;
+  includeRelatedIndices: boolean;
+}): KoreanMarketDataContext {
+  const dailyCharts: Array<Record<string, unknown>> = [];
+  const relatedIndices: Array<Record<string, unknown>> = [];
+
+  for (const asset of options.resolvedAssets) {
+    if (options.includeChart && asset.assetType !== "index") {
+      dailyCharts.push(unavailable("Real daily chart provider is not implemented.", asset.symbol));
+    }
+
+    if (options.includeRelatedIndices) {
+      relatedIndices.push(unavailable("Real index provider is not implemented.", asset.symbol));
+    }
+  }
+
+  return {
+    query: options.query,
+    resolved_assets: options.resolvedAssets.map((asset) => ({
+      ...asset,
+      provider: asset.provider === "mock" ? "resolver" : asset.provider
+    })),
+    data: {
+      quotes: [],
+      daily_charts: dailyCharts,
+      related_indices: relatedIndices
+    },
+    provider: "kiwoom",
+    environment: "local",
+    fetched_at: nowIso(),
+    data_status: options.resolvedAssets.length === 0 ? "unresolved" : "blocked",
+    provider_error: options.resolvedAssets.length === 0
+      ? undefined
+      : {
+          code: "KIWOOM_REAL_PROVIDER_NOT_READY",
+          message: "Real Kiwoom provider is not enabled or credentials are missing."
+        }
   };
 }
 
@@ -219,20 +206,4 @@ function getKiwoomDataStatus(
   }
 
   return "ok";
-}
-
-function getRelatedIndexCodes(asset: ResolvedKoreanMarketAsset): string[] {
-  if (asset.assetType === "etf") {
-    return ["KOSPI200", "KOSPI"];
-  }
-
-  return asset.market === "KOSDAQ" ? ["KOSDAQ"] : ["KOSPI", "KOSPI200"];
-}
-
-function getDataStatus(assets: ResolvedKoreanMarketAsset[], failedFetches: number): KoreanMarketDataContext["data_status"] {
-  if (assets.length === 0) {
-    return "unresolved";
-  }
-
-  return failedFetches > 0 ? "partial" : "ok";
 }

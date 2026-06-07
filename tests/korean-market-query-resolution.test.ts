@@ -54,44 +54,67 @@ describe("Korean market data query resolution", () => {
     expect(result.suggested_next_tools).toEqual([]);
   });
 
-  it("returns stock quote, chart, and related index context for Samsung Electronics", async () => {
+  it("returns real-provider-only blocked context for Samsung Electronics without mock market values", async () => {
     const result = await getKoreanMarketDataContextTool.handler(
       { query: "삼성전자 요즘 어때?" },
       context
     ) as KoreanMarketDataContext;
 
-    expect(result.data_status).toBe("ok");
+    expect(result.data_status).toBe("blocked");
+    expect(result.provider).toBe("kiwoom");
+    expect(result.environment).toBe("local");
     expect(result.resolved_assets[0]).toMatchObject({ symbol: "005930", assetType: "stock" });
-    expect(result.data.quotes[0]).toMatchObject({ symbol: "005930", assetType: "stock" });
-    expect(result.data.daily_charts[0]).toMatchObject({ symbol: "005930", assetType: "stock" });
-    expect(result.data.related_indices.map((index) => index.indexCode)).toEqual(expect.arrayContaining(["KOSPI", "KOSPI200"]));
+    expect(result.data.quotes).toEqual([]);
+    expect(result.data.daily_charts[0]).toMatchObject({
+      status: "unavailable",
+      reason: "Real daily chart provider is not implemented."
+    });
+    expect(result.data.related_indices[0]).toMatchObject({
+      status: "unavailable",
+      reason: "Real index provider is not implemented."
+    });
+    expect(result.provider_error).toMatchObject({
+      code: "KIWOOM_REAL_PROVIDER_NOT_READY"
+    });
+    expect(JSON.stringify(result)).not.toContain("70000");
+    expect(JSON.stringify(result)).not.toContain("2026-05-25");
+    expect(JSON.stringify(result)).not.toContain("\"provider\":\"mock\"");
     expect(Date.parse(result.fetched_at)).not.toBeNaN();
   });
 
-  it("returns ETF quote, chart, and related index context for KODEX 200", async () => {
+  it("returns real-provider-only blocked context for KODEX 200 without mock market values", async () => {
     const result = await getKoreanMarketDataContextTool.handler(
       { query: "KODEX 200 조회해줘" },
       context
     ) as KoreanMarketDataContext;
 
-    expect(result.data_status).toBe("ok");
+    expect(result.data_status).toBe("blocked");
+    expect(result.provider).toBe("kiwoom");
+    expect(result.environment).toBe("local");
     expect(result.resolved_assets[0]).toMatchObject({ symbol: "069500", assetType: "etf", market: "KOSPI" });
-    expect(result.data.quotes[0]).toMatchObject({ symbol: "069500", assetType: "etf" });
-    expect(result.data.daily_charts[0]).toMatchObject({ symbol: "069500", assetType: "etf" });
-    expect(result.data.related_indices.map((index) => index.indexCode)).toEqual(expect.arrayContaining(["KOSPI", "KOSPI200"]));
+    expect(result.data.quotes).toEqual([]);
+    expect(result.data.daily_charts[0]).toMatchObject({ status: "unavailable" });
+    expect(result.data.related_indices[0]).toMatchObject({ status: "unavailable" });
+    expect(JSON.stringify(result)).not.toContain("36250");
   });
 
-  it("returns index context for KOSPI queries", async () => {
+  it("returns unavailable real-provider-only index context for KOSPI queries", async () => {
     const result = await getKoreanMarketDataContextTool.handler(
       { query: "코스피 흐름 알려줘" },
       context
     ) as KoreanMarketDataContext;
 
-    expect(result.data_status).toBe("ok");
+    expect(result.data_status).toBe("blocked");
+    expect(result.provider).toBe("kiwoom");
+    expect(result.environment).toBe("local");
     expect(result.resolved_assets[0]).toMatchObject({ symbol: "KOSPI", assetType: "index" });
     expect(result.data.quotes).toEqual([]);
     expect(result.data.daily_charts).toEqual([]);
-    expect(result.data.related_indices[0]).toMatchObject({ indexCode: "KOSPI" });
+    expect(result.data.related_indices[0]).toMatchObject({
+      status: "unavailable",
+      symbol: "KOSPI"
+    });
+    expect(JSON.stringify(result)).not.toContain("2725.14");
   });
 
   it("registers the new public read-only query resolution tools without removing existing tools", () => {

@@ -2,6 +2,19 @@
 
 All notable alpha release documentation and safety-scope changes are tracked here.
 
+## v0.35.0-alpha - Remove Mock Market Data
+
+Remove mock market data payloads from market data context flow.
+
+- Updated package metadata and server defaults to `0.35.0-alpha`.
+- Removed mock stock quote, ETF quote, market index, and daily chart payloads from the mock provider.
+- Prevented `get_korean_market_data_context` from returning mock quote/chart/index values as successful context data.
+- Updated context behavior so unavailable real provider data returns blocked/provider_error/unavailable status.
+- Retained resolver and symbol-search fixtures for known Korean assets such as Samsung Electronics, KODEX 200, KOSPI, KOSDAQ, and KOSPI 200.
+- Added a v0.35.0-alpha release checklist and tests proving mock market values are not returned as runtime context payloads.
+
+This release keeps symbol resolution fixtures while removing market-price-like mock payloads. It does not add account access, orders, balance lookup, holdings lookup, trading, auto-trading, investment recommendations, hosted proxy behavior, or centralized data redistribution.
+
 ## v0.34.0-alpha - Claude Desktop Live Usage Result Capture
 
 Claude Desktop live usage result capture documentation.
