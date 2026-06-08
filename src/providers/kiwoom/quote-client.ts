@@ -21,6 +21,7 @@ export interface KiwoomQuoteClientOptions {
   useMappedQuoteEndpoint?: boolean;
   accessToken?: string;
   apiId?: string;
+  debugProviderResponse?: boolean;
 }
 
 export class DefaultKiwoomQuoteClient implements KiwoomQuoteClient {
@@ -55,7 +56,9 @@ export class DefaultKiwoomQuoteClient implements KiwoomQuoteClient {
     };
 
     try {
-      return normalizeKiwoomQuoteResponse(await this.transport.requestQuote(transportRequest), request);
+      const rawResponse = await this.transport.requestQuote(transportRequest);
+      this.writeDebugProviderResponse(transportRequest, rawResponse);
+      return normalizeKiwoomQuoteResponse(rawResponse, request);
     } catch (error) {
       throw normalizeKiwoomQuoteError(error);
     }
@@ -95,6 +98,33 @@ export class DefaultKiwoomQuoteClient implements KiwoomQuoteClient {
       market: request.market
     };
   }
+
+  private writeDebugProviderResponse(
+    request: KiwoomQuoteTransportRequest,
+    response: KiwoomQuoteResponse
+  ): void {
+    if (this.options.debugProviderResponse !== true) {
+      return;
+    }
+
+    const responseRecord = response as Record<string, unknown>;
+    const priceCandidateFields = ["cur_prc", "현재가", "price", "current_price", "close", "stck_prpr", "trade_price"];
+    const summary = {
+      provider: "kiwoom",
+      debug: "quote_provider_response",
+      endpoint: request.url,
+      method: request.method,
+      api_id: this.options.apiId,
+      request_body: request.body,
+      response_top_level_keys: Object.keys(responseRecord),
+      price_candidate_fields: Object.fromEntries(
+        priceCandidateFields.map((field) => [field, hasNonEmptyField(responseRecord, field)])
+      ),
+      redacted_response: redactSecrets(responseRecord)
+    };
+
+    process.stderr.write(`${JSON.stringify(summary, null, 2)}\n`);
+  }
 }
 
 export function createKiwoomQuoteClient(options: KiwoomQuoteClientOptions = {}): KiwoomQuoteClient {
@@ -118,19 +148,28 @@ export function normalizeKiwoomQuoteResponse(
     );
   }
 
-  const symbol = normalizeRequiredString(response.symbol ?? response.stock_code ?? request.symbol, "symbol");
-  const price = normalizeRequiredNumber(response.price ?? response.current_price, "price");
+  const responseRecord = response as Record<string, unknown>;
+  const symbol = normalizeRequiredString(response.symbol ?? response.stock_code ?? readStringField(responseRecord, "stk_cd") ?? request.symbol, "symbol");
+  const price = normalizeRequiredPrice(readFirstField(responseRecord, [
+    "cur_prc",
+    "현재가",
+    "price",
+    "current_price",
+    "close",
+    "stck_prpr",
+    "trade_price"
+  ]), "price");
 
   return {
     provider: "kiwoom",
     symbol,
-    name: normalizeOptionalString(response.name),
+    name: normalizeOptionalString(response.name ?? readStringField(responseRecord, "stk_nm")),
     market: normalizeOptionalString(response.market ?? request.market),
     currency: "KRW",
     price,
-    change: normalizeOptionalNumber(response.change, "change"),
-    change_rate: normalizeOptionalNumber(response.change_rate, "change_rate"),
-    volume: normalizeOptionalNumber(response.volume, "volume"),
+    change: normalizeOptionalNumber(response.change ?? readFirstField(responseRecord, ["pred_pre", "change"]), "change"),
+    change_rate: normalizeOptionalNumber(response.change_rate ?? readFirstField(responseRecord, ["flu_rt", "change_rate"]), "change_rate"),
+    volume: normalizeOptionalNumber(response.volume ?? readFirstField(responseRecord, ["trde_qty", "volume"]), "volume"),
     as_of: normalizeOptionalString(response.as_of ?? response.timestamp),
     raw_available: false,
     returnCode,
@@ -201,6 +240,11 @@ function normalizeOptionalNumber(value: string | number | undefined, fieldName: 
   return normalized;
 }
 
+function normalizeRequiredPrice(value: string | number | undefined, fieldName: string): number {
+  const normalized = normalizeRequiredNumber(value, fieldName);
+  return Math.abs(normalized);
+}
+
 function normalizeRequiredNumber(value: string | number | undefined, fieldName: string): number {
   const normalized = normalizeOptionalNumber(value, fieldName);
 
@@ -209,4 +253,26 @@ function normalizeRequiredNumber(value: string | number | undefined, fieldName: 
   }
 
   return normalized;
+}
+
+function readFirstField(record: Record<string, unknown>, fieldNames: string[]): string | number | undefined {
+  for (const fieldName of fieldNames) {
+    const value = record[fieldName];
+
+    if ((typeof value === "string" && value.trim() !== "") || typeof value === "number") {
+      return value;
+    }
+  }
+
+  return undefined;
+}
+
+function readStringField(record: Record<string, unknown>, fieldName: string): string | undefined {
+  const value = record[fieldName];
+  return typeof value === "string" ? value : undefined;
+}
+
+function hasNonEmptyField(record: Record<string, unknown>, fieldName: string): boolean {
+  const value = record[fieldName];
+  return (typeof value === "string" && value.trim() !== "") || typeof value === "number";
 }

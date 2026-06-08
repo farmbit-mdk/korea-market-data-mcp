@@ -93,12 +93,12 @@ export class DefaultKiwoomTokenClient implements KiwoomTokenClient {
         url: `${this.baseUrl}/oauth2/token`,
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json;charset=UTF-8"
         },
         body: {
+          grant_type: "client_credentials",
           appkey: request.appKey,
-          secretkey: request.appSecret,
-          grant_type: "client_credentials"
+          secretkey: request.appSecret
         }
       });
     } catch (error) {
@@ -145,7 +145,7 @@ export function normalizeKiwoomTokenResponse(response: KiwoomRawTokenResponse): 
   }
 
   return {
-    accessToken,
+    accessToken: accessToken.trim(),
     tokenType: response.token_type ?? "Bearer",
     expiresAt: normalizeExpiresAt(response),
     provider: "kiwoom",
@@ -178,8 +178,12 @@ function normalizeExpiresAt(response: KiwoomRawTokenResponse): string {
     return response.expires_at;
   }
 
-  if (response.expires_dt !== undefined && !Number.isNaN(Date.parse(response.expires_dt))) {
-    return response.expires_dt;
+  if (response.expires_dt !== undefined) {
+    const expiresDt = response.expires_dt.trim();
+
+    if (/^\d{14}$/.test(expiresDt) || !Number.isNaN(Date.parse(expiresDt))) {
+      return expiresDt;
+    }
   }
 
   if (response.expires_in !== undefined && Number.isFinite(response.expires_in)) {

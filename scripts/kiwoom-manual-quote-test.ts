@@ -43,6 +43,7 @@ interface ManualKiwoomQuoteEnv {
   KIWOOM_API_BASE_URL?: string;
   KIWOOM_MOCK_API_BASE_URL?: string;
   KIWOOM_QUOTE_SYMBOL?: string;
+  KIWOOM_DEBUG_PROVIDER_RESPONSE?: string;
 }
 
 interface ManualKiwoomQuoteDependencies {
@@ -123,6 +124,7 @@ export async function runManualKiwoomQuoteVerification(
       quoteEndpointPath: quoteEndpointMapping.path,
       accessToken: token.accessToken,
       apiId: quoteEndpointMapping.apiId,
+      debugProviderResponse: env.KIWOOM_DEBUG_PROVIDER_RESPONSE === "true",
       transport: dependencies.quoteTransport
     }).getQuote({ symbol });
 

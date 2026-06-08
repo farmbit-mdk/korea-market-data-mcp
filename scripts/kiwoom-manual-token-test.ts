@@ -45,7 +45,9 @@ export async function runManualKiwoomTokenVerification(
   env: ManualKiwoomEnv = process.env,
   transport?: KiwoomTokenTransport
 ): Promise<ManualKiwoomTokenSummary> {
-  const environment = parseKiwoomManualEnvironment(env.KIWOOM_ENV);
+  const environment = normalizeEnvValue(env.KIWOOM_ENV) === undefined
+    ? "production"
+    : parseKiwoomManualEnvironment(env.KIWOOM_ENV);
   const rawAppKey = env.KIWOOM_APP_KEY;
   const rawSecretKey = env.KIWOOM_SECRET_KEY ?? env.KIWOOM_APP_SECRET;
   const appKey = normalizeEnvValue(env.KIWOOM_APP_KEY);
