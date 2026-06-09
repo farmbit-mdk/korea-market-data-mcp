@@ -14,12 +14,26 @@ export const kiwoomQuoteEndpointMappings = {
     apiId: "ka10001",
     description: "Stock basic information request. Disabled until endpoint path/header/body are verified against official Kiwoom documentation.",
     verified: false
+  },
+  dailyChart: {
+    enabled: false,
+    manualOnly: true,
+    readOnly: true,
+    requiresToken: true,
+    exposesPublicTool: false,
+    forbiddenScopes: ["account", "order", "balance", "holdings", "trading"],
+    method: "POST",
+    path: "TODO_VERIFY_OFFICIAL_KIWOOM_DAILY_CHART_ENDPOINT",
+    apiId: "ka10081",
+    description: "Stock daily chart request. Enabled only for explicit local Kiwoom market data context verification.",
+    verified: false
   }
 } as const satisfies Record<string, KiwoomQuoteEndpointMapping>;
 
 export type KiwoomQuoteEndpointKey = keyof typeof kiwoomQuoteEndpointMappings;
 
 export const localKiwoomQuoteEndpointPath = "/api/dostk/stkinfo";
+export const localKiwoomDailyChartEndpointPath = "/api/dostk/chart";
 
 const placeholderCredentialValues = new Set([
   "YOUR_APP_KEY",
@@ -48,6 +62,26 @@ export function getEffectiveKiwoomQuoteEndpointMapping(
     readOnly: true,
     path: localKiwoomQuoteEndpointPath,
     description: "Stock basic information request enabled only for explicit local Kiwoom quote verification.",
+    verified: true
+  };
+}
+
+export function getEffectiveKiwoomDailyChartEndpointMapping(
+  env: NodeJS.ProcessEnv = process.env,
+  mapping: KiwoomQuoteEndpointMapping = kiwoomQuoteEndpointMappings.dailyChart
+): KiwoomQuoteEndpointMapping {
+  if (!isLocalKiwoomQuoteVerificationEnabled(env)) {
+    return mapping;
+  }
+
+  return {
+    ...mapping,
+    enabled: true,
+    exposesPublicTool: true,
+    manualOnly: true,
+    readOnly: true,
+    path: localKiwoomDailyChartEndpointPath,
+    description: "Stock daily chart request enabled only for explicit local Kiwoom market data context verification.",
     verified: true
   };
 }

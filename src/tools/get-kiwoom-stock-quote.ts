@@ -147,7 +147,12 @@ export async function runGuardedKiwoomPublicQuote(
 
   try {
     const normalizedInput = normalizeKiwoomPublicQuoteInput(input);
-    const env = dependencies.env ?? process.env;
+    const hasInjectedRuntime =
+      dependencies.tokenClient !== undefined ||
+      dependencies.quoteClient !== undefined ||
+      dependencies.quoteEndpointMapping !== undefined ||
+      dependencies.activationDecisionRecord !== undefined;
+    const env = dependencies.env ?? (hasInjectedRuntime ? {} : process.env);
     const mapping = dependencies.quoteEndpointMapping ?? getEffectiveKiwoomQuoteEndpointMapping(env);
 
     if (!mapping.readOnly) {
@@ -269,7 +274,7 @@ function normalizeKiwoomPublicQuoteInput(input: unknown): Required<Pick<KiwoomPu
     throw new MarketDataProviderError("INVALID_INPUT", "symbol is required.", "kiwoom", false);
   }
 
-  if (!/^[0-9A-Za-z]{6}$/.test(symbol)) {
+  if (!/^(?=.*\d)[0-9A-Za-z]{6}$/.test(symbol)) {
     throw new MarketDataProviderError("INVALID_INPUT", "symbol must be a 6-character Korean stock or ETF code.", "kiwoom", false);
   }
 
@@ -307,7 +312,7 @@ function getSafeErrorSymbol(input: unknown): string | undefined {
   }
 
   const symbol = input.symbol.trim();
-  return /^[0-9A-Za-z]{6}$/.test(symbol) ? symbol.toUpperCase() : undefined;
+  return /^(?=.*\d)[0-9A-Za-z]{6}$/.test(symbol) ? symbol.toUpperCase() : undefined;
 }
 
 function isPlainInputRecord(input: unknown): input is Record<string, unknown> {

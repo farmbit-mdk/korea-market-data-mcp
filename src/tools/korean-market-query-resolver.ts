@@ -400,10 +400,10 @@ function extractQuantityNearTerm(query: string, term: string): number | undefine
     return undefined;
   }
 
-  const afterTerm = compactQuery.slice(index + compactTerm.length, index + compactTerm.length + 12);
-  const beforeTerm = compactQuery.slice(Math.max(0, index - 12), index);
-  const afterMatch = /^(?:etf|stock|shares?)?([0-9,]+)(?:\uC8FC|shares?)?/.exec(afterTerm);
-  const beforeMatch = /([0-9,]+)(?:\uC8FC|shares?)?$/.exec(beforeTerm);
+  const afterTerm = compactQuery.slice(index + compactTerm.length, index + compactTerm.length + 16);
+  const beforeTerm = compactQuery.slice(Math.max(0, index - 16), index);
+  const afterMatch = /^(?:etf|stock)?([0-9,]+)(?:\uC8FC|shares)/.exec(afterTerm);
+  const beforeMatch = /([0-9,]+)(?:\uC8FC|shares)$/.exec(beforeTerm);
   const rawQuantity = afterMatch?.[1] ?? beforeMatch?.[1];
 
   if (rawQuantity === undefined) {

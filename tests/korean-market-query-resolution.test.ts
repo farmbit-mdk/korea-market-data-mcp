@@ -65,10 +65,7 @@ describe("Korean market data query resolution", () => {
     expect(result.environment).toBe("local");
     expect(result.resolved_assets[0]).toMatchObject({ symbol: "005930", assetType: "stock" });
     expect(result.data.quotes).toEqual([]);
-    expect(result.data.daily_charts[0]).toMatchObject({
-      status: "unavailable",
-      reason: "Real daily chart provider is not implemented."
-    });
+    expect(result.data.daily_charts).toEqual([]);
     expect(result.data.related_indices[0]).toMatchObject({
       status: "unavailable",
       reason: "Real index provider is not implemented."
@@ -93,7 +90,7 @@ describe("Korean market data query resolution", () => {
     expect(result.environment).toBe("local");
     expect(result.resolved_assets[0]).toMatchObject({ symbol: "069500", assetType: "etf", market: "KOSPI" });
     expect(result.data.quotes).toEqual([]);
-    expect(result.data.daily_charts[0]).toMatchObject({ status: "unavailable" });
+    expect(result.data.daily_charts).toEqual([]);
     expect(result.data.related_indices[0]).toMatchObject({ status: "unavailable" });
     expect(JSON.stringify(result)).not.toContain("36250");
   });
