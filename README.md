@@ -11,6 +11,87 @@ It does **not** provide trading, order execution, automated trading, or personal
 
 ---
 
+## 한국어 Quick Start
+
+`korea-market-data-mcp`는 Claude Desktop, GPT, Codex, Cursor 같은 AI 클라이언트가 국내 주식/ETF 데이터를 조회할 수 있도록 돕는 **Kiwoom REST API 기반 read-only MCP 서버**입니다.
+
+이 MCP는 답변 엔진이나 투자 추천 도구가 아닙니다. MCP는 종목 resolve, 실제 현재가 quote, 다종목 quote bundle 같은 데이터 payload를 제공하고, 평가액/비중 계산이나 해석은 Claude/GPT/Codex 같은 AI 클라이언트가 담당합니다.
+
+주의: 이 프로젝트는 Open API+ OCX 프로그램이 아닙니다. 아래 Kiwoom Open API+ / KOA Studio 링크는 국내 사용자가 키움 API 사용 신청, 개발 환경 확인, TR 정보 확인에 참고하기 위한 공식 링크입니다.
+
+Kiwoom 공식 참고:
+
+```text
+https://www.kiwoom.com/h/customer/download/VOpenApiInfoView
+```
+
+### 설치
+
+```powershell
+npm install -g korea-market-data-mcp@alpha
+```
+
+또는 로컬 저장소에서:
+
+```powershell
+npm install
+npm run build
+```
+
+### PowerShell 환경변수
+
+실제 Kiwoom REST API 호출은 명시적으로 opt-in한 로컬 환경에서만 동작합니다. 실제 app key, secret key, token은 Git, 문서, PR, 스크린샷, 로그에 남기지 마세요.
+
+```powershell
+$env:MARKET_DATA_PROVIDER = "kiwoom"
+$env:KIWOOM_ENABLE_REAL_API_CALLS = "true"
+$env:KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH = "true"
+$env:KIWOOM_ENV = "production"
+$env:KIWOOM_INVESTMENT_ENV = "real"
+$env:KIWOOM_APP_KEY = "YOUR_KIWOOM_APP_KEY"
+$env:KIWOOM_SECRET_KEY = "YOUR_KIWOOM_SECRET_KEY"
+```
+
+### 로컬 검증
+
+```powershell
+npm run build
+npm run kiwoom:setup:check
+npm run kiwoom:token:manual
+npm run kiwoom:quote:manual
+```
+
+성공 시에도 token 원문은 출력하지 않습니다. quote 응답은 read-only market data로만 사용합니다.
+
+### Claude Desktop 질문 예시
+
+```text
+삼성전자우 현재가를 키움 데이터로 조회해줘.
+TIGER 미국S&P500 100주 평가액을 계산해줘.
+삼성전자우 50주, TIGER 미국S&P500 100주, TIGER 코리아AI전력기기TOP3플러스 100주를 키움 데이터로 조회해줘.
+TIGER AI전력 ETF를 조회해줘. 애매하면 후보를 보여줘.
+```
+
+다종목 보유분 예시는 `get_korean_market_data_context`가 여러 종목/ETF를 resolve하고 실제 Kiwoom quote bundle을 반환하는 흐름입니다. 수량이 포함되면 `quantity`와 `position_value`를 payload에 포함할 수 있습니다. MCP는 데이터만 공급하고, 평가액 합계, 비중 계산, 리밸런싱 관점의 해석은 AI 클라이언트가 수행합니다.
+
+### 지원하지 않는 기능
+
+이 MCP는 아래 기능을 제공하지 않습니다.
+
+```text
+계좌 조회 없음
+잔고 조회 없음
+보유종목 자동 조회 없음
+주문 없음
+매매 없음
+자동매매 없음
+투자 추천 로직 없음
+중앙 데이터 재배포 프록시 없음
+user-facing mock market data 없음
+```
+
+---
+
 ## Why this project exists
 
 AI agents often fail to retrieve accurate and up-to-date Korean financial market data through generic web search.
