@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { checkKiwoomSetup } from "../src/providers/kiwoom/setup-check.js";
 import { normalizeKiwoomTokenResponse } from "../src/providers/kiwoom/token-client.js";
 import type { MarketDataProvider } from "../src/providers/types.js";
@@ -6,8 +6,28 @@ import { getKoreanMarketDataContextTool } from "../src/tools/get-korean-market-d
 import { getKiwoomSetupStatusTool } from "../src/tools/get-kiwoom-setup-status.js";
 import type { KoreanMarketDataContext } from "../src/tools/korean-market-query-resolver.js";
 import { getRegisteredToolNames } from "../src/tools/index.js";
+import { getMarketIndexTool } from "../src/tools/get-market-index.js";
 
 describe("real market data context UX", () => {
+  const originalEnv = { ...process.env };
+
+  beforeEach(() => {
+    process.env = {
+      ...originalEnv,
+      KIWOOM_ENABLE_REAL_API_CALLS: "false",
+      KIWOOM_ENABLE_PUBLIC_QUOTE_REAL_PATH: "false",
+      KIWOOM_APP_KEY: "",
+      KIWOOM_SECRET_KEY: "",
+      KIWOOM_APP_SECRET: "",
+      KIWOOM_ENV: "prod",
+      KIWOOM_INVESTMENT_ENV: "real"
+    };
+  });
+
+  afterEach(() => {
+    process.env = originalEnv;
+  });
+
   it("reports Kiwoom setup blocked when real API opt-in is false", () => {
     const result = checkKiwoomSetup({
       KIWOOM_ENABLE_REAL_API_CALLS: "false",
@@ -153,7 +173,7 @@ describe("real market data context UX", () => {
     expect(result.data.daily_charts).toEqual([]);
     expect(result.data.related_indices[0]).toMatchObject({
       status: "unavailable",
-      reason: "Real index provider is not implemented."
+      reason: "Kiwoom market index endpoint mapping is not enabled for local verification."
     });
     expect(JSON.stringify(result)).not.toContain("Samsung Electronics mock");
   });
@@ -164,7 +184,7 @@ describe("real market data context UX", () => {
       { provider: createKiwoomLikeProvider() }
     ) as KoreanMarketDataContext;
 
-    expect(result.data_status).toBe("partial");
+    expect(result.data_status).toBe("blocked");
     expect(result.resolved_assets[0]).toMatchObject({
       symbol: "KOSPI",
       assetType: "index"
@@ -173,8 +193,71 @@ describe("real market data context UX", () => {
     expect(result.data.daily_charts).toEqual([]);
     expect(result.data.related_indices[0]).toMatchObject({
       status: "unavailable",
-      symbol: "KOSPI"
+      symbol: "KOSPI",
+      reason: "Kiwoom market index endpoint mapping is not enabled for local verification."
     });
+  });
+
+  it("returns blocked get_market_index payload without mock fallback when Kiwoom guard is disabled", async () => {
+    const result = await getMarketIndexTool.handler(
+      { indexCode: "코스피200" },
+      { provider: createKiwoomLikeProvider() }
+    );
+
+    expect(result).toMatchObject({
+      status: "blocked",
+      provider: "kiwoom",
+      source: "real",
+      index_present: false,
+      reason_code: "MARKET_INDEX_ENDPOINT_DISABLED"
+    });
+    expect(JSON.stringify(result)).not.toContain("mock");
+  });
+
+  it("keeps unsupported raw Kiwoom sector codes out of the public market index input", async () => {
+    const result = await getMarketIndexTool.handler(
+      { indexCode: "0001" },
+      { provider: createKiwoomLikeProvider() }
+    );
+
+    expect(result).toMatchObject({
+      status: "blocked",
+      provider: "kiwoom",
+      index_present: false,
+      reason_code: "UNSUPPORTED_MARKET_INDEX"
+    });
+  });
+
+  it("adds related index placeholders for stock context without user-facing mock market data", async () => {
+    const result = await getKoreanMarketDataContextTool.handler(
+      { query: "삼성전자우 최근 20일 일봉과 코스피 지수 데이터를 같이 가져와줘" },
+      { provider: createKiwoomLikeProvider() }
+    ) as KoreanMarketDataContext;
+
+    expect(result.resolved_assets[0]).toMatchObject({
+      symbol: "005935",
+      assetType: "stock"
+    });
+    expect(result.data.related_indices).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        status: "unavailable",
+        symbol: "KOSPI"
+      })
+    ]));
+    expect(JSON.stringify(result)).not.toContain("mock");
+  });
+
+  it("does not invent an S&P500 index fallback for a domestic S&P500 ETF context", async () => {
+    const result = await getKoreanMarketDataContextTool.handler(
+      { query: "TIGER 미국S&P500 최근 20일 흐름을 가져와줘" },
+      { provider: createKiwoomLikeProvider() }
+    ) as KoreanMarketDataContext;
+
+    expect(result.resolved_assets[0]).toMatchObject({
+      symbol: "360750",
+      assetType: "etf"
+    });
+    expect(result.data.related_indices).toEqual([]);
   });
 
   function createKiwoomLikeProvider(): MarketDataProvider {

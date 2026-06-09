@@ -98,6 +98,55 @@ export interface KiwoomQuoteEndpointMapping {
   verified: boolean;
 }
 
+export type KiwoomMarketIndexCode = "KOSPI" | "KOSDAQ" | "KOSPI200";
+
+export interface KiwoomMarketIndexRequest {
+  indexCode: KiwoomMarketIndexCode;
+}
+
+export interface KiwoomMarketIndexResponse {
+  return_code?: string | number;
+  return_msg?: string;
+  cur_prc?: string | number;
+  pred_pre?: string | number;
+  flu_rt?: string | number;
+  open_pric?: string | number;
+  high_pric?: string | number;
+  low_pric?: string | number;
+  trde_qty?: string | number;
+  trde_prica?: string | number;
+  output?: Array<Record<string, string | number | undefined>> | Record<string, unknown>;
+  output1?: Array<Record<string, string | number | undefined>>;
+  [key: string]: unknown;
+}
+
+export interface NormalizedKiwoomMarketIndex {
+  provider: "kiwoom";
+  source: "real";
+  source_tr: string;
+  endpoint?: string;
+  public_index_code: KiwoomMarketIndexCode;
+  kiwoom_market_type: string;
+  kiwoom_sector_code: string;
+  index_code: KiwoomMarketIndexCode;
+  symbol: KiwoomMarketIndexCode;
+  name: string;
+  market: "KRX";
+  currency: "KRW";
+  value: number;
+  price: number;
+  change?: number;
+  change_rate?: number;
+  open?: number;
+  high?: number;
+  low?: number;
+  volume?: number;
+  trading_value?: number;
+  fetched_at: string;
+  returnCode?: string;
+  returnMessage?: string;
+}
+
 export interface KiwoomChartRequest {
   symbol: string;
   name?: string;
@@ -178,4 +227,15 @@ export interface KiwoomChartTransportRequest {
 
 export interface KiwoomChartTransport {
   requestChart(request: KiwoomChartTransportRequest): Promise<KiwoomChartResponse>;
+}
+
+export interface KiwoomMarketIndexTransportRequest {
+  url: string;
+  method: "POST";
+  headers: Record<string, string>;
+  body: Record<string, string | undefined>;
+}
+
+export interface KiwoomMarketIndexTransport {
+  requestMarketIndex(request: KiwoomMarketIndexTransportRequest): Promise<KiwoomMarketIndexResponse>;
 }

@@ -4,6 +4,9 @@ import type {
   KiwoomChartResponse,
   KiwoomChartTransport,
   KiwoomChartTransportRequest,
+  KiwoomMarketIndexResponse,
+  KiwoomMarketIndexTransport,
+  KiwoomMarketIndexTransportRequest,
   KiwoomQuoteResponse,
   KiwoomQuoteTransport,
   KiwoomQuoteTransportRequest,
@@ -12,7 +15,7 @@ import type {
   KiwoomTokenTransportRequest
 } from "./types.js";
 
-export class FetchKiwoomTransport implements KiwoomTokenTransport, KiwoomQuoteTransport, KiwoomChartTransport {
+export class FetchKiwoomTransport implements KiwoomTokenTransport, KiwoomQuoteTransport, KiwoomChartTransport, KiwoomMarketIndexTransport {
   async requestToken(request: KiwoomTokenTransportRequest): Promise<KiwoomRawTokenResponse> {
     try {
       const response = await fetch(request.url, {
@@ -81,6 +84,60 @@ export class FetchKiwoomTransport implements KiwoomTokenTransport, KiwoomQuoteTr
       throw new MarketDataProviderError("KIWOOM_DAILY_CHART_REQUEST_FAILED", message, "kiwoom", true);
     }
   }
+
+  async requestMarketIndex(request: KiwoomMarketIndexTransportRequest): Promise<KiwoomMarketIndexResponse> {
+    try {
+      const response = await fetch(request.url, {
+        method: request.method,
+        headers: request.headers,
+        body: JSON.stringify(request.body)
+      });
+
+      if (!response.ok) {
+        const providerResponse = await readJsonResponse(response);
+        throw new MarketDataProviderError(
+          "KIWOOM_MARKET_INDEX_REQUEST_FAILED",
+          readProviderErrorMessage(providerResponse) ?? "Kiwoom market index request failed.",
+          "kiwoom",
+          false,
+          readProviderReturnCode(providerResponse),
+          readProviderReturnMessage(providerResponse)
+        );
+      }
+
+      return (await response.json()) as KiwoomMarketIndexResponse;
+    } catch (error) {
+      if (error instanceof MarketDataProviderError) {
+        throw error;
+      }
+
+      const message = error instanceof Error ? redactSecrets(error.message) : "Kiwoom market index request failed.";
+      throw new MarketDataProviderError("KIWOOM_MARKET_INDEX_REQUEST_FAILED", message, "kiwoom", true);
+    }
+  }
+}
+
+async function readJsonResponse(response: Response): Promise<Record<string, unknown> | undefined> {
+  try {
+    return (await response.json()) as Record<string, unknown>;
+  } catch {
+    return undefined;
+  }
+}
+
+function readProviderErrorMessage(response: Record<string, unknown> | undefined): string | undefined {
+  const message = readProviderReturnMessage(response);
+  return message === undefined ? undefined : redactSecrets(message);
+}
+
+function readProviderReturnCode(response: Record<string, unknown> | undefined): string | undefined {
+  const value = response?.return_code;
+  return value === undefined ? undefined : String(value);
+}
+
+function readProviderReturnMessage(response: Record<string, unknown> | undefined): string | undefined {
+  const value = response?.return_msg;
+  return typeof value === "string" && value.trim() !== "" ? redactSecrets(value) : undefined;
 }
 
 export function createFetchKiwoomTokenTransport(): KiwoomTokenTransport {
@@ -92,6 +149,10 @@ export function createFetchKiwoomQuoteTransport(): KiwoomQuoteTransport {
 }
 
 export function createFetchKiwoomChartTransport(): KiwoomChartTransport {
+  return new FetchKiwoomTransport();
+}
+
+export function createFetchKiwoomMarketIndexTransport(): KiwoomMarketIndexTransport {
   return new FetchKiwoomTransport();
 }
 

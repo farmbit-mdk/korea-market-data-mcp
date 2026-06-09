@@ -27,6 +27,19 @@ export const kiwoomQuoteEndpointMappings = {
     apiId: "ka10081",
     description: "Stock daily chart request. Enabled only for explicit local Kiwoom market data context verification.",
     verified: false
+  },
+  marketIndex: {
+    enabled: false,
+    manualOnly: true,
+    readOnly: true,
+    requiresToken: true,
+    exposesPublicTool: false,
+    forbiddenScopes: ["account", "order", "balance", "holdings", "trading"],
+    method: "POST",
+    path: "TODO_VERIFY_OFFICIAL_KIWOOM_MARKET_INDEX_ENDPOINT",
+    apiId: "ka20001",
+    description: "Industry current price request. Official Kiwoom REST guide lists ka20001 under domestic stock sector APIs; local real path uses /api/dostk/sect only when quote verification opt-in is complete.",
+    verified: false
   }
 } as const satisfies Record<string, KiwoomQuoteEndpointMapping>;
 
@@ -34,6 +47,7 @@ export type KiwoomQuoteEndpointKey = keyof typeof kiwoomQuoteEndpointMappings;
 
 export const localKiwoomQuoteEndpointPath = "/api/dostk/stkinfo";
 export const localKiwoomDailyChartEndpointPath = "/api/dostk/chart";
+export const localKiwoomMarketIndexEndpointPath = "/api/dostk/sect";
 
 const placeholderCredentialValues = new Set([
   "YOUR_APP_KEY",
@@ -82,6 +96,26 @@ export function getEffectiveKiwoomDailyChartEndpointMapping(
     readOnly: true,
     path: localKiwoomDailyChartEndpointPath,
     description: "Stock daily chart request enabled only for explicit local Kiwoom market data context verification.",
+    verified: true
+  };
+}
+
+export function getEffectiveKiwoomMarketIndexEndpointMapping(
+  env: NodeJS.ProcessEnv = process.env,
+  mapping: KiwoomQuoteEndpointMapping = kiwoomQuoteEndpointMappings.marketIndex
+): KiwoomQuoteEndpointMapping {
+  if (!isLocalKiwoomQuoteVerificationEnabled(env)) {
+    return mapping;
+  }
+
+  return {
+    ...mapping,
+    enabled: true,
+    exposesPublicTool: true,
+    manualOnly: true,
+    readOnly: true,
+    path: localKiwoomMarketIndexEndpointPath,
+    description: "Industry current price request enabled only for explicit local Kiwoom market data context verification. Official Kiwoom REST ka20001 URL is /api/dostk/sect.",
     verified: true
   };
 }
