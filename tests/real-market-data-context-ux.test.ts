@@ -150,10 +150,7 @@ describe("real market data context UX", () => {
     expect(result.provider_error).toMatchObject({
       code: "PUBLIC_TOOL_EXPOSURE_DISABLED"
     });
-    expect(result.data.daily_charts[0]).toMatchObject({
-      status: "unavailable",
-      reason: "Real daily chart provider is not implemented."
-    });
+    expect(result.data.daily_charts).toEqual([]);
     expect(result.data.related_indices[0]).toMatchObject({
       status: "unavailable",
       reason: "Real index provider is not implemented."

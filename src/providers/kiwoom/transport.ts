@@ -1,6 +1,9 @@
 import { MarketDataProviderError } from "../errors.js";
 import { redactSecrets } from "../../safety/redact-secret.js";
 import type {
+  KiwoomChartResponse,
+  KiwoomChartTransport,
+  KiwoomChartTransportRequest,
   KiwoomQuoteResponse,
   KiwoomQuoteTransport,
   KiwoomQuoteTransportRequest,
@@ -9,7 +12,7 @@ import type {
   KiwoomTokenTransportRequest
 } from "./types.js";
 
-export class FetchKiwoomTransport implements KiwoomTokenTransport, KiwoomQuoteTransport {
+export class FetchKiwoomTransport implements KiwoomTokenTransport, KiwoomQuoteTransport, KiwoomChartTransport {
   async requestToken(request: KiwoomTokenTransportRequest): Promise<KiwoomRawTokenResponse> {
     try {
       const response = await fetch(request.url, {
@@ -55,6 +58,29 @@ export class FetchKiwoomTransport implements KiwoomTokenTransport, KiwoomQuoteTr
       throw new MarketDataProviderError("KIWOOM_QUOTE_REQUEST_FAILED", message, "kiwoom", true);
     }
   }
+
+  async requestChart(request: KiwoomChartTransportRequest): Promise<KiwoomChartResponse> {
+    try {
+      const response = await fetch(request.url, {
+        method: request.method,
+        headers: request.headers,
+        body: JSON.stringify(request.body)
+      });
+
+      if (!response.ok) {
+        throw new MarketDataProviderError("KIWOOM_DAILY_CHART_REQUEST_FAILED", "Kiwoom daily chart request failed.", "kiwoom", false);
+      }
+
+      return (await response.json()) as KiwoomChartResponse;
+    } catch (error) {
+      if (error instanceof MarketDataProviderError) {
+        throw error;
+      }
+
+      const message = error instanceof Error ? redactSecrets(error.message) : "Kiwoom daily chart request failed.";
+      throw new MarketDataProviderError("KIWOOM_DAILY_CHART_REQUEST_FAILED", message, "kiwoom", true);
+    }
+  }
 }
 
 export function createFetchKiwoomTokenTransport(): KiwoomTokenTransport {
@@ -62,6 +88,10 @@ export function createFetchKiwoomTokenTransport(): KiwoomTokenTransport {
 }
 
 export function createFetchKiwoomQuoteTransport(): KiwoomQuoteTransport {
+  return new FetchKiwoomTransport();
+}
+
+export function createFetchKiwoomChartTransport(): KiwoomChartTransport {
   return new FetchKiwoomTransport();
 }
 

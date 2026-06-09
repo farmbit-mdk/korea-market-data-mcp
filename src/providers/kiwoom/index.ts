@@ -6,6 +6,11 @@ export function createKiwoomProvider(): MarketDataProvider {
 }
 
 export { createKiwoomAuthClient, KiwoomAuthClient, loadKiwoomAuthConfig } from "./auth.js";
+export {
+  createKiwoomChartClient,
+  DefaultKiwoomChartClient,
+  normalizeKiwoomDailyChartResponse
+} from "./chart-client.js";
 export { KiwoomMarketDataProvider };
 export {
   createKiwoomQuoteClient,
@@ -23,12 +28,17 @@ export {
 export {
   FetchKiwoomTokenTransport,
   FetchKiwoomTransport,
+  createFetchKiwoomChartTransport,
   createFetchKiwoomQuoteTransport,
   createFetchKiwoomTokenTransport
 } from "./transport.js";
 export { InMemoryKiwoomTokenCache } from "./token-cache.js";
 export type {
   KiwoomAccessToken,
+  KiwoomChartRequest,
+  KiwoomChartResponse,
+  KiwoomChartTransport,
+  KiwoomChartTransportRequest,
   KiwoomQuoteRequest,
   KiwoomQuoteEndpointMapping,
   KiwoomQuoteResponse,
@@ -40,5 +50,6 @@ export type {
   KiwoomTokenRequest,
   KiwoomTokenTransport,
   KiwoomTokenTransportRequest,
+  NormalizedKiwoomDailyChart,
   NormalizedKiwoomQuote
 } from "./types.js";

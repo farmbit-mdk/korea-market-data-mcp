@@ -98,6 +98,50 @@ export interface KiwoomQuoteEndpointMapping {
   verified: boolean;
 }
 
+export interface KiwoomChartRequest {
+  symbol: string;
+  name?: string;
+  market?: KiwoomQuoteMarket;
+  limit?: number;
+  baseDate?: string;
+}
+
+export interface KiwoomChartResponse {
+  return_code?: string | number;
+  return_msg?: string;
+  stk_dt_pole_chart_qry?: Array<Record<string, string | number | undefined>>;
+  output?: Array<Record<string, string | number | undefined>> | Record<string, unknown>;
+  output1?: Array<Record<string, string | number | undefined>>;
+  ka10081OutBlock1?: Array<Record<string, string | number | undefined>>;
+  [key: string]: unknown;
+}
+
+export interface NormalizedKiwoomDailyCandle {
+  date: string;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  volume: number;
+  change?: number;
+  change_rate?: number;
+  trading_value?: number;
+}
+
+export interface NormalizedKiwoomDailyChart {
+  provider: "kiwoom";
+  source: "real";
+  symbol: string;
+  name?: string;
+  market?: string;
+  currency: "KRW";
+  timeframe: "1d";
+  limit: number;
+  fetched_at: string;
+  source_tr: string;
+  candles: NormalizedKiwoomDailyCandle[];
+}
+
 export interface NormalizedKiwoomQuote {
   provider: "kiwoom";
   symbol: string;
@@ -123,4 +167,15 @@ export interface KiwoomQuoteTransportRequest {
 
 export interface KiwoomQuoteTransport {
   requestQuote(request: KiwoomQuoteTransportRequest): Promise<KiwoomQuoteResponse>;
+}
+
+export interface KiwoomChartTransportRequest {
+  url: string;
+  method: "POST";
+  headers: Record<string, string>;
+  body: Record<string, string | undefined>;
+}
+
+export interface KiwoomChartTransport {
+  requestChart(request: KiwoomChartTransportRequest): Promise<KiwoomChartResponse>;
 }

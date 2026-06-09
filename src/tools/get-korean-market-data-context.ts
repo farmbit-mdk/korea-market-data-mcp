@@ -1,5 +1,8 @@
 import { z } from "zod";
 import { toToolErrorResponse } from "../providers/errors.js";
+import { createKiwoomAuthClient, loadKiwoomAuthConfig } from "../providers/kiwoom/auth.js";
+import { createKiwoomChartClient } from "../providers/kiwoom/chart-client.js";
+import { getEffectiveKiwoomDailyChartEndpointMapping } from "../providers/kiwoom/quote-endpoints.js";
 import { nowIso } from "../utils/time.js";
 import type { ToolDefinition } from "./types.js";
 import type { KoreanMarketDataContext, ResolvedKoreanMarketAsset } from "./korean-market-query-resolver.js";
@@ -22,7 +25,7 @@ export const getKoreanMarketDataContextTool: ToolDefinition = {
     try {
       const query = input.query as string;
       const includeQuote = input.includeQuote !== false;
-      const includeChart = input.includeChart !== false;
+      const includeChart = input.includeChart === true || (input.includeChart !== false && shouldFetchDailyChart(query));
       const includeRelatedIndices = input.includeRelatedIndices !== false;
       const maxAssets = typeof input.maxAssets === "number" ? input.maxAssets : 3;
       const resolution = await resolveKoreanMarketQuery({
@@ -68,6 +71,7 @@ async function getKiwoomMarketDataContext(options: {
   let blockedCount = 0;
   let errorCount = 0;
   let unavailableCount = 0;
+  let successCount = 0;
   let providerError: KoreanMarketDataContext["provider_error"];
 
   for (const asset of options.resolvedAssets) {
@@ -105,6 +109,7 @@ async function getKiwoomMarketDataContext(options: {
 
       if (quoteResult.status === "ok") {
         const price = typeof quoteResult.quote.price === "number" ? quoteResult.quote.price : undefined;
+        successCount += 1;
         quotes.push({
           ...quoteResult.quote,
           quantity: asset.quantity,
@@ -128,8 +133,26 @@ async function getKiwoomMarketDataContext(options: {
     }
 
     if (options.includeChart) {
-      dailyCharts.push(unavailable("Real daily chart provider is not implemented.", asset.symbol));
-      unavailableCount += 1;
+      const chartResult = await runGuardedKiwoomDailyChart({
+        symbol: asset.symbol,
+        name: asset.name,
+        market: asset.market,
+        limit: inferDailyChartLimit(options.query)
+      });
+
+      if (chartResult.status === "ok") {
+        successCount += 1;
+        dailyCharts.push(chartResult.chart);
+      } else if (chartResult.status === "blocked") {
+        unavailableCount += 1;
+        dailyCharts.push(unavailable(chartResult.reason, asset.symbol));
+      } else {
+        errorCount += 1;
+        providerError = {
+          code: chartResult.error.code,
+          message: chartResult.error.message
+        };
+      }
     }
 
     if (options.includeRelatedIndices) {
@@ -152,10 +175,69 @@ async function getKiwoomMarketDataContext(options: {
     provider: "kiwoom",
     environment: "local",
     fetched_at: nowIso(),
-    data_status: getKiwoomDataStatus(options.resolvedAssets.length, blockedCount, errorCount, unavailableCount),
+    data_status: getKiwoomDataStatus(options.resolvedAssets.length, successCount, blockedCount, errorCount, unavailableCount),
     unresolved_assets: unresolvedAssets.length > 0 ? unresolvedAssets : undefined,
     provider_error: providerError
   };
+}
+
+async function runGuardedKiwoomDailyChart(input: {
+  symbol: string;
+  name?: string;
+  market?: string;
+  limit?: number;
+}): Promise<
+  | { status: "ok"; chart: Record<string, unknown> }
+  | { status: "blocked"; reason: string }
+  | { status: "error"; error: { code: string; message: string } }
+> {
+  try {
+    const env = process.env;
+    const mapping = getEffectiveKiwoomDailyChartEndpointMapping(env);
+
+    if (!mapping.enabled || !mapping.readOnly || !mapping.manualOnly) {
+      return { status: "blocked", reason: "Kiwoom daily chart endpoint mapping is not enabled for local verification." };
+    }
+
+    const config = loadKiwoomAuthConfig(env);
+
+    if (!config.enableRealApiCalls) {
+      return { status: "blocked", reason: "KIWOOM_ENABLE_REAL_API_CALLS must be true." };
+    }
+
+    if (config.appKey === undefined || config.appSecret === undefined) {
+      return { status: "blocked", reason: "Kiwoom credentials are missing or invalid." };
+    }
+
+    const token = await createKiwoomAuthClient(config).getAccessToken();
+
+    if (token.accessToken.trim() === "") {
+      return { status: "blocked", reason: "A Kiwoom access token must be present before daily chart lookup." };
+    }
+
+    const chart = await createKiwoomChartClient({
+      baseUrl: config.env === "mock" ? config.mockApiBaseUrl : config.apiBaseUrl,
+      chartEndpointPath: mapping.path,
+      accessToken: token.accessToken,
+      apiId: mapping.apiId
+    }).getDailyChart({
+      symbol: input.symbol,
+      name: input.name,
+      market: input.market as never,
+      limit: input.limit
+    });
+
+    return { status: "ok", chart: chart as unknown as Record<string, unknown> };
+  } catch (error) {
+    const toolError = toToolErrorResponse(error, "kiwoom").error;
+    return {
+      status: "error",
+      error: {
+        code: toolError.code,
+        message: toolError.message
+      }
+    };
+  }
 }
 
 function getRealProviderNotReadyContext(options: {
@@ -201,6 +283,41 @@ function getRealProviderNotReadyContext(options: {
   };
 }
 
+function shouldFetchDailyChart(query: string): boolean {
+  const normalizedQuery = query.toLocaleLowerCase();
+  const chartTerms = [
+    "최근 흐름",
+    "최근 20일",
+    "최근 60일",
+    "일봉",
+    "차트",
+    "추세",
+    "변동성",
+    "수익률",
+    "고점",
+    "저점",
+    "거래량 흐름",
+    "가격 흐름",
+    "daily chart",
+    "chart",
+    "trend",
+    "volume"
+  ];
+
+  return chartTerms.some((term) => normalizedQuery.includes(term));
+}
+
+function inferDailyChartLimit(query: string): number {
+  const match = /최근\s*([0-9]{1,2})\s*일/.exec(query);
+
+  if (match !== null) {
+    const limit = Number(match[1]);
+    return Number.isInteger(limit) ? Math.min(Math.max(limit, 1), 60) : 20;
+  }
+
+  return 20;
+}
+
 function unavailable(reason: string, symbol?: string): Record<string, unknown> {
   return {
     status: "unavailable",
@@ -211,6 +328,7 @@ function unavailable(reason: string, symbol?: string): Record<string, unknown> {
 
 function getKiwoomDataStatus(
   assetCount: number,
+  successCount: number,
   blockedCount: number,
   errorCount: number,
   unavailableCount: number
@@ -219,15 +337,15 @@ function getKiwoomDataStatus(
     return "unresolved";
   }
 
-  if (errorCount > 0) {
+  if (errorCount > 0 && successCount === 0) {
     return "provider_error";
   }
 
-  if (blockedCount > 0) {
+  if (blockedCount > 0 && successCount === 0) {
     return "blocked";
   }
 
-  if (unavailableCount > 0) {
+  if (errorCount > 0 || blockedCount > 0 || unavailableCount > 0) {
     return "partial";
   }
 
