@@ -6,6 +6,8 @@ import type { KoreanMarketDataContext, ResolvedKoreanMarketAsset } from "./korea
 import { resolveKoreanMarketQuery } from "./korean-market-query-resolver.js";
 import { runGuardedKiwoomPublicQuote } from "./get-kiwoom-stock-quote.js";
 
+const quoteConfidenceThreshold = 0.8;
+
 export const getKoreanMarketDataContextTool: ToolDefinition = {
   name: "get_korean_market_data_context",
   description: "Resolve a natural-language Korean market query and return structured market data context from real providers when configured. Does not return mock market prices; if real provider data is unavailable, returns blocked/provider_error/unavailable status.",
@@ -61,12 +63,31 @@ async function getKiwoomMarketDataContext(options: {
   const quotes: Array<Record<string, unknown>> = [];
   const dailyCharts: Array<Record<string, unknown>> = [];
   const relatedIndices: Array<Record<string, unknown>> = [];
+  const unresolvedAssets: NonNullable<KoreanMarketDataContext["unresolved_assets"]> = [];
+  const unresolvedKeys = new Set<string>();
   let blockedCount = 0;
   let errorCount = 0;
   let unavailableCount = 0;
   let providerError: KoreanMarketDataContext["provider_error"];
 
   for (const asset of options.resolvedAssets) {
+    if (asset.confidence < quoteConfidenceThreshold) {
+      const unresolvedKey = `${asset.assetType}:${asset.matchedTerm}`;
+      if (!unresolvedKeys.has(unresolvedKey)) {
+        unresolvedKeys.add(unresolvedKey);
+        unresolvedAssets.push({
+          query: asset.matchedTerm,
+          reason: "Resolver confidence is too low to request a real Kiwoom quote automatically.",
+          candidates: options.resolvedAssets.filter((candidate) =>
+            candidate.assetType === asset.assetType &&
+            candidate.matchedTerm === asset.matchedTerm
+          )
+        });
+      }
+      unavailableCount += 1;
+      continue;
+    }
+
     if (asset.assetType === "index") {
       if (options.includeRelatedIndices) {
         relatedIndices.push(unavailable("Real index context is not implemented yet.", asset.symbol));
@@ -83,8 +104,12 @@ async function getKiwoomMarketDataContext(options: {
       });
 
       if (quoteResult.status === "ok") {
+        const price = typeof quoteResult.quote.price === "number" ? quoteResult.quote.price : undefined;
         quotes.push({
           ...quoteResult.quote,
+          quantity: asset.quantity,
+          position_value: asset.quantity !== undefined && price !== undefined ? asset.quantity * price : undefined,
+          fetched_at: nowIso(),
           source: "real"
         });
       } else if (quoteResult.status === "blocked") {
@@ -128,6 +153,7 @@ async function getKiwoomMarketDataContext(options: {
     environment: "local",
     fetched_at: nowIso(),
     data_status: getKiwoomDataStatus(options.resolvedAssets.length, blockedCount, errorCount, unavailableCount),
+    unresolved_assets: unresolvedAssets.length > 0 ? unresolvedAssets : undefined,
     provider_error: providerError
   };
 }

@@ -14,6 +14,7 @@ export interface ResolvedKoreanMarketAsset {
   sourceSymbol?: string;
   confidence: number;
   matchedTerm: string;
+  quantity?: number;
 }
 
 export interface KoreanMarketQueryResolution {
@@ -40,6 +41,11 @@ export interface KoreanMarketDataContext {
   environment: string;
   fetched_at: string;
   data_status: "ok" | "partial" | "unresolved" | "blocked" | "provider_error" | "unavailable";
+  unresolved_assets?: Array<{
+    query: string;
+    reason: string;
+    candidates: ResolvedKoreanMarketAsset[];
+  }>;
   provider_error?: {
     code: string;
     message: string;
@@ -68,6 +74,8 @@ const knownTerms: Array<{ term: string; canonicalQuery: string; assetType: Resol
   { term: "코덱스 200", canonicalQuery: "코덱스 200", assetType: "etf", confidence: 0.98 },
   { term: "코덱스200", canonicalQuery: "코덱스200", assetType: "etf", confidence: 0.98 },
   { term: "360750", canonicalQuery: "360750", assetType: "etf", confidence: 1 },
+  { term: "tiger \uBBF8\uAD6Ds&p500", canonicalQuery: "TIGER \uBBF8\uAD6DS&P500", assetType: "etf", confidence: 0.99 },
+  { term: "tiger \uBBF8\uAD6D s&p500", canonicalQuery: "TIGER \uBBF8\uAD6DS&P500", assetType: "etf", confidence: 0.99 },
   { term: "tiger 미국s&p500", canonicalQuery: "TIGER 미국S&P500", assetType: "etf", confidence: 0.99 },
   { term: "tiger 미국 s&p500", canonicalQuery: "TIGER 미국S&P500", assetType: "etf", confidence: 0.99 },
   { term: "tiger s&p500", canonicalQuery: "TIGER 미국S&P500", assetType: "etf", confidence: 0.94 },
@@ -76,6 +84,13 @@ const knownTerms: Array<{ term: string; canonicalQuery: string; assetType: Resol
   { term: "tiger 글로벌 ai 전력 인프라 액티브", canonicalQuery: "TIGER 글로벌AI전력인프라액티브", assetType: "etf", confidence: 0.99 },
   { term: "tiger ai전력", canonicalQuery: "TIGER AI전력", assetType: "etf", confidence: 0.62 },
   { term: "tiger ai 전력", canonicalQuery: "TIGER AI전력", assetType: "etf", confidence: 0.62 },
+  { term: "491010", canonicalQuery: "TIGER \uAE00\uB85C\uBC8CAI\uC804\uB825\uC778\uD504\uB77C\uC561\uD2F0\uBE0C", assetType: "etf", confidence: 1 },
+  { term: "tiger \uAE00\uB85C\uBC8Cai\uC804\uB825\uC778\uD504\uB77C\uC561\uD2F0\uBE0C", canonicalQuery: "TIGER \uAE00\uB85C\uBC8CAI\uC804\uB825\uC778\uD504\uB77C\uC561\uD2F0\uBE0C", assetType: "etf", confidence: 0.99 },
+  { term: "0117v0", canonicalQuery: "0117V0", assetType: "etf", confidence: 1 },
+  { term: "tiger \uCF54\uB9AC\uC544ai\uC804\uB825\uAE30\uAE30top3\uD50C\uB7EC\uC2A4", canonicalQuery: "TIGER \uCF54\uB9AC\uC544AI\uC804\uB825\uAE30\uAE30TOP3\uD50C\uB7EC\uC2A4", assetType: "etf", confidence: 0.99 },
+  { term: "tiger \uCF54\uB9AC\uC544 ai \uC804\uB825\uAE30\uAE30 top3 \uD50C\uB7EC\uC2A4", canonicalQuery: "TIGER \uCF54\uB9AC\uC544AI\uC804\uB825\uAE30\uAE30TOP3\uD50C\uB7EC\uC2A4", assetType: "etf", confidence: 0.99 },
+  { term: "tiger ai\uC804\uB825", canonicalQuery: "TIGER AI\uC804\uB825", assetType: "etf", confidence: 0.62 },
+  { term: "tiger ai \uC804\uB825", canonicalQuery: "TIGER AI\uC804\uB825", assetType: "etf", confidence: 0.62 },
   { term: "kospi200", canonicalQuery: "KOSPI200", assetType: "index", confidence: 0.98 },
   { term: "kospi 200", canonicalQuery: "KOSPI200", assetType: "index", confidence: 0.98 },
   { term: "코스피 200", canonicalQuery: "코스피200", assetType: "index", confidence: 0.98 },
@@ -144,6 +159,48 @@ const builtInAssets: Array<SymbolSearchResult & { aliases: string[] }> = [
     ]
   },
   {
+    symbol: "360750",
+    name: "TIGER \uBBF8\uAD6DS&P500",
+    market: "KOSPI",
+    assetType: "etf",
+    currency: "KRW",
+    provider: "resolver",
+    sourceSymbol: "360750",
+    aliases: ["TIGER \uBBF8\uAD6DS&P500", "TIGER \uBBF8\uAD6D S&P500", "TIGER S&P500", "360750"]
+  },
+  {
+    symbol: "491010",
+    name: "TIGER \uAE00\uB85C\uBC8CAI\uC804\uB825\uC778\uD504\uB77C\uC561\uD2F0\uBE0C",
+    market: "KOSPI",
+    assetType: "etf",
+    currency: "KRW",
+    provider: "resolver",
+    sourceSymbol: "491010",
+    aliases: [
+      "TIGER \uAE00\uB85C\uBC8CAI\uC804\uB825\uC778\uD504\uB77C\uC561\uD2F0\uBE0C",
+      "TIGER \uAE00\uB85C\uBC8C AI \uC804\uB825 \uC778\uD504\uB77C \uC561\uD2F0\uBE0C",
+      "TIGER AI\uC804\uB825",
+      "TIGER AI \uC804\uB825",
+      "491010"
+    ]
+  },
+  {
+    symbol: "0117V0",
+    name: "TIGER \uCF54\uB9AC\uC544AI\uC804\uB825\uAE30\uAE30TOP3\uD50C\uB7EC\uC2A4",
+    market: "KOSPI",
+    assetType: "etf",
+    currency: "KRW",
+    provider: "resolver",
+    sourceSymbol: "0117V0",
+    aliases: [
+      "TIGER \uCF54\uB9AC\uC544AI\uC804\uB825\uAE30\uAE30TOP3\uD50C\uB7EC\uC2A4",
+      "TIGER \uCF54\uB9AC\uC544 AI \uC804\uB825\uAE30\uAE30 TOP3 \uD50C\uB7EC\uC2A4",
+      "TIGER AI\uC804\uB825",
+      "TIGER AI \uC804\uB825",
+      "0117V0"
+    ]
+  },
+  {
     symbol: "KOSPI",
     name: "KOSPI",
     market: "KRX",
@@ -196,7 +253,7 @@ export async function resolveKoreanMarketQuery(
 
       const key = `${result.assetType}:${result.symbol}`;
       const existing = resolved.get(key);
-      const candidate = mapResolvedAsset(result, match.term, match.confidence);
+      const candidate = mapResolvedAsset(result, match.term, match.confidence, options.query);
 
       if (existing === undefined || candidate.confidence > existing.confidence) {
         resolved.set(key, candidate);
@@ -291,7 +348,8 @@ function findMatchedTerms(query: string): typeof knownTerms {
 function mapResolvedAsset(
   result: SymbolSearchResult,
   matchedTerm: string,
-  confidence: number
+  confidence: number,
+  query: string
 ): ResolvedKoreanMarketAsset {
   return {
     symbol: result.symbol,
@@ -302,8 +360,58 @@ function mapResolvedAsset(
     provider: result.provider,
     sourceSymbol: result.sourceSymbol,
     confidence,
-    matchedTerm
+    matchedTerm,
+    quantity: extractQuantity(query, result, matchedTerm)
   };
+}
+
+function extractQuantity(query: string, result: SymbolSearchResult, matchedTerm: string): number | undefined {
+  const matchedTermQuantity = extractQuantityNearTerm(query, matchedTerm);
+
+  if (matchedTermQuantity !== undefined) {
+    return matchedTermQuantity;
+  }
+
+  const resultWithAliases = result as SymbolSearchResult & { aliases?: string[] };
+  const candidateTerms = [
+    result.symbol,
+    result.name,
+    result.sourceSymbol,
+    ...(resultWithAliases.aliases ?? [])
+  ].filter((value): value is string => value !== undefined && value.trim() !== "");
+
+  for (const term of candidateTerms.sort((a, b) => compactText(b).length - compactText(a).length)) {
+    const quantity = extractQuantityNearTerm(query, term);
+
+    if (quantity !== undefined) {
+      return quantity;
+    }
+  }
+
+  return undefined;
+}
+
+function extractQuantityNearTerm(query: string, term: string): number | undefined {
+  const compactQuery = compactText(normalizeSearchText(query));
+  const compactTerm = compactText(normalizeSearchText(term));
+  const index = compactQuery.indexOf(compactTerm);
+
+  if (index < 0) {
+    return undefined;
+  }
+
+  const afterTerm = compactQuery.slice(index + compactTerm.length, index + compactTerm.length + 12);
+  const beforeTerm = compactQuery.slice(Math.max(0, index - 12), index);
+  const afterMatch = /^(?:etf|stock|shares?)?([0-9,]+)(?:\uC8FC|shares?)?/.exec(afterTerm);
+  const beforeMatch = /([0-9,]+)(?:\uC8FC|shares?)?$/.exec(beforeTerm);
+  const rawQuantity = afterMatch?.[1] ?? beforeMatch?.[1];
+
+  if (rawQuantity === undefined) {
+    return undefined;
+  }
+
+  const quantity = Number(rawQuantity.replace(/,/g, ""));
+  return Number.isFinite(quantity) && quantity > 0 ? quantity : undefined;
 }
 
 function inferDataRequirements(assets: ResolvedKoreanMarketAsset[]): string[] {
