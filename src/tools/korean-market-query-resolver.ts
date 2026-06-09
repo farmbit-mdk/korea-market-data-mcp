@@ -54,6 +54,9 @@ export interface ResolveKoreanMarketQueryOptions {
 }
 
 const knownTerms: Array<{ term: string; canonicalQuery: string; assetType: ResolvableAssetType; confidence: number }> = [
+  { term: "005935", canonicalQuery: "005935", assetType: "stock", confidence: 1 },
+  { term: "삼성전자우", canonicalQuery: "삼성전자우", assetType: "stock", confidence: 0.99 },
+  { term: "삼전우", canonicalQuery: "삼성전자우", assetType: "stock", confidence: 0.96 },
   { term: "005930", canonicalQuery: "005930", assetType: "stock", confidence: 1 },
   { term: "삼성전자", canonicalQuery: "삼성전자", assetType: "stock", confidence: 0.98 },
   { term: "삼전", canonicalQuery: "삼성전자", assetType: "stock", confidence: 0.94 },
@@ -64,6 +67,15 @@ const knownTerms: Array<{ term: string; canonicalQuery: string; assetType: Resol
   { term: "kodex200", canonicalQuery: "KODEX 200", assetType: "etf", confidence: 0.96 },
   { term: "코덱스 200", canonicalQuery: "코덱스 200", assetType: "etf", confidence: 0.98 },
   { term: "코덱스200", canonicalQuery: "코덱스200", assetType: "etf", confidence: 0.98 },
+  { term: "360750", canonicalQuery: "360750", assetType: "etf", confidence: 1 },
+  { term: "tiger 미국s&p500", canonicalQuery: "TIGER 미국S&P500", assetType: "etf", confidence: 0.99 },
+  { term: "tiger 미국 s&p500", canonicalQuery: "TIGER 미국S&P500", assetType: "etf", confidence: 0.99 },
+  { term: "tiger s&p500", canonicalQuery: "TIGER 미국S&P500", assetType: "etf", confidence: 0.94 },
+  { term: "491010", canonicalQuery: "TIGER 글로벌AI전력인프라액티브", assetType: "etf", confidence: 1 },
+  { term: "tiger 글로벌ai전력인프라액티브", canonicalQuery: "TIGER 글로벌AI전력인프라액티브", assetType: "etf", confidence: 0.99 },
+  { term: "tiger 글로벌 ai 전력 인프라 액티브", canonicalQuery: "TIGER 글로벌AI전력인프라액티브", assetType: "etf", confidence: 0.99 },
+  { term: "tiger ai전력", canonicalQuery: "TIGER AI전력", assetType: "etf", confidence: 0.62 },
+  { term: "tiger ai 전력", canonicalQuery: "TIGER AI전력", assetType: "etf", confidence: 0.62 },
   { term: "kospi200", canonicalQuery: "KOSPI200", assetType: "index", confidence: 0.98 },
   { term: "kospi 200", canonicalQuery: "KOSPI200", assetType: "index", confidence: 0.98 },
   { term: "코스피 200", canonicalQuery: "코스피200", assetType: "index", confidence: 0.98 },
@@ -75,6 +87,16 @@ const knownTerms: Array<{ term: string; canonicalQuery: string; assetType: Resol
 ];
 
 const builtInAssets: Array<SymbolSearchResult & { aliases: string[] }> = [
+  {
+    symbol: "005935",
+    name: "Samsung Electronics Preferred",
+    market: "KOSPI",
+    assetType: "stock",
+    currency: "KRW",
+    provider: "resolver",
+    sourceSymbol: "005935",
+    aliases: ["삼성전자우", "삼전우", "Samsung Electronics Preferred", "Samsung Electronics Pref", "005935"]
+  },
   {
     symbol: "005930",
     name: "Samsung Electronics",
@@ -94,6 +116,32 @@ const builtInAssets: Array<SymbolSearchResult & { aliases: string[] }> = [
     provider: "resolver",
     sourceSymbol: "069500",
     aliases: ["KODEX 200", "KODEX200", "코덱스 200", "코덱스200", "069500"]
+  },
+  {
+    symbol: "360750",
+    name: "TIGER 미국S&P500",
+    market: "KOSPI",
+    assetType: "etf",
+    currency: "KRW",
+    provider: "resolver",
+    sourceSymbol: "360750",
+    aliases: ["TIGER 미국S&P500", "TIGER 미국 S&P500", "TIGER S&P500", "TIGER US S&P500", "360750"]
+  },
+  {
+    symbol: "491010",
+    name: "TIGER 글로벌AI전력인프라액티브",
+    market: "KOSPI",
+    assetType: "etf",
+    currency: "KRW",
+    provider: "resolver",
+    sourceSymbol: "491010",
+    aliases: [
+      "TIGER 글로벌AI전력인프라액티브",
+      "TIGER 글로벌 AI 전력 인프라 액티브",
+      "TIGER AI전력",
+      "TIGER AI 전력",
+      "491010"
+    ]
   },
   {
     symbol: "KOSPI",
@@ -203,10 +251,12 @@ async function searchSymbols(
       const values = [asset.symbol, asset.name, asset.sourceSymbol, ...asset.aliases].filter((value): value is string => value !== undefined);
       return values.some((value) => {
         const normalizedValue = normalizeSearchText(value);
-        return normalizedValue.includes(normalizedQuery) ||
-          compactText(normalizedValue).includes(compactQuery) ||
-          normalizedQuery.includes(normalizedValue) ||
-          compactQuery.includes(compactText(normalizedValue));
+        const compactValue = compactText(normalizedValue);
+
+        return normalizedValue === normalizedQuery ||
+          compactValue === compactQuery ||
+          normalizedValue.includes(normalizedQuery) ||
+          compactValue.includes(compactQuery);
       });
     })
     .slice(0, maxResults);
@@ -219,9 +269,23 @@ function findMatchedTerms(query: string): typeof knownTerms {
   return knownTerms
     .filter((candidate) => {
       const normalizedTerm = normalizeSearchText(candidate.term);
-      return normalizedQuery.includes(normalizedTerm) || compactQuery.includes(compactText(normalizedTerm));
+      const compactTerm = compactText(normalizedTerm);
+
+      return normalizedQuery === normalizedTerm ||
+        compactQuery === compactTerm ||
+        normalizedQuery.includes(normalizedTerm) ||
+        compactQuery.includes(compactTerm);
     })
-    .sort((a, b) => compactText(b.term).length - compactText(a.term).length);
+    .sort((a, b) => compactText(b.term).length - compactText(a.term).length)
+    .filter((candidate, index, candidates) => {
+      const compactCandidate = compactText(normalizeSearchText(candidate.term));
+      return !candidates.slice(0, index).some((moreSpecific) => {
+        const compactSpecific = compactText(normalizeSearchText(moreSpecific.term));
+        return moreSpecific.assetType === candidate.assetType &&
+          compactSpecific.length > compactCandidate.length &&
+          compactSpecific.includes(compactCandidate);
+      });
+    });
 }
 
 function mapResolvedAsset(

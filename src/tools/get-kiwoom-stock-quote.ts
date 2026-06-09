@@ -269,8 +269,8 @@ function normalizeKiwoomPublicQuoteInput(input: unknown): Required<Pick<KiwoomPu
     throw new MarketDataProviderError("INVALID_INPUT", "symbol is required.", "kiwoom", false);
   }
 
-  if (!/^[0-9]{6}$/.test(symbol)) {
-    throw new MarketDataProviderError("INVALID_INPUT", "symbol must be a 6-digit Korean stock code.", "kiwoom", false);
+  if (!/^[0-9A-Za-z]{6}$/.test(symbol)) {
+    throw new MarketDataProviderError("INVALID_INPUT", "symbol must be a 6-character Korean stock or ETF code.", "kiwoom", false);
   }
 
   if (input.provider !== undefined && input.provider !== "kiwoom") {
@@ -282,7 +282,7 @@ function normalizeKiwoomPublicQuoteInput(input: unknown): Required<Pick<KiwoomPu
   }
 
   return {
-    symbol,
+    symbol: symbol.toUpperCase(),
     market: input.market as KiwoomQuoteMarket | undefined,
     provider: "kiwoom"
   };
@@ -307,7 +307,7 @@ function getSafeErrorSymbol(input: unknown): string | undefined {
   }
 
   const symbol = input.symbol.trim();
-  return /^[0-9]{6}$/.test(symbol) ? symbol : undefined;
+  return /^[0-9A-Za-z]{6}$/.test(symbol) ? symbol.toUpperCase() : undefined;
 }
 
 function isPlainInputRecord(input: unknown): input is Record<string, unknown> {
