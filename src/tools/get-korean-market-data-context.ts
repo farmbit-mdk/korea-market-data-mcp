@@ -8,6 +8,8 @@ import type { ToolDefinition } from "./types.js";
 import type { KoreanMarketDataContext, ResolvedKoreanMarketAsset } from "./korean-market-query-resolver.js";
 import { resolveKoreanMarketQuery } from "./korean-market-query-resolver.js";
 import { runGuardedKiwoomPublicQuote } from "./get-kiwoom-stock-quote.js";
+import { runGuardedKiwoomMarketIndex } from "./get-market-index.js";
+import type { KiwoomMarketIndexCode } from "../providers/kiwoom/types.js";
 
 const quoteConfidenceThreshold = 0.8;
 
@@ -73,6 +75,7 @@ async function getKiwoomMarketDataContext(options: {
   let unavailableCount = 0;
   let successCount = 0;
   let providerError: KoreanMarketDataContext["provider_error"];
+  const relatedIndexKeys = new Set<string>();
 
   for (const asset of options.resolvedAssets) {
     if (asset.confidence < quoteConfidenceThreshold) {
@@ -94,8 +97,24 @@ async function getKiwoomMarketDataContext(options: {
 
     if (asset.assetType === "index") {
       if (options.includeRelatedIndices) {
-        relatedIndices.push(unavailable("Real index context is not implemented yet.", asset.symbol));
-        unavailableCount += 1;
+        const result = await fetchKiwoomIndex(asset.symbol, false);
+        if (result.status === "ok") {
+          successCount += 1;
+          pushRelatedIndex(relatedIndices, relatedIndexKeys, result.index);
+        } else if (result.status === "blocked") {
+          blockedCount += 1;
+          providerError = {
+            code: result.reason_code,
+            message: result.reason
+          };
+          pushRelatedIndex(relatedIndices, relatedIndexKeys, unavailable(result.reason, asset.symbol));
+        } else {
+          errorCount += 1;
+          providerError = {
+            code: result.error.code,
+            message: result.error.message
+          };
+        }
       }
       continue;
     }
@@ -156,8 +175,19 @@ async function getKiwoomMarketDataContext(options: {
     }
 
     if (options.includeRelatedIndices) {
-      relatedIndices.push(unavailable("Real index provider is not implemented.", asset.symbol));
-      unavailableCount += 1;
+      for (const indexCode of inferRelatedIndexCodes(asset, options.query)) {
+        const result = await fetchKiwoomIndex(indexCode, true);
+        if (result.status === "ok") {
+          successCount += 1;
+          pushRelatedIndex(relatedIndices, relatedIndexKeys, result.index);
+        } else if (result.status === "blocked") {
+          unavailableCount += 1;
+          pushRelatedIndex(relatedIndices, relatedIndexKeys, unavailable(result.reason, indexCode));
+        } else {
+          unavailableCount += 1;
+          pushRelatedIndex(relatedIndices, relatedIndexKeys, unavailable(result.error.message, indexCode));
+        }
+      }
     }
   }
 
@@ -178,6 +208,36 @@ async function getKiwoomMarketDataContext(options: {
     data_status: getKiwoomDataStatus(options.resolvedAssets.length, successCount, blockedCount, errorCount, unavailableCount),
     unresolved_assets: unresolvedAssets.length > 0 ? unresolvedAssets : undefined,
     provider_error: providerError
+  };
+}
+
+async function fetchKiwoomIndex(indexCode: string, relatedOnly: boolean): Promise<
+  | { status: "ok"; index: Record<string, unknown> }
+  | { status: "blocked"; reason_code: string; reason: string; relatedOnly: boolean }
+  | { status: "error"; error: { code: string; message: string }; relatedOnly: boolean }
+> {
+  const result = await runGuardedKiwoomMarketIndex({ indexCode });
+
+  if (result.status === "ok") {
+    return {
+      status: "ok",
+      index: result.index
+    };
+  }
+
+  if (result.status === "blocked") {
+    return {
+      status: "blocked",
+      reason_code: result.reason_code,
+      reason: result.reason,
+      relatedOnly
+    };
+  }
+
+  return {
+    status: "error",
+    error: result.error,
+    relatedOnly
   };
 }
 
@@ -281,6 +341,85 @@ function getRealProviderNotReadyContext(options: {
           message: "Real Kiwoom provider is not enabled or credentials are missing."
         }
   };
+}
+
+function inferRelatedIndexCodes(asset: ResolvedKoreanMarketAsset, query: string): KiwoomMarketIndexCode[] {
+  const inferred = new Set<KiwoomMarketIndexCode>();
+  const normalizedName = normalizeCompact(`${asset.name} ${asset.symbol} ${asset.market}`);
+  const normalizedQuery = normalizeCompact(query);
+
+  for (const explicitIndex of inferExplicitIndexCodes(query)) {
+    inferred.add(explicitIndex);
+  }
+
+  if (asset.assetType === "stock") {
+    if (asset.market === "KOSDAQ") {
+      inferred.add("KOSDAQ");
+    } else if (asset.market === "KOSPI") {
+      inferred.add("KOSPI");
+      inferred.add("KOSPI200");
+    }
+  }
+
+  if (asset.assetType === "etf") {
+    const isKospi200Tracker =
+      normalizedName.includes("kodex200") ||
+      normalizedName.includes("tiger200") ||
+      normalizedQuery.includes("kospi200") ||
+      normalizedQuery.includes("\uCF54\uC2A4\uD53C200");
+    const isForeignSp500Tracker =
+      normalizedName.includes("s&p500") ||
+      normalizedName.includes("sp500") ||
+      normalizedQuery.includes("s&p500") ||
+      normalizedQuery.includes("sp500");
+
+    if (isKospi200Tracker) {
+      inferred.add("KOSPI200");
+      inferred.add("KOSPI");
+    } else if (isForeignSp500Tracker) {
+      return [...inferred];
+    }
+  }
+
+  return [...inferred];
+}
+
+function inferExplicitIndexCodes(query: string): KiwoomMarketIndexCode[] {
+  const normalized = normalizeCompact(query);
+  const codes = new Set<KiwoomMarketIndexCode>();
+
+  if (normalized.includes("kospi200") || normalized.includes("\uCF54\uC2A4\uD53C200")) {
+    codes.add("KOSPI200");
+  }
+
+  if (normalized.includes("kosdaq") || normalized.includes("\uCF54\uC2A4\uB2E5")) {
+    codes.add("KOSDAQ");
+  }
+
+  if (normalized.includes("kospi") || normalized.includes("\uCF54\uC2A4\uD53C")) {
+    codes.add("KOSPI");
+  }
+
+  return [...codes];
+}
+
+function pushRelatedIndex(
+  relatedIndices: Array<Record<string, unknown>>,
+  relatedIndexKeys: Set<string>,
+  index: Record<string, unknown>
+): void {
+  const key = String(index.index_code ?? index.symbol ?? JSON.stringify(index));
+
+  if (relatedIndexKeys.has(key)) {
+    return;
+  }
+
+  relatedIndexKeys.add(key);
+  relatedIndices.push(index);
+}
+
+function normalizeCompact(value: string): string {
+  return value.toLocaleLowerCase().replace(/\s+/g, "");
 }
 
 function shouldFetchDailyChart(query: string): boolean {

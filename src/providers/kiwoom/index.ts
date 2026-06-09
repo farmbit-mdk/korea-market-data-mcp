@@ -11,6 +11,14 @@ export {
   DefaultKiwoomChartClient,
   normalizeKiwoomDailyChartResponse
 } from "./chart-client.js";
+export {
+  createKiwoomIndexClient,
+  DefaultKiwoomIndexClient,
+  kiwoomMarketIndexMappings,
+  normalizeKiwoomMarketIndexCode,
+  normalizeKiwoomMarketIndexError,
+  normalizeKiwoomMarketIndexResponse
+} from "./index-client.js";
 export { KiwoomMarketDataProvider };
 export {
   createKiwoomQuoteClient,
@@ -29,6 +37,7 @@ export {
   FetchKiwoomTokenTransport,
   FetchKiwoomTransport,
   createFetchKiwoomChartTransport,
+  createFetchKiwoomMarketIndexTransport,
   createFetchKiwoomQuoteTransport,
   createFetchKiwoomTokenTransport
 } from "./transport.js";
@@ -39,6 +48,11 @@ export type {
   KiwoomChartResponse,
   KiwoomChartTransport,
   KiwoomChartTransportRequest,
+  KiwoomMarketIndexCode,
+  KiwoomMarketIndexRequest,
+  KiwoomMarketIndexResponse,
+  KiwoomMarketIndexTransport,
+  KiwoomMarketIndexTransportRequest,
   KiwoomQuoteRequest,
   KiwoomQuoteEndpointMapping,
   KiwoomQuoteResponse,
@@ -51,5 +65,6 @@ export type {
   KiwoomTokenTransport,
   KiwoomTokenTransportRequest,
   NormalizedKiwoomDailyChart,
+  NormalizedKiwoomMarketIndex,
   NormalizedKiwoomQuote
 } from "./types.js";
