@@ -2,6 +2,18 @@
 
 All notable alpha release documentation and safety-scope changes are tracked here.
 
+## v0.40.0-alpha - Quant Research Data Bundle UX
+
+Data-only research metric payloads for real market data context.
+
+- Updated package metadata and server defaults to `0.40.0-alpha`.
+- Added `research_metrics` to `get_korean_market_data_context` responses when daily chart candles are available.
+- Added pure research metric helpers for period return, high/low dates, latest close, latest volume, average volume, and volume ratio.
+- Added related index comparison fields that remain `null` unless comparable index period data is available.
+- Added tests for metric calculations, insufficient candle handling, no mock fallback, and no judgment wording in generated metrics.
+
+`research_metrics` are data-based calculations only. This release does not add buy/sell judgments, recommendations, target prices, strategy conclusions, account access, orders, balance lookup, holdings lookup, trading, or auto-trading.
+
 ## v0.36.0-alpha - Enable Local Kiwoom Quote Verification
 
 Local Kiwoom quote verification path for explicitly opted-in users.

@@ -74,6 +74,8 @@ TIGER AI전력 ETF를 조회해줘. 애매하면 후보를 보여줘.
 
 다종목 보유분 예시는 `get_korean_market_data_context`가 여러 종목/ETF를 resolve하고 실제 Kiwoom quote bundle을 반환하는 흐름입니다. 수량이 포함되면 `quantity`와 `position_value`를 payload에 포함할 수 있습니다. MCP는 데이터만 공급하고, 평가액 합계, 비중 계산, 리밸런싱 관점의 해석은 AI 클라이언트가 수행합니다.
 
+v0.40.0-alpha부터 `get_korean_market_data_context`는 `daily_charts[]`를 기반으로 `research_metrics`를 함께 반환할 수 있습니다. 이 값은 기간 시작/종료 가격, 기간 수익률, 고가/저가, 평균 거래량, 최신 거래량 비율 같은 데이터 기반 계산값입니다. `research_metrics`는 투자 판단, 매수/매도 의견, 추천, 목표가가 아니며, 해석은 Claude/GPT/Codex 같은 AI 클라이언트가 담당합니다.
+
 ### 지원하지 않는 기능
 
 이 MCP는 아래 기능을 제공하지 않습니다.
