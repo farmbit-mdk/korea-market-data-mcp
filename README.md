@@ -76,6 +76,17 @@ TIGER AI전력 ETF를 조회해줘. 애매하면 후보를 보여줘.
 
 v0.40.0-alpha부터 `get_korean_market_data_context`는 `daily_charts[]`를 기반으로 `research_metrics`를 함께 반환할 수 있습니다. 이 값은 기간 시작/종료 가격, 기간 수익률, 고가/저가, 평균 거래량, 최신 거래량 비율 같은 데이터 기반 계산값입니다. `research_metrics`는 투자 판단, 매수/매도 의견, 추천, 목표가가 아니며, 해석은 Claude/GPT/Codex 같은 AI 클라이언트가 담당합니다.
 
+v0.41.0-alpha는 `research_metrics`의 null semantics를 강화합니다. `period_return`은 `(period_end_price - period_start_price) / period_start_price`, `volume_ratio`는 `latest_volume / average_volume`입니다. `candle_count`는 실제 계산에 사용된 candle 수이고, `average_volume`은 유효 volume candle 기준 평균입니다. 시작 가격이 0이거나 invalid, candle이 부족하거나 날짜/가격/거래량이 계산 불가능하면 해당 값은 `null` 또는 `comparison_unavailable`로 남습니다. 관련 지수 기간 데이터가 없거나 asset/index 기간이 다르면 `index_period_return`과 `asset_vs_index_return_diff`는 억지 계산하지 않습니다.
+
+Claude Desktop 데이터 중심 예시:
+
+```text
+삼성전자 최근 20일 가격 흐름과 거래량 변화를 데이터 기준으로 요약해줘.
+KODEX 200의 최근 20일 수익률과 KOSPI200 관련 지수 context를 비교해서 설명해줘. 단, 투자 추천은 하지 마.
+최근 일봉 데이터와 research_metrics를 기준으로 변동성이나 거래량 변화가 있는지만 데이터 중심으로 정리해줘.
+related_indices 비교값이 null이면 왜 비교할 수 없는지 데이터 상태만 설명해줘.
+```
+
 ### 지원하지 않는 기능
 
 이 MCP는 아래 기능을 제공하지 않습니다.
