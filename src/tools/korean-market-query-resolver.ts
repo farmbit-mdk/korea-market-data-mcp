@@ -1,6 +1,7 @@
 import type { NormalizedDailyChart, NormalizedIndex, NormalizedQuote, SymbolSearchResult } from "../schemas/index.js";
 import type { AssetType } from "../schemas/common.js";
 import type { MarketDataProvider } from "../providers/types.js";
+import type { MarketDataResearchMetric } from "../utils/research-metrics.js";
 
 export type ResolvableAssetType = "stock" | "etf" | "index";
 
@@ -40,6 +41,7 @@ export interface KoreanMarketDataContext {
   provider: string;
   environment: string;
   fetched_at: string;
+  research_metrics?: MarketDataResearchMetric[];
   data_status: "ok" | "partial" | "unresolved" | "blocked" | "provider_error" | "unavailable";
   unresolved_assets?: Array<{
     query: string;

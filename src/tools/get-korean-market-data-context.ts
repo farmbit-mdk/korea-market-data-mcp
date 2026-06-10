@@ -4,6 +4,7 @@ import { createKiwoomAuthClient, loadKiwoomAuthConfig } from "../providers/kiwoo
 import { createKiwoomChartClient } from "../providers/kiwoom/chart-client.js";
 import { getEffectiveKiwoomDailyChartEndpointMapping } from "../providers/kiwoom/quote-endpoints.js";
 import { nowIso } from "../utils/time.js";
+import { buildMarketDataResearchMetrics } from "../utils/research-metrics.js";
 import type { ToolDefinition } from "./types.js";
 import type { KoreanMarketDataContext, ResolvedKoreanMarketAsset } from "./korean-market-query-resolver.js";
 import { resolveKoreanMarketQuery } from "./korean-market-query-resolver.js";
@@ -205,6 +206,12 @@ async function getKiwoomMarketDataContext(options: {
     provider: "kiwoom",
     environment: "local",
     fetched_at: nowIso(),
+    research_metrics: buildMarketDataResearchMetrics({
+      resolvedAssets: options.resolvedAssets,
+      dailyCharts,
+      relatedIndices,
+      requestedDays: inferDailyChartLimit(options.query)
+    }),
     data_status: getKiwoomDataStatus(options.resolvedAssets.length, successCount, blockedCount, errorCount, unavailableCount),
     unresolved_assets: unresolvedAssets.length > 0 ? unresolvedAssets : undefined,
     provider_error: providerError
@@ -333,6 +340,7 @@ function getRealProviderNotReadyContext(options: {
     provider: "kiwoom",
     environment: "local",
     fetched_at: nowIso(),
+    research_metrics: [],
     data_status: options.resolvedAssets.length === 0 ? "unresolved" : "blocked",
     provider_error: options.resolvedAssets.length === 0
       ? undefined

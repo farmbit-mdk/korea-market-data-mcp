@@ -1,5 +1,16 @@
 # Provider Status
 
+## v0.40.0-alpha
+
+Quant research data bundle UX is available for real-provider market data context.
+
+- `get_korean_market_data_context` may return `research_metrics` when real `daily_charts[]` candles are present.
+- `research_metrics` includes data-only calculations such as period return, period high/low, latest close, average volume, volume ratio, and related index comparison placeholders.
+- Related index return comparison fields remain `null` unless comparable period data is available; the MCP does not invent index history or mock fallback values.
+- The MCP remains a data supply engine. Claude/GPT/Codex performs interpretation.
+
+No buy/sell judgment. No recommendation. No target price. No account access. No orders. No balance lookup. No holdings lookup. No trading. No auto-trading.
+
 ## v0.36.0-alpha
 
 Kiwoom local quote verification is enabled only through explicit local opt-in.
