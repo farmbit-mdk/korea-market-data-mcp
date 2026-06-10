@@ -2,6 +2,18 @@
 
 All notable alpha release documentation and safety-scope changes are tracked here.
 
+## v0.41.0-alpha - Quant Research Metrics Hardening
+
+Research metric edge-case hardening for context payloads.
+
+- Updated package metadata and server defaults to `0.41.0-alpha`.
+- Hardened `research_metrics` null semantics for empty candles, one-candle periods, invalid close values, zero start prices, missing volume, and invalid numeric strings.
+- Added comparison metadata for related index metrics, including `comparison_unavailable`, `missing_comparable_index_period`, `insufficient_index_candles`, and `period_mismatch`.
+- Documented period return, volume ratio, candle count, average volume, high/low, and related index comparison rules.
+- Added Claude Desktop data-summary prompts that avoid recommendation wording.
+
+This release stabilizes data-only calculated metrics. It does not add buy/sell judgments, recommendations, target prices, return forecasts, account access, orders, balance lookup, holdings lookup, trading, or auto-trading.
+
 ## v0.40.0-alpha - Quant Research Data Bundle UX
 
 Data-only research metric payloads for real market data context.

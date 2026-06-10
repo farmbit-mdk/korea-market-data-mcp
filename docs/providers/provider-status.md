@@ -1,5 +1,20 @@
 # Provider Status
 
+## v0.41.0-alpha
+
+Quant research metrics hardening is available for context payloads.
+
+- `period_return` is calculated as `(period_end_price - period_start_price) / period_start_price`.
+- `volume_ratio` is calculated as `latest_volume / average_volume`.
+- `candle_count` is the number of valid dated candles used by the metric helper.
+- `average_volume` is based only on candles with valid volume values.
+- Period start/end dates come from the earliest and latest dated candles after normalization.
+- High/low metrics ignore invalid high/low values and keep `null` when no valid value exists.
+- Related index comparison stays `null` when comparable index period data is missing, insufficient, or period-mismatched.
+- Comparison notes use data-state labels such as `comparison_unavailable`, `missing_comparable_index_period`, `insufficient_index_candles`, and `period_mismatch`.
+
+These are data-only calculated metrics. The MCP does not generate buy/sell judgments, recommendations, target prices, return forecasts, account access, orders, balance lookup, holdings lookup, trading, or auto-trading.
+
 ## v0.40.0-alpha
 
 Quant research data bundle UX is available for real-provider market data context.

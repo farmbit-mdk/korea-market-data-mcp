@@ -1,6 +1,7 @@
 export interface ResearchMetricPeriod {
   requested_days?: number;
   candle_count: number;
+  requested_period_complete: boolean | null;
   period_start_date: string | null;
   period_end_date: string | null;
 }
@@ -22,6 +23,11 @@ export interface AssetResearchMetric {
 export interface RelatedIndexResearchMetric {
   symbol: string;
   name?: string;
+  comparison_status: "ok" | "comparison_unavailable";
+  comparison_unavailable_reason?: "missing_comparable_index_period" | "insufficient_index_candles" | "period_mismatch" | "asset_period_return_unavailable";
+  index_period_start_date: string | null;
+  index_period_end_date: string | null;
+  index_period_return: number | null;
   period_return: number | null;
   asset_vs_index_return_diff: number | null;
 }
@@ -95,7 +101,7 @@ export function buildSingleMarketDataResearchMetric(options: {
   const assetMetric = buildAssetResearchMetric(candles);
   const relatedIndices = options.relatedIndices
     .filter((index) => index.status !== "unavailable")
-    .map((index) => buildRelatedIndexResearchMetric(index, assetMetric.period_return));
+    .map((index) => buildRelatedIndexResearchMetric(index, assetMetric.period_return, period));
 
   return {
     symbol: options.symbol ?? readString(options.chart.symbol) ?? "",
@@ -120,15 +126,17 @@ function buildAssetResearchMetric(candles: NormalizedCandle[]): AssetResearchMet
   }
 
   const candlesWithClose = candles.filter((candle) => candle.close !== null);
-  const start = candlesWithClose.length >= 2 ? candlesWithClose[0] : undefined;
-  const end = candlesWithClose.length >= 2 ? candlesWithClose.at(-1) : undefined;
-  const periodReturn = start?.close !== null && start?.close !== undefined && end?.close !== null && end?.close !== undefined && start.close !== 0
-    ? roundMetric((end.close - start.close) / start.close)
+  const start = candlesWithClose[0];
+  const end = candlesWithClose.at(-1);
+  const startClose = start?.close ?? null;
+  const endClose = end?.close ?? null;
+  const periodReturn = candlesWithClose.length >= 2 && startClose !== null && endClose !== null && startClose > 0
+    ? safeRoundMetric((endClose - startClose) / startClose)
     : null;
   const high = findExtreme(candles, "high", "max");
   const low = findExtreme(candles, "low", "min");
   const volumes = candles.map((candle) => candle.volume).filter((volume): volume is number => volume !== null);
-  const averageVolume = volumes.length > 0 ? roundMetric(volumes.reduce((sum, volume) => sum + volume, 0) / volumes.length) : null;
+  const averageVolume = volumes.length > 0 ? safeRoundMetric(volumes.reduce((sum, volume) => sum + volume, 0) / volumes.length) : null;
   const latestVolume = candles.at(-1)?.volume ?? null;
 
   return {
@@ -142,8 +150,8 @@ function buildAssetResearchMetric(candles: NormalizedCandle[]): AssetResearchMet
     latest_close: end?.close ?? null,
     latest_volume: latestVolume,
     average_volume: averageVolume,
-    volume_ratio: latestVolume !== null && averageVolume !== null && averageVolume !== 0
-      ? roundMetric(latestVolume / averageVolume)
+    volume_ratio: latestVolume !== null && averageVolume !== null && averageVolume > 0
+      ? safeRoundMetric(latestVolume / averageVolume)
       : null
   };
 }
@@ -152,6 +160,7 @@ function buildPeriodMetric(candles: NormalizedCandle[], requestedDays: number | 
   return {
     requested_days: requestedDays,
     candle_count: candles.length,
+    requested_period_complete: requestedDays === undefined ? null : candles.length >= requestedDays,
     period_start_date: candles[0]?.date ?? null,
     period_end_date: candles.at(-1)?.date ?? null
   };
@@ -159,19 +168,59 @@ function buildPeriodMetric(candles: NormalizedCandle[], requestedDays: number | 
 
 function buildRelatedIndexResearchMetric(
   index: Record<string, unknown>,
-  assetPeriodReturn: number | null
+  assetPeriodReturn: number | null,
+  assetPeriod: ResearchMetricPeriod
 ): RelatedIndexResearchMetric {
   const symbol = readString(index.index_code) ?? readString(index.symbol) ?? "";
-  const indexPeriodReturn = readNumber(index.period_return) ?? buildAssetResearchMetricFromCandles(index.candles).period_return;
+  const indexCandles = normalizeCandles(index.candles);
+  const indexPeriod = buildPeriodMetric(indexCandles, assetPeriod.requested_days);
+  const rawIndexPeriodReturn = readNumber(index.index_period_return) ?? readNumber(index.period_return);
+  const indexPeriodReturn = indexPeriod.candle_count > 0
+    ? rawIndexPeriodReturn ?? buildAssetResearchMetric(indexCandles).period_return
+    : null;
+  const unavailableReason = getComparisonUnavailableReason(assetPeriodReturn, assetPeriod, indexPeriod, indexPeriodReturn);
 
   return {
     symbol,
     name: readString(index.name),
+    comparison_status: unavailableReason === undefined ? "ok" : "comparison_unavailable",
+    comparison_unavailable_reason: unavailableReason,
+    index_period_start_date: indexPeriod.period_start_date,
+    index_period_end_date: indexPeriod.period_end_date,
+    index_period_return: indexPeriodReturn,
     period_return: indexPeriodReturn,
-    asset_vs_index_return_diff: assetPeriodReturn !== null && indexPeriodReturn !== null
-      ? roundMetric(assetPeriodReturn - indexPeriodReturn)
+    asset_vs_index_return_diff: unavailableReason === undefined && assetPeriodReturn !== null && indexPeriodReturn !== null
+      ? safeRoundMetric(assetPeriodReturn - indexPeriodReturn)
       : null
   };
+}
+
+function getComparisonUnavailableReason(
+  assetPeriodReturn: number | null,
+  assetPeriod: ResearchMetricPeriod,
+  indexPeriod: ResearchMetricPeriod,
+  indexPeriodReturn: number | null
+): RelatedIndexResearchMetric["comparison_unavailable_reason"] | undefined {
+  if (assetPeriodReturn === null) {
+    return "asset_period_return_unavailable";
+  }
+
+  if (indexPeriod.candle_count === 0) {
+    return "missing_comparable_index_period";
+  }
+
+  if (indexPeriodReturn === null) {
+    return "insufficient_index_candles";
+  }
+
+  if (
+    assetPeriod.period_start_date !== indexPeriod.period_start_date ||
+    assetPeriod.period_end_date !== indexPeriod.period_end_date
+  ) {
+    return "period_mismatch";
+  }
+
+  return undefined;
 }
 
 function normalizeCandles(value: unknown): NormalizedCandle[] {
@@ -242,6 +291,10 @@ function readNumber(value: unknown): number | null {
   return Number.isFinite(normalized) ? normalized : null;
 }
 
-function roundMetric(value: number): number {
+function safeRoundMetric(value: number): number | null {
+  if (!Number.isFinite(value)) {
+    return null;
+  }
+
   return Number(value.toFixed(6));
 }

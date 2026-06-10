@@ -32,6 +32,7 @@ describe("research metrics", () => {
       period: {
         requested_days: 20,
         candle_count: 3,
+        requested_period_complete: false,
         period_start_date: "2026-06-01",
         period_end_date: "2026-06-03"
       },
@@ -75,6 +76,10 @@ describe("research metrics", () => {
     expect(result.related_indices[0]).toMatchObject({
       symbol: "KOSPI200",
       name: "KOSPI 200",
+      comparison_status: "ok",
+      index_period_start_date: "2026-06-01",
+      index_period_end_date: "2026-06-03",
+      index_period_return: 0.05,
       period_return: 0.05,
       asset_vs_index_return_diff: 0.05
     });
@@ -101,7 +106,91 @@ describe("research metrics", () => {
     expect(result.period.candle_count).toBe(1);
     expect(result.metric_status).toBe("unavailable");
     expect(result.asset.period_return).toBeNull();
+    expect(result.asset.latest_close).toBe(100);
     expect(result.related_indices).toEqual([]);
+  });
+
+  it("keeps invalid close, zero start price, and invalid volume as null-safe metrics", () => {
+    const result = buildSingleMarketDataResearchMetric({
+      chart: {
+        symbol: "005930",
+        candles: [
+          { date: "2026-06-01", high: "bad", low: 100, close: "0", volume: "bad" },
+          { date: "2026-06-02", high: "130", low: "90", close: "120", volume: "2,000" },
+          { date: undefined, high: 999, low: 1, close: 999, volume: 999 }
+        ]
+      },
+      relatedIndices: []
+    });
+    const serialized = JSON.stringify(result);
+
+    expect(result.period.candle_count).toBe(2);
+    expect(result.asset.period_return).toBeNull();
+    expect(result.asset.period_high).toBe(130);
+    expect(result.asset.period_high_date).toBe("2026-06-02");
+    expect(result.asset.period_low).toBe(90);
+    expect(result.asset.average_volume).toBe(2000);
+    expect(result.asset.volume_ratio).toBe(1);
+    expect(serialized).not.toContain("NaN");
+    expect(serialized).not.toContain("Infinity");
+  });
+
+  it("keeps volume ratio null when average volume cannot be calculated", () => {
+    const result = buildSingleMarketDataResearchMetric({
+      chart: {
+        symbol: "005930",
+        candles: [
+          { date: "2026-06-01", close: 100, volume: "bad" },
+          { date: "2026-06-02", close: 110, volume: undefined }
+        ]
+      },
+      relatedIndices: []
+    });
+
+    expect(result.asset.latest_volume).toBeNull();
+    expect(result.asset.average_volume).toBeNull();
+    expect(result.asset.volume_ratio).toBeNull();
+  });
+
+  it("keeps related index comparison null when period data is missing or mismatched", () => {
+    const noPeriod = buildSingleMarketDataResearchMetric({
+      chart: {
+        symbol: "005935",
+        candles
+      },
+      relatedIndices: [{ index_code: "KOSPI", name: "KOSPI", value: 2800 }]
+    });
+
+    expect(noPeriod.related_indices[0]).toMatchObject({
+      symbol: "KOSPI",
+      comparison_status: "comparison_unavailable",
+      comparison_unavailable_reason: "missing_comparable_index_period",
+      index_period_return: null,
+      asset_vs_index_return_diff: null
+    });
+
+    const periodMismatch = buildSingleMarketDataResearchMetric({
+      chart: {
+        symbol: "005935",
+        candles
+      },
+      relatedIndices: [
+        {
+          index_code: "KOSPI",
+          candles: [
+            { date: "2026-05-30", close: 1000, high: 1000, low: 1000, volume: 1 },
+            { date: "2026-06-03", close: 1010, high: 1010, low: 1000, volume: 1 }
+          ]
+        }
+      ]
+    });
+
+    expect(periodMismatch.related_indices[0]).toMatchObject({
+      comparison_status: "comparison_unavailable",
+      comparison_unavailable_reason: "period_mismatch",
+      index_period_return: 0.01,
+      asset_vs_index_return_diff: null
+    });
   });
 
   it("builds context-level research metrics without mock data or judgment wording", () => {

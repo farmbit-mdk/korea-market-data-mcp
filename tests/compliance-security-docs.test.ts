@@ -352,7 +352,7 @@ describe("provider compliance and security review docs", () => {
     };
 
     expect(packageJson.name).toBe("korea-market-data-mcp");
-    expect(packageJson.version).toBe("0.40.0-alpha");
+    expect(packageJson.version).toBe("0.41.0-alpha");
     expect(packageLock.version).toBe(packageJson.version);
     expect(packageLock.packages[""].version).toBe(packageJson.version);
     expect(packageJson.description).toContain("Read-only MCP server");
