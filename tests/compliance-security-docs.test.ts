@@ -352,7 +352,7 @@ describe("provider compliance and security review docs", () => {
     };
 
     expect(packageJson.name).toBe("korea-market-data-mcp");
-    expect(packageJson.version).toBe("0.41.0-alpha");
+    expect(packageJson.version).toBe("0.42.0-alpha");
     expect(packageLock.version).toBe(packageJson.version);
     expect(packageLock.packages[""].version).toBe(packageJson.version);
     expect(packageJson.description).toContain("Read-only MCP server");
@@ -989,6 +989,52 @@ describe("provider compliance and security review docs", () => {
     expect(combinedSmokeArtifacts).not.toMatch(/"trading"\s*:/i);
     expect(combinedSmokeArtifacts).not.toMatch(/"recommendation"\s*:/i);
     expect(combinedSmokeArtifacts).not.toMatch(/"raw(_payload|_response)?"\s*:/i);
+  });
+
+  it("documents v0.42 quant research examples without recommendation prompts", () => {
+    const exampleDocPaths = [
+      "docs/examples/quant-research-prompt-pack.md",
+      "docs/examples/claude-desktop-quant-research-examples.md",
+      "docs/examples/codex-cursor-research-workflows.md",
+      "docs/examples/data-only-analysis-boundaries.md",
+      "docs/release/v0.42.0-alpha-checklist.md"
+    ];
+
+    for (const path of exampleDocPaths) {
+      expect(existsSync(path), `${path} should exist`).toBe(true);
+    }
+
+    const combinedDocs = [
+      ...exampleDocPaths,
+      "README.md",
+      "CHANGELOG.md",
+      "docs/providers/provider-status.md"
+    ].map((path) => readFileSync(path, "utf8")).join("\n");
+    const promptPack = readFileSync("docs/examples/quant-research-prompt-pack.md", "utf8");
+
+    expect(combinedDocs).toContain("v0.42.0-alpha");
+    expect(combinedDocs).toContain("Quant Research Examples and Prompt Pack");
+    expect(combinedDocs).toContain("research_metrics");
+    expect(combinedDocs).toContain("data supply engine");
+    expect(combinedDocs).toContain("Claude/GPT/Codex");
+    expect(combinedDocs).toContain("No account access.");
+    expect(combinedDocs).toContain("No orders.");
+    expect(combinedDocs).toContain("No balance lookup.");
+    expect(combinedDocs).toContain("No holdings lookup.");
+    expect(combinedDocs).toContain("No trading.");
+    expect(combinedDocs).toContain("No auto-trading.");
+    expect(combinedDocs).toContain("No investment recommendations.");
+    expect(combinedDocs).toContain("No user-facing mock market data fallback.");
+    expect(promptPack).toContain("데이터 기준");
+    expect(promptPack).toContain("투자 추천은 하지 말고");
+    expect(promptPack).toContain("추천 순위는 매기지 마");
+    expect(promptPack).not.toContain("추천해줘");
+    expect(promptPack).not.toContain("매수할까");
+    expect(promptPack).not.toContain("매도할까");
+    expect(promptPack).not.toContain("목표가 알려");
+    expect(promptPack).not.toMatch(/\btop picks\b/i);
+    expect(promptPack).not.toMatch(/\bbuy list\b/i);
+    expect(promptPack).not.toMatch(/\bsell list\b/i);
   });
 
   it("keeps the MCP registry at allowed read-only tools with guarded Kiwoom quote only", () => {
