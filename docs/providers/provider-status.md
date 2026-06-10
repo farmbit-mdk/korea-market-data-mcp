@@ -1,5 +1,17 @@
 # Provider Status
 
+## v0.42.0-alpha
+
+Quant Research Examples and Prompt Pack documentation is available.
+
+- Added example prompts for data-only stock, ETF, related index, volume, 20/60 day price flow, `research_metrics`, unavailable comparison, multi-asset table, and research note workflows.
+- Added Claude Desktop examples for using real market data bundles in analysis prompts.
+- Added Codex/Cursor workflow examples for Markdown notes, observation tables, and CSV-like candle tables.
+- Added data-only analysis boundary documentation.
+- Provider capability is unchanged.
+
+The MCP remains a data supply engine. Claude/GPT/Codex performs interpretation. No account access. No orders. No balance lookup. No holdings lookup. No trading. No auto-trading. No investment recommendations. No user-facing mock market data fallback.
+
 ## v0.41.0-alpha
 
 Quant research metrics hardening is available for context payloads.

@@ -78,6 +78,17 @@ v0.40.0-alpha부터 `get_korean_market_data_context`는 `daily_charts[]`를 기�
 
 v0.41.0-alpha는 `research_metrics`의 null semantics를 강화합니다. `period_return`은 `(period_end_price - period_start_price) / period_start_price`, `volume_ratio`는 `latest_volume / average_volume`입니다. `candle_count`는 실제 계산에 사용된 candle 수이고, `average_volume`은 유효 volume candle 기준 평균입니다. 시작 가격이 0이거나 invalid, candle이 부족하거나 날짜/가격/거래량이 계산 불가능하면 해당 값은 `null` 또는 `comparison_unavailable`로 남습니다. 관련 지수 기간 데이터가 없거나 asset/index 기간이 다르면 `index_period_return`과 `asset_vs_index_return_diff`는 억지 계산하지 않습니다.
 
+v0.42.0-alpha는 Quant Research Examples and Prompt Pack 문서를 추가합니다. 기능 범위는 변경하지 않으며, `quote`, `daily_charts[]`, `related_indices[]`, `research_metrics` payload를 Claude/GPT/Codex가 데이터 중심 리서치에 바로 쓰기 좋은 프롬프트와 워크플로 예시로 정리합니다. MCP는 data supply engine이고 해석은 AI 클라이언트가 담당합니다.
+
+예시 문서:
+
+```text
+docs/examples/quant-research-prompt-pack.md
+docs/examples/claude-desktop-quant-research-examples.md
+docs/examples/codex-cursor-research-workflows.md
+docs/examples/data-only-analysis-boundaries.md
+```
+
 Claude Desktop 데이터 중심 예시:
 
 ```text
@@ -85,6 +96,8 @@ Claude Desktop 데이터 중심 예시:
 KODEX 200의 최근 20일 수익률과 KOSPI200 관련 지수 context를 비교해서 설명해줘. 단, 투자 추천은 하지 마.
 최근 일봉 데이터와 research_metrics를 기준으로 변동성이나 거래량 변화가 있는지만 데이터 중심으로 정리해줘.
 related_indices 비교값이 null이면 왜 비교할 수 없는지 데이터 상태만 설명해줘.
+삼성전자, SK하이닉스, KODEX 200의 최근 20일 데이터를 표로 정리해줘. period_return, latest_close, average_volume, volume_ratio 중심으로 비교하되 추천 순위는 매기지 마.
+아래 MCP 데이터 bundle을 바탕으로 데이터 중심 리서치 노트 초안을 작성해줘. 매수/매도, 목표가, 수익 전망은 포함하지 마.
 ```
 
 ### 지원하지 않는 기능

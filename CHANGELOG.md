@@ -2,6 +2,19 @@
 
 All notable alpha release documentation and safety-scope changes are tracked here.
 
+## v0.42.0-alpha - Quant Research Examples and Prompt Pack
+
+Documentation and prompt examples for data-only quant research workflows.
+
+- Updated package metadata to `0.42.0-alpha`.
+- Added a quant research prompt pack for stock, ETF, related index, volume, recent 20/60 day flow, `research_metrics`, unavailable comparison, multi-asset table, and research note workflows.
+- Added Claude Desktop examples for data-centered Korean market research prompts.
+- Added Codex/Cursor workflow examples for converting MCP data bundles into Markdown notes, tables, and CSV-like candle views.
+- Added data-only analysis boundary documentation.
+- Updated README example prompts and links to the examples.
+
+This release adds documentation and examples only. It does not add buy/sell judgments, recommendations, target prices, return forecasts, account access, orders, balance lookup, holdings lookup, trading, auto-trading, or user-facing mock market data fallback.
+
 ## v0.41.0-alpha - Quant Research Metrics Hardening
 
 Research metric edge-case hardening for context payloads.
