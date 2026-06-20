@@ -1,8 +1,8 @@
 # korea-market-data-mcp
 
-Open-source Model Context Protocol server for reliable Korean financial market data access from AI agents.
+`korea-market-data-mcp` is a read-only Korean market data MCP server for AI agents such as Claude, Codex, ChatGPT, Cursor, and other MCP-compatible clients.
 
-`korea-market-data-mcp` helps AI tools such as Codex, Claude, ChatGPT, Cursor, and other MCP-compatible clients query Korean stocks, ETFs, indices, charts, and market data through structured provider adapters.
+It provides structured Korean stock, ETF, index, daily chart, related index, and research metric data so AI agents can build market research, quant research, and data analysis workflows without scraping or manual data copying.
 
 The first target provider is **Kiwoom Securities REST API**.
 
@@ -13,9 +13,9 @@ It does **not** provide trading, order execution, automated trading, or personal
 
 ## 한국어 Quick Start
 
-`korea-market-data-mcp`는 Claude Desktop, GPT, Codex, Cursor 같은 AI 클라이언트가 국내 주식/ETF 데이터를 조회할 수 있도록 돕는 **Kiwoom REST API 기반 read-only MCP 서버**입니다.
+`korea-market-data-mcp`는 Claude, Codex, ChatGPT, Cursor 등 AI 에이전트가 한국 주식·ETF·지수 데이터를 안정적으로 조회할 수 있도록 돕는 **Kiwoom REST API 기반 read-only MCP 서버**입니다.
 
-이 MCP는 답변 엔진이나 투자 추천 도구가 아닙니다. MCP는 종목 resolve, 실제 현재가 quote, 다종목 quote bundle 같은 데이터 payload를 제공하고, 평가액/비중 계산이나 해석은 Claude/GPT/Codex 같은 AI 클라이언트가 담당합니다.
+이 프로젝트는 투자 판단 엔진이 아니라 데이터 공급 엔진입니다. MCP는 종목/ETF/지수 resolve, 현재가, 일봉, 거래량, 관련 지수, `research_metrics`를 구조화해서 제공하고, 해석과 비교 분석, 리서치 노트 작성은 AI 클라이언트가 담당합니다.
 
 주의: 이 프로젝트는 Open API+ OCX 프로그램이 아닙니다. 아래 Kiwoom Open API+ / KOA Studio 링크는 국내 사용자가 키움 API 사용 신청, 개발 환경 확인, TR 정보 확인에 참고하기 위한 공식 링크입니다.
 
@@ -25,20 +25,22 @@ Kiwoom 공식 참고:
 https://www.kiwoom.com/h/customer/download/VOpenApiInfoView
 ```
 
-### 설치
+### 1. Install
 
 ```powershell
 npm install -g korea-market-data-mcp@alpha
 ```
 
-또는 로컬 저장소에서:
+### 2. Build
+
+로컬 저장소에서 개발하거나 직접 실행할 때:
 
 ```powershell
 npm install
 npm run build
 ```
 
-### PowerShell 환경변수
+### 3. Configure environment
 
 실제 Kiwoom REST API 호출은 명시적으로 opt-in한 로컬 환경에서만 동작합니다. 실제 app key, secret key, token은 Git, 문서, PR, 스크린샷, 로그에 남기지 마세요.
 
@@ -52,18 +54,27 @@ $env:KIWOOM_APP_KEY = "YOUR_KIWOOM_APP_KEY"
 $env:KIWOOM_SECRET_KEY = "YOUR_KIWOOM_SECRET_KEY"
 ```
 
-### 로컬 검증
+### 4. Run setup check
 
 ```powershell
 npm run build
 npm run kiwoom:setup:check
+```
+
+실제 Kiwoom 자격증명과 opt-in 설정이 준비된 로컬 환경에서만 수동 검증을 이어갑니다.
+
+```powershell
 npm run kiwoom:token:manual
 npm run kiwoom:quote:manual
 ```
 
 성공 시에도 token 원문은 출력하지 않습니다. quote 응답은 read-only market data로만 사용합니다.
 
-### Claude Desktop 질문 예시
+### 5. Connect an MCP client
+
+MCP-compatible client가 빌드된 stdio 서버 또는 npm alpha package를 실행하도록 설정합니다. Claude Desktop은 현재 주요 로컬 검증 경로 중 하나이며, 전체 설정 예시는 [MCP client setup](docs/getting-started/mcp-client-setup.md)과 [Claude Desktop setup](docs/getting-started/claude-desktop-setup.md)을 참고하세요.
+
+### 6. Ask data-only market questions
 
 ```text
 삼성전자우 현재가를 키움 데이터로 조회해줘.
@@ -89,7 +100,7 @@ docs/examples/codex-cursor-research-workflows.md
 docs/examples/data-only-analysis-boundaries.md
 ```
 
-Claude Desktop 데이터 중심 예시:
+AI agent 데이터 중심 예시:
 
 ```text
 삼성전자 최근 20일 가격 흐름과 거래량 변화를 데이터 기준으로 요약해줘.
@@ -115,6 +126,58 @@ related_indices 비교값이 null이면 왜 비교할 수 없는지 데이터 �
 중앙 데이터 재배포 프록시 없음
 user-facing mock market data 없음
 ```
+
+## Use cases for AI agents
+
+- Claude Desktop local Korean market data research using structured market data context.
+- Codex repository-based quant research workflows and research note drafts.
+- Cursor data analysis, comparison table, and developer workflow examples.
+- ChatGPT remote MCP integration readiness without claiming local stdio compatibility.
+- Korean stock, ETF, and index data context for AI agents.
+- Data-only quant research prompt workflows and metrics explanation.
+- Market data bundle inspection and documentation workflows.
+
+These use cases focus on data summary, market data context, quant research workflow, research note draft, comparison table, and metrics explanation. They do not turn the MCP into an investment recommendation or trading engine.
+
+## Supported clients / integration targets
+
+### Claude Desktop
+
+- Local stdio MCP setup.
+- Current primary local verification path for real Kiwoom data bundles.
+
+### Codex
+
+- Repository-based development workflow.
+- Documentation, tests, and examples generation.
+- Quant research workflow scaffolding around structured MCP payloads.
+
+### Cursor
+
+- Developer IDE workflow.
+- MCP-driven research scripts, data analysis, and documentation.
+
+### ChatGPT
+
+- Future remote MCP or custom app integration target.
+- Remote transport readiness and integration documentation are planned.
+- ChatGPT support is not presented as equivalent to the current local stdio setup.
+
+### Other MCP-compatible clients
+
+- Read-only Korean market data context provider for compatible AI agents.
+
+## Future: ChatGPT and remote MCP integration
+
+ChatGPT integration may require a remote MCP transport or custom app wrapper; local stdio setup and remote setup are different. The current project remains local-first and read-only. Future releases will document remote MCP transport readiness without implying that the present local configuration works unchanged in ChatGPT.
+
+Recommended GitHub repository description:
+
+```text
+Read-only Korean stock, ETF, index, and quant research market data MCP server for AI agents.
+```
+
+No account access. No orders. No balance lookup. No holdings lookup. No trading. No auto-trading. No investment recommendations. No user-facing mock market data fallback. No centralized hosted data redistribution proxy.
 
 ---
 
