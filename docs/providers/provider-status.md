@@ -1,5 +1,17 @@
 # Provider Status
 
+## v0.43.0-alpha
+
+AI Agents Landing and Package Polish is available.
+
+- Repositioned project landing documentation for Claude, Codex, ChatGPT, Cursor, and other MCP-compatible AI agents.
+- Added an examples index and clarified local stdio versus future remote MCP integration targets.
+- Updated npm package metadata for Korean stock, ETF, index, daily chart, and quant research discovery.
+- Provider capability is unchanged.
+- The existing data bundle remains quote + `daily_charts[]` + `related_indices[]` + `research_metrics`.
+
+The MCP remains a read-only data supply engine. No account access. No orders. No balance lookup. No holdings lookup. No trading. No auto-trading. No investment recommendations. No user-facing mock market data fallback. No centralized hosted data redistribution proxy.
+
 ## v0.42.0-alpha
 
 Quant Research Examples and Prompt Pack documentation is available.

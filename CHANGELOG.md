@@ -2,6 +2,20 @@
 
 All notable alpha release documentation and safety-scope changes are tracked here.
 
+## v0.43.0-alpha - AI Agents Landing and Package Polish
+
+Landing page, examples index, and npm package metadata polish for AI-agent users.
+
+- Repositioned the README around Claude, Codex, ChatGPT, Cursor, and other MCP-compatible AI agents.
+- Updated the project description from a client-specific presentation to an AI agents data-provider position.
+- Added use cases and supported clients / integration targets sections.
+- Clarified the distinct roles and current integration status of Claude Desktop, Codex, Cursor, and ChatGPT.
+- Added `docs/examples/README.md` as an index for the quant research examples.
+- Updated npm package description and keywords.
+- Added the v0.43.0-alpha release checklist.
+
+This release changes landing documentation and package metadata only. It preserves the read-only data supply engine boundary and adds no account access, orders, balance lookup, holdings lookup, trading, auto-trading, investment recommendations, or user-facing mock market data fallback.
+
 ## v0.42.0-alpha - Quant Research Examples and Prompt Pack
 
 Documentation and prompt examples for data-only quant research workflows.

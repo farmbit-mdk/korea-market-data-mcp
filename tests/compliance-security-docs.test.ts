@@ -352,7 +352,7 @@ describe("provider compliance and security review docs", () => {
     };
 
     expect(packageJson.name).toBe("korea-market-data-mcp");
-    expect(packageJson.version).toBe("0.42.0-alpha");
+    expect(packageJson.version).toBe("0.43.0-alpha");
     expect(packageLock.version).toBe(packageJson.version);
     expect(packageLock.packages[""].version).toBe(packageJson.version);
     expect(packageJson.description).toContain("Read-only MCP server");
@@ -1035,6 +1035,73 @@ describe("provider compliance and security review docs", () => {
     expect(promptPack).not.toMatch(/\btop picks\b/i);
     expect(promptPack).not.toMatch(/\bbuy list\b/i);
     expect(promptPack).not.toMatch(/\bsell list\b/i);
+  });
+
+  it("documents v0.43 AI agent positioning without expanding provider scope", () => {
+    const v043DocPaths = [
+      "docs/examples/README.md",
+      "docs/release/v0.43.0-alpha-checklist.md"
+    ];
+
+    for (const path of v043DocPaths) {
+      expect(existsSync(path), `${path} should exist`).toBe(true);
+    }
+
+    const readme = readFileSync("README.md", "utf8");
+    const examplesIndex = readFileSync("docs/examples/README.md", "utf8");
+    const checklist = readFileSync("docs/release/v0.43.0-alpha-checklist.md", "utf8");
+    const changelog = readFileSync("CHANGELOG.md", "utf8");
+    const providerStatus = readFileSync("docs/providers/provider-status.md", "utf8");
+    const packageJson = JSON.parse(readFileSync("package.json", "utf8")) as {
+      description: string;
+      keywords: string[];
+    };
+    const combinedDocs = [readme, examplesIndex, checklist, changelog, providerStatus].join("\n");
+
+    expect(readme).toContain("read-only Korean market data MCP server for AI agents");
+    expect(readme).toContain("Use cases for AI agents");
+    expect(readme).toContain("Supported clients / integration targets");
+    expect(readme).toContain("Claude Desktop");
+    expect(readme).toContain("Codex");
+    expect(readme).toContain("ChatGPT");
+    expect(readme).toContain("Cursor");
+    expect(readme).toContain("Future: ChatGPT and remote MCP integration");
+    expect(readme).toContain("local stdio setup and remote setup are different");
+    expect(examplesIndex).toContain("quant-research-prompt-pack.md");
+    expect(examplesIndex).toContain("claude-desktop-quant-research-examples.md");
+    expect(examplesIndex).toContain("codex-cursor-research-workflows.md");
+    expect(examplesIndex).toContain("data-only-analysis-boundaries.md");
+    expect(packageJson.description).toBe(
+      "Read-only MCP server for Korean stock, ETF, index, daily chart, and quant research data for AI agents."
+    );
+    expect(packageJson.keywords).toEqual(expect.arrayContaining([
+      "mcp",
+      "model-context-protocol",
+      "korean-market",
+      "korean-stocks",
+      "etf",
+      "index-data",
+      "market-data",
+      "kiwoom",
+      "quant-research",
+      "ai-agents",
+      "claude",
+      "codex",
+      "chatgpt",
+      "cursor"
+    ]));
+    expect(combinedDocs).toContain("v0.43.0-alpha");
+    expect(combinedDocs).toContain("AI Agents Landing and Package Polish");
+    expect(combinedDocs).toContain("data supply engine");
+    expect(combinedDocs).toContain("Provider capability is unchanged");
+    expect(combinedDocs).toContain("No account access.");
+    expect(combinedDocs).toContain("No orders.");
+    expect(combinedDocs).toContain("No balance lookup.");
+    expect(combinedDocs).toContain("No holdings lookup.");
+    expect(combinedDocs).toContain("No trading.");
+    expect(combinedDocs).toContain("No auto-trading.");
+    expect(combinedDocs).toContain("No investment recommendations.");
+    expect(combinedDocs).toContain("No user-facing mock market data fallback.");
   });
 
   it("keeps the MCP registry at allowed read-only tools with guarded Kiwoom quote only", () => {
